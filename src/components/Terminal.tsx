@@ -44,10 +44,15 @@ export function Terminal() {
 
     if (command === 'help') {
       return [
-        'Available commands:',
-        '  add <name>  : Add stock to portfolio (e.g. add 삼성전자)',
-        '  rm <name>   : Remove stock from portfolio (e.g. rm 삼성전자)',
-        '  clear       : Clear terminal',
+        '[사용 가능한 명령어]',
+        '  add <종목명>  : 관심 종목에 추가 (예: add 삼성전자)',
+        '  rm <종목명>   : 관심 종목에서 제거 (예: rm 삼성전자)',
+        '  clear         : 터미널 화면 지우기',
+        '',
+        '[유용한 단축키]',
+        '  Ctrl + P      : 종목 빠른 검색 및 추가 (Quick Open)',
+        '  Ctrl + B      : 좌측 탐색기(사이드바) 열기/닫기',
+        '  Ctrl + \\      : 하단 터미널 열기/닫기',
       ];
     }
 
