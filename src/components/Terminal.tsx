@@ -38,7 +38,7 @@ export function Terminal() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [history]);
 
-  const handleCommand = (cmd: string) => {
+  const handleCommand = async (cmd: string): Promise<string[]> => {
     const args = cmd.trim().split(/\s+/);
     const command = args[0].toLowerCase();
 
@@ -65,18 +65,37 @@ export function Terminal() {
       if (args.length < 2) return ['Error: Usage: add <name>'];
       const name = args.slice(1).join(' ');
       
-      const code = MAPPING[name] || MAPPING[name.toUpperCase()];
+      let code = MAPPING[name] || MAPPING[name.toUpperCase()];
+      let finalName = name;
       
       if (!code) {
-        return [`Error: "${name}" 은(는) 지원되지 않는 종목입니다. 사전에 정의된 종목(예: 테슬라, QQQ 등)만 추가 가능합니다.`];
+        // 로컬에 없으면 API 검색
+        try {
+          const backendUrl = `http://${window.location.hostname}:3001`;
+          const res = await fetch(`${backendUrl}/api/search?q=${encodeURIComponent(name)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) {
+              // 가장 유사도가 높은 첫 번째 결과 선택
+              code = data[0].code;
+              finalName = data[0].name;
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      if (!code) {
+        return [`Error: "${name}" 검색 결과가 없습니다. (전체 시장 검색 실패)`];
       }
 
       if (portfolio.some(s => s.code === code)) {
-        return [`Error: "${name}" (${code}) 은(는) 이미 내 관심 종목(포트폴리오)에 존재합니다.`];
+        return [`Error: "${finalName}" (${code}) 은(는) 이미 내 관심 종목(포트폴리오)에 존재합니다.`];
       }
       
-      addStock({ name: name, code });
-      return [`Successfully added ${name} (${code}) to portfolio.`];
+      addStock({ name: finalName, code });
+      return [`Successfully added ${finalName} (${code}) to portfolio.`];
     }
 
     if (command === 'rm' || command === 'rm-rf' || command === 'rm -rf') {
@@ -94,24 +113,29 @@ export function Terminal() {
     return [`Command not found: ${command}`];
   };
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
 
     const newHistory = [...history, { type: 'input' as const, text: input }];
-    const outputLines = handleCommand(input);
-    
-    if (outputLines.length > 0) {
-      outputLines.forEach(line => {
-        newHistory.push({
-          type: line.startsWith('Error') ? 'error' : 'output',
-          text: line
-        });
-      });
-    }
-
+    // 낙관적 업데이트로 입력줄 먼저 표시
     setHistory(newHistory);
     setInput('');
+
+    const outputLines = await handleCommand(input);
+    
+    if (outputLines.length > 0) {
+      setHistory(prev => {
+        const next = [...prev];
+        outputLines.forEach(line => {
+          next.push({
+            type: line.startsWith('Error') ? 'error' : 'output',
+            text: line
+          });
+        });
+        return next;
+      });
+    }
   };
 
   return (

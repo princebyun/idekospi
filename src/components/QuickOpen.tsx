@@ -10,17 +10,59 @@ interface QuickOpenProps {
 export function QuickOpen({ isOpen, onClose }: QuickOpenProps) {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { addStock, portfolio } = useStore();
 
-  const allItems = [...DOMESTIC_LIST, ...GLOBAL_LIST, ...CRYPTO_LIST].map(item => ({
+  const predefinedItems = [...DOMESTIC_LIST, ...GLOBAL_LIST, ...CRYPTO_LIST];
+
+  useEffect(() => {
+    if (!query) {
+      setSearchResults(predefinedItems.slice(0, 10));
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const backendUrl = `http://${window.location.hostname}:3001`;
+        const res = await fetch(`${backendUrl}/api/search?q=${encodeURIComponent(query)}`);
+        if (res.ok) {
+          const data = await res.json();
+          // Merge with local matches
+          const localMatches = predefinedItems.filter(item => 
+            item.name.toLowerCase().includes(query.toLowerCase()) || 
+            item.code.toLowerCase().includes(query.toLowerCase())
+          );
+          
+          // Combine and deduplicate
+          const combined = [...localMatches];
+          const existingCodes = new Set(localMatches.map(i => i.code));
+          
+          data.forEach((apiItem: any) => {
+            if (!existingCodes.has(apiItem.code)) {
+              combined.push(apiItem);
+              existingCodes.add(apiItem.code);
+            }
+          });
+          
+          setSearchResults(combined.slice(0, 15));
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  const allItems = searchResults.map(item => ({
     ...item,
     inPortfolio: portfolio.some(p => p.code === item.code)
   }));
-
-  const filteredItems = query 
-    ? allItems.filter(item => item.name.toLowerCase().includes(query.toLowerCase()) || item.code.toLowerCase().includes(query.toLowerCase()))
-    : allItems.slice(0, 10);
 
   useEffect(() => {
     if (isOpen) {
@@ -48,14 +90,14 @@ export function QuickOpen({ isOpen, onClose }: QuickOpenProps) {
       onClose();
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setSelectedIndex(prev => Math.min(prev + 1, filteredItems.length - 1));
+      setSelectedIndex(prev => Math.min(prev + 1, allItems.length - 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setSelectedIndex(prev => Math.max(prev - 1, 0));
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (filteredItems[selectedIndex]) {
-        handleSelect(filteredItems[selectedIndex]);
+      if (allItems[selectedIndex]) {
+        handleSelect(allItems[selectedIndex]);
       }
     }
   };
@@ -76,11 +118,16 @@ export function QuickOpen({ isOpen, onClose }: QuickOpenProps) {
             spellCheck={false}
           />
         </div>
-        <div className="max-h-[300px] overflow-y-auto py-1 custom-scrollbar">
-          {filteredItems.length === 0 ? (
+        <div className="max-h-[300px] overflow-y-auto py-1 custom-scrollbar relative">
+          {isSearching && (
+            <div className="absolute top-0 left-0 right-0 h-0.5 overflow-hidden">
+              <div className="w-full h-full bg-[#007acc] animate-pulse"></div>
+            </div>
+          )}
+          {allItems.length === 0 && !isSearching ? (
             <div className="px-4 py-2 text-[#858585] text-sm">No matching results</div>
           ) : (
-            filteredItems.map((item, idx) => (
+            allItems.map((item, idx) => (
               <div
                 key={item.code}
                 className={`px-4 py-1.5 flex items-center justify-between cursor-pointer text-[13px]

@@ -50,6 +50,30 @@ app.get('/api/stocks', async (req, res) => {
   }
 });
 
+app.get('/api/search', async (req, res) => {
+  try {
+    const query = req.query.q as string;
+    if (!query) return res.json([]);
+    
+    const result = await yahooFinance.search(query, {
+      newsCount: 0,
+      quotesCount: 15
+    });
+    
+    const formatted = result.quotes.map((q: any) => ({
+      code: q.symbol,
+      name: q.shortname || q.longname || q.symbol,
+      type: q.quoteType,
+      exchange: q.exchDisp
+    }));
+    
+    res.json(formatted);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Search failed' });
+  }
+});
+
 const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`Stock proxy server running on http://localhost:${PORT}`);
