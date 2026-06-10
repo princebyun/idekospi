@@ -25,19 +25,20 @@ export function QuickOpen({ isOpen, onClose }: QuickOpenProps) {
 
     const timer = setTimeout(async () => {
       setIsSearching(true);
+      
+      const localMatches = predefinedItems.filter(item => 
+        item.name.toLowerCase().includes(query.toLowerCase()) || 
+        item.code.toLowerCase().includes(query.toLowerCase())
+      );
+      
       try {
         const backendUrl = `http://${window.location.hostname}:3001`;
         const res = await fetch(`${backendUrl}/api/search?q=${encodeURIComponent(query)}`);
+        
+        let combined = [...localMatches];
+        
         if (res.ok) {
           const data = await res.json();
-          // Merge with local matches
-          const localMatches = predefinedItems.filter(item => 
-            item.name.toLowerCase().includes(query.toLowerCase()) || 
-            item.code.toLowerCase().includes(query.toLowerCase())
-          );
-          
-          // Combine and deduplicate
-          const combined = [...localMatches];
           const existingCodes = new Set(localMatches.map(i => i.code));
           
           data.forEach((apiItem: any) => {
@@ -46,11 +47,11 @@ export function QuickOpen({ isOpen, onClose }: QuickOpenProps) {
               existingCodes.add(apiItem.code);
             }
           });
-          
-          setSearchResults(combined.slice(0, 15));
         }
+        setSearchResults(combined.slice(0, 15));
       } catch (err) {
         console.error(err);
+        setSearchResults(localMatches.slice(0, 15));
       } finally {
         setIsSearching(false);
       }
