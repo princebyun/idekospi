@@ -42,18 +42,20 @@ export const startMarketStream = () => {
     }
   };
 
-  // 2. 가상의 주식 시세 스트리밍 (2초마다 미세하게 변동시킴)
-  mockInterval = setInterval(() => {
-    MOCK_STOCKS.forEach(stock => {
-      const volatility = 0.002; // 0.2% 변동성
-      const randomChange = 1 + (Math.random() * volatility * 2 - volatility);
-      const state = useStore.getState();
-      const currentPrice = state.prices[stock.code]?.price || stock.basePrice;
-      
-      const newPrice = Math.round(currentPrice * randomChange * 100) / 100;
-      const changeRate = ((newPrice - stock.basePrice) / stock.basePrice) * 100;
-      
-      state.updatePrice(stock.code, newPrice, changeRate);
-    });
-  }, 2000);
+  // 2. 백엔드 프록시 서버를 통한 실제 주식 실시간 시세 (5초 주기 폴링)
+  const fetchStockData = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/stocks');
+      if (!response.ok) return;
+      const data = await response.json();
+      data.forEach((stock: any) => {
+        useStore.getState().updatePrice(stock.code, stock.price, stock.changeRate);
+      });
+    } catch (e) {
+      console.error('Failed to fetch real stock data:', e);
+    }
+  };
+  
+  fetchStockData();
+  mockInterval = setInterval(fetchStockData, 5000);
 };
