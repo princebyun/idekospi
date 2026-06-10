@@ -102,7 +102,11 @@ export function Terminal() {
       const name = args.slice(1).join(' ');
       if (!name) return ['Error: Usage: rm <name>'];
       
-      const target = portfolio.find(s => s.name === name || s.code === name);
+      const target = portfolio.find(s => 
+        s.name === name || 
+        s.code === name || 
+        s.name.replace(/ /g, '_') === name
+      );
       if (target) {
         removeStock(target.id);
         return [`Successfully removed ${target.name} from portfolio.`];

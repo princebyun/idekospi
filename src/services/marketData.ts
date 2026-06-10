@@ -76,7 +76,15 @@ export const startMarketStream = () => {
   // 2. 백엔드 프록시 서버를 통한 실제 주식/지수 시세 (5초 주기 폴링)
   const fetchStockData = async () => {
     try {
-      const allStocks = [...DOMESTIC_LIST, ...GLOBAL_LIST].map(s => s.code).join(',');
+      const portfolio = useStore.getState().portfolio;
+      const portfolioCodes = portfolio.filter(p => !p.code.startsWith('KRW-')).map(p => p.code);
+      
+      const allStocks = [...new Set([
+        ...DOMESTIC_LIST.map(s => s.code), 
+        ...GLOBAL_LIST.map(s => s.code),
+        ...portfolioCodes
+      ])].join(',');
+
       const backendUrl = `http://${window.location.hostname}:3001`;
       const response = await fetch(`${backendUrl}/api/stocks?symbols=${allStocks}`);
       if (!response.ok) return;
