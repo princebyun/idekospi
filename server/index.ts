@@ -20,12 +20,10 @@ app.get('/api/stocks', async (req, res) => {
         let displayChange = quote.regularMarketChangePercent;
         const marketState = quote.marketState || 'REGULAR';
         
-        const isKoreanStock = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
-        
-        if (!isKoreanStock && marketState === 'PRE' && quote.preMarketPrice) {
+        if (marketState === 'PRE' && quote.preMarketPrice) {
           displayPrice = quote.preMarketPrice;
           displayChange = quote.preMarketChangePercent;
-        } else if (!isKoreanStock && (marketState === 'POST' || marketState === 'CLOSED') && quote.postMarketPrice) {
+        } else if ((marketState === 'POST' || marketState === 'CLOSED') && quote.postMarketPrice) {
           displayPrice = quote.postMarketPrice;
           displayChange = quote.postMarketChangePercent;
         }
