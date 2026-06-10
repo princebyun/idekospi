@@ -77,7 +77,8 @@ export const startMarketStream = () => {
   const fetchStockData = async () => {
     try {
       const allStocks = [...DOMESTIC_LIST, ...GLOBAL_LIST].map(s => s.code).join(',');
-      const response = await fetch(`http://localhost:3001/api/stocks?symbols=${allStocks}`);
+      const backendUrl = `http://${window.location.hostname}:3001`;
+      const response = await fetch(`${backendUrl}/api/stocks?symbols=${allStocks}`);
       if (!response.ok) return;
       const data = await response.json();
       data.forEach((stock: any) => {
