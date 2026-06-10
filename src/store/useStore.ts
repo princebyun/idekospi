@@ -12,7 +12,7 @@ export interface Tab {
   title: string;
   icon: string;
   color: string;
-  type: 'portfolio' | 'market_domestic' | 'market_global' | 'market_crypto' | 'patchnotes';
+  type: 'markets_all' | 'patchnotes';
 }
 
 export interface MarketPrices {
@@ -44,12 +44,9 @@ export const useStore = create<IdeState>()(
         { id: '2', name: 'BTC', code: 'KRW-BTC' },
       ],
       tabs: [
-        { id: 'domestic', title: 'DomesticMarket.ts', icon: 'TS', color: '#007acc', type: 'market_domestic' },
-        { id: 'global', title: 'GlobalMarket.ts', icon: 'TS', color: '#007acc', type: 'market_global' },
-        { id: 'crypto', title: 'CryptoMarket.ts', icon: 'TS', color: '#007acc', type: 'market_crypto' },
-        { id: 'portfolio', title: 'Portfolio.js', icon: 'JS', color: '#e3c75b', type: 'portfolio' },
+        { id: 'markets', title: 'Markets.ts', icon: 'TS', color: '#007acc', type: 'markets_all' },
       ],
-      activeTabId: 'domestic',
+      activeTabId: 'markets',
       prices: {},
       addStock: (stock) => set((state) => ({ 
         portfolio: [...state.portfolio, { ...stock, id: Date.now().toString() }] 
@@ -81,7 +78,7 @@ export const useStore = create<IdeState>()(
       }))
     }),
     {
-      name: 'ide-kospi-storage-v2',
+      name: 'ide-kospi-storage-v3',
       partialize: (state) => ({ portfolio: state.portfolio, tabs: state.tabs, activeTabId: state.activeTabId }),
     }
   )

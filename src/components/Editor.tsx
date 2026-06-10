@@ -7,37 +7,55 @@ export function Editor() {
   
   const activeTab = tabs.find((t) => t.id === activeTabId);
 
-  const renderMarketTable = (title: string, list: { code: string; name: string }[]) => (
-    <div className="flex">
-      <div className="text-[#858585] text-right pr-4 select-none w-12 shrink-0 border-r border-[#404040] mr-4">
-        {Array.from({ length: list.length + 6 }).map((_, i) => <div key={i}>{i + 1}</div>)}
+  const renderMarketMethod = (methodName: string, title: string, list: { code: string; name: string }[]) => {
+    return (
+      <div className="mb-6">
+        <span className="text-[#6a9955] pl-4">/** {title} 실시간 시세 */</span><br/>
+        <span className="text-[#569cd6] pl-4">public async</span> <span className="text-[#dcdcaa]">{methodName}</span><span className="text-[#d4d4d4]">() {'{'}</span><br/>
+        {list.map(item => {
+          const info = prices[item.code] || { price: 0, changeRate: 0 };
+          const isProfit = info.changeRate > 0;
+          const isLoss = info.changeRate < 0;
+          let changeColor = 'text-[#ce9178]'; // default string color
+          if (isProfit) changeColor = 'text-[#ff9d9d]'; // red
+          if (isLoss) changeColor = 'text-[#8cb4ff]'; // blue
+          
+          const priceStr = info.price.toLocaleString(undefined, { maximumFractionDigits: 2 });
+          const changeStr = ((isProfit ? '+' : '') + info.changeRate.toFixed(2) + '%');
+          
+          return (
+            <div key={item.code} className="transition-opacity duration-300 pl-8 py-0.5 hover:bg-[#2a2d2e] select-text">
+              <span className="text-[#569cd6]">function</span> <span className="text-[#dcdcaa]">{item.name.replace(/ /g, '_')}</span><span className="text-[#d4d4d4]">() {'{'} </span>
+              <span className="text-[#c586c0]">return</span> <span className="text-[#d4d4d4]">{'{'}</span> <span className="text-[#9cdcfe]">price:</span> <span className="text-[#b5cea8]">{priceStr}</span>, <span className="text-[#9cdcfe]">change:</span> <span className={changeColor}>'{changeStr}'</span> <span className="text-[#d4d4d4]">{'}; }'}</span>
+            </div>
+          );
+        })}
+        <span className="text-[#d4d4d4] pl-4">{'}'}</span>
       </div>
-      <div className="text-[#d4d4d4] whitespace-pre font-mono">
-        <span className="text-[#6a9955]">// {title} 실시간 데이터</span><br/>
-        <span className="text-[#569cd6]">export</span> <span className="text-[#569cd6]">const</span> <span className="text-[#4fc1ff]">marketData</span> <span className="text-[#d4d4d4]"> = {'['}</span><br/>
-        <div className="pl-4">
-          {list.map(item => {
-            const info = prices[item.code] || { price: 0, changeRate: 0 };
-            const isProfit = info.changeRate > 0;
-            const isLoss = info.changeRate < 0;
-            let changeColor = 'text-[#ce9178]'; // default string color
-            if (isProfit) changeColor = 'text-[#ff9d9d]'; // red
-            if (isLoss) changeColor = 'text-[#8cb4ff]'; // blue
-            
-            const priceStr = info.price.toLocaleString(undefined, { maximumFractionDigits: 2 }).padStart(12, ' ');
-            const changeStr = ((isProfit ? '+' : '') + info.changeRate.toFixed(2) + '%').padStart(8, ' ');
-            
-            return (
-              <div key={item.code} className="transition-opacity duration-300">
-                <span className="text-[#d4d4d4]">{'{'}</span> <span className="text-[#9cdcfe]">name:</span> <span className="text-[#ce9178]">'{item.name.padEnd(12, ' ')}'</span>, <span className="text-[#9cdcfe]">price:</span> <span className="text-[#b5cea8]">{priceStr}</span>, <span className="text-[#9cdcfe]">change:</span> <span className={changeColor}>'{changeStr}'</span> <span className="text-[#d4d4d4]">{'}'}</span>,
-              </div>
-            );
-          })}
+    );
+  };
+
+  const renderAllMarkets = () => {
+    const totalLines = 6 + portfolio.length + DOMESTIC_LIST.length + GLOBAL_LIST.length + CRYPTO_LIST.length + 20;
+
+    return (
+      <div className="flex">
+        <div className="text-[#858585] text-right pr-4 select-none w-12 shrink-0 border-r border-[#404040] mr-4">
+          {Array.from({ length: totalLines }).map((_, i) => <div key={i}>{i + 1}</div>)}
         </div>
-        <span className="text-[#d4d4d4]">];</span><br/>
+        <div className="text-[#d4d4d4] whitespace-pre font-mono pb-20">
+          <span className="text-[#c586c0]">export class</span> <span className="text-[#4ec9b0]">MarketDashboard</span> <span className="text-[#d4d4d4]"> {'{'}</span><br/><br/>
+          
+          {renderMarketMethod('getMyPortfolio', '내 관심 종목 (포트폴리오)', portfolio)}
+          {renderMarketMethod('getDomesticMarket', '국내주식 (국장)', DOMESTIC_LIST)}
+          {renderMarketMethod('getGlobalMarket', '해외주식 (미장)', GLOBAL_LIST)}
+          {renderMarketMethod('getCryptoMarket', '가상화폐 (코인)', CRYPTO_LIST)}
+          
+          <span className="text-[#d4d4d4]">{'}'}</span>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-[#1e1e1e]">
@@ -75,11 +93,7 @@ export function Editor() {
 
       {/* Editor Content */}
       <div className="flex-1 overflow-auto p-4 custom-scrollbar bg-[#1e1e1e]">
-        {activeTab?.type === 'portfolio' && renderMarketTable('내 관심 종목', portfolio)}
-
-        {activeTab?.type === 'market_domestic' && renderMarketTable('국내주식 (국장)', DOMESTIC_LIST)}
-        {activeTab?.type === 'market_global' && renderMarketTable('해외주식 (미장)', GLOBAL_LIST)}
-        {activeTab?.type === 'market_crypto' && renderMarketTable('가상화폐 (코인)', CRYPTO_LIST)}
+        {activeTab?.type === 'markets_all' && renderAllMarkets()}
 
         {!activeTab && (
           <div className="h-full flex items-center justify-center text-[#858585] select-none">
