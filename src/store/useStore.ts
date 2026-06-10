@@ -5,8 +5,6 @@ export interface StockItem {
   id: string;
   name: string;
   code: string;
-  averagePrice: number;
-  quantity: number;
 }
 
 export interface Tab {
@@ -42,8 +40,8 @@ export const useStore = create<IdeState>()(
   persist(
     (set) => ({
       portfolio: [
-        { id: '1', name: '삼성전자', code: '005930.KS', averagePrice: 75000, quantity: 100 },
-        { id: '2', name: 'BTC', code: 'KRW-BTC', averagePrice: 95000000, quantity: 0.1 },
+        { id: '1', name: '삼성전자', code: '005930.KS' },
+        { id: '2', name: 'BTC', code: 'KRW-BTC' },
       ],
       tabs: [
         { id: 'domestic', title: 'DomesticMarket.ts', icon: 'TS', color: '#007acc', type: 'market_domestic' },

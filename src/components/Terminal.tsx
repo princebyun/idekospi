@@ -29,9 +29,9 @@ export function Terminal() {
     if (command === 'help') {
       return [
         'Available commands:',
-        '  buy <name> <price> <amount>  : Add stock to portfolio (e.g. buy 삼성전자 75000 100)',
-        '  rm <name>                    : Remove stock from portfolio (e.g. rm 삼성전자)',
-        '  clear                        : Clear terminal',
+        '  add <name>  : Add stock to portfolio (e.g. add 삼성전자)',
+        '  rm <name>   : Remove stock from portfolio (e.g. rm 삼성전자)',
+        '  clear       : Clear terminal',
       ];
     }
 
@@ -40,16 +40,12 @@ export function Terminal() {
       return [];
     }
 
-    if (command === 'buy') {
-      if (args.length !== 4) return ['Error: Usage: buy <name> <price> <amount>'];
-      const name = args[1];
-      const price = parseFloat(args[2]);
-      const amount = parseFloat(args[3]);
+    if (command === 'buy' || command === 'add') {
+      if (args.length < 2) return ['Error: Usage: add <name>'];
+      const name = args.slice(1).join(' ');
       
-      if (isNaN(price) || isNaN(amount)) return ['Error: Invalid price or amount'];
-
-      const code = MAPPING[name] || name; // MAPPING에 없으면 입력한 이름 그대로 코드 사용
-      addStock({ name, code, averagePrice: price, quantity: amount });
+      const code = MAPPING[name] || name;
+      addStock({ name, code });
       return [`Successfully added ${name} (${code}) to portfolio.`];
     }
 

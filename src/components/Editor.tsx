@@ -75,49 +75,7 @@ export function Editor() {
 
       {/* Editor Content */}
       <div className="flex-1 overflow-auto p-4 custom-scrollbar bg-[#1e1e1e]">
-        {activeTab?.type === 'portfolio' && (
-          <div className="flex">
-            {/* Line numbers */}
-            <div className="text-[#858585] text-right pr-4 select-none w-12 shrink-0 border-r border-[#404040] mr-4">
-              {Array.from({ length: Math.max(10, portfolio.length + 6) }).map((_, i) => (
-                <div key={i}>{i + 1}</div>
-              ))}
-            </div>
-            
-            {/* Code content */}
-            <div className="text-[#d4d4d4] font-mono whitespace-pre">
-              <div className="text-[#6a9955] mb-2">/**<br/> * 내 주식 포트폴리오<br/> * 터미널에서 buy/rm 명령어로 수정 가능합니다.<br/> */</div>
-              <span className="text-[#569cd6]">const</span> <span className="text-[#4fc1ff]">myPortfolio</span> <span className="text-[#d4d4d4]"> = {'['}</span><br/>
-              <div className="pl-4">
-                {portfolio.map((stock) => {
-                  const info = prices[stock.code];
-                  const currentPrice = info ? info.price : stock.averagePrice;
-                  const profitRate = ((currentPrice - stock.averagePrice) / stock.averagePrice) * 100;
-                  const isProfit = profitRate > 0;
-                  const isLoss = profitRate < 0;
-                  
-                  let commentColor = 'text-[#6a9955]';
-                  if (isProfit) commentColor = 'text-[#ff9d9d]';
-                  if (isLoss) commentColor = 'text-[#8cb4ff]';
-
-                  return (
-                    <div key={stock.id} className="hover:bg-[#2a2d2e] -ml-4 pl-4 py-0.5">
-                      <span className="text-[#d4d4d4]">{'{'}</span>
-                      <span className="text-[#9cdcfe]"> name</span>: <span className="text-[#ce9178]">'{stock.name}'</span>, 
-                      <span className="text-[#9cdcfe]"> code</span>: <span className="text-[#ce9178]">'{stock.code}'</span>, 
-                      <span className="text-[#9cdcfe]"> averagePrice</span>: <span className="text-[#b5cea8]">{stock.averagePrice.toLocaleString()}</span>, 
-                      <span className="text-[#9cdcfe]"> quantity</span>: <span className="text-[#b5cea8]">{stock.quantity}</span>,
-                      <span className="text-[#d4d4d4]">{'}'}</span>, 
-                      <span className={`${commentColor} ml-4`}>// {isProfit ? '+' : ''}{profitRate.toFixed(2)}% ({currentPrice.toLocaleString()})</span>
-                    </div>
-                  );
-                })}
-              </div>
-              <span className="text-[#d4d4d4]">];</span><br/><br/>
-              <span className="text-[#c586c0]">export default</span> <span className="text-[#4fc1ff]">myPortfolio</span><span className="text-[#d4d4d4]">;</span>
-            </div>
-          </div>
-        )}
+        {activeTab?.type === 'portfolio' && renderMarketTable('내 관심 종목', portfolio)}
 
         {activeTab?.type === 'market_domestic' && renderMarketTable('국내주식 (국장)', DOMESTIC_LIST)}
         {activeTab?.type === 'market_global' && renderMarketTable('해외주식 (미장)', GLOBAL_LIST)}
