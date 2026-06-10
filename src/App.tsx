@@ -19,7 +19,7 @@ function App() {
       <div className="flex flex-1 overflow-hidden">
         <ActivityBar activeTab={activeTab} setActiveTab={setActiveTab} />
         
-        <PanelGroup direction="horizontal" className="flex-1">
+        <PanelGroup orientation="horizontal" className="flex-1">
           <Panel defaultSize={18} minSize={10} maxSize={30} className="bg-[#252526] flex flex-col border-r border-[#2b2b2b]">
             <Sidebar activeTab={activeTab} />
           </Panel>
@@ -27,7 +27,7 @@ function App() {
           <PanelResizeHandle className="w-[1px] bg-[#2b2b2b] hover:bg-[#007acc] active:bg-[#007acc] transition-colors z-10" />
           
           <Panel className="flex flex-col min-w-[300px]">
-            <PanelGroup direction="vertical">
+            <PanelGroup orientation="vertical">
               <Panel defaultSize={70} minSize={20} className="bg-[#1e1e1e] flex flex-col relative z-0">
                 <Editor />
               </Panel>

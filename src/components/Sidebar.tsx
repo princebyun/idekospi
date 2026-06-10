@@ -1,4 +1,5 @@
-import { useStore, Tab } from '../store/useStore';
+import { useStore } from '../store/useStore';
+import type { Tab } from '../store/useStore';
 
 export function Sidebar({ activeTab }: { activeTab: string }) {
   const { openTab, activeTabId } = useStore();
