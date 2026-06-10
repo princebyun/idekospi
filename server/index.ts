@@ -15,11 +15,25 @@ app.get('/api/stocks', async (req, res) => {
     const promises = symbols.map(async (symbol) => {
       try {
         const quote = await yahooFinance.quote(symbol);
+        
+        let displayPrice = quote.regularMarketPrice;
+        let displayChange = quote.regularMarketChangePercent;
+        const marketState = quote.marketState || 'REGULAR';
+        
+        if (marketState === 'PRE' && quote.preMarketPrice) {
+          displayPrice = quote.preMarketPrice;
+          displayChange = quote.preMarketChangePercent;
+        } else if ((marketState === 'POST' || marketState === 'CLOSED') && quote.postMarketPrice) {
+          displayPrice = quote.postMarketPrice;
+          displayChange = quote.postMarketChangePercent;
+        }
+
         return {
           symbol,
-          code: symbol.replace('.KS', ''), // 프론트엔드 코드 매핑용 (예: 005930.KS -> 005930)
-          price: quote.regularMarketPrice,
-          changeRate: quote.regularMarketChangePercent
+          code: symbol.replace('.KS', ''),
+          price: displayPrice,
+          changeRate: displayChange,
+          marketState: marketState
         };
       } catch (err) {
         console.error(`Failed to fetch ${symbol}:`);

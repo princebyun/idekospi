@@ -19,6 +19,7 @@ export interface MarketPrices {
   [code: string]: {
     price: number;
     changeRate: number;
+    marketState?: string;
   }
 }
 
@@ -33,7 +34,7 @@ interface IdeState {
   openTab: (tab: Tab) => void;
   closeTab: (tabId: string) => void;
   setActiveTabId: (tabId: string) => void;
-  updatePrice: (code: string, price: number, changeRate: number) => void;
+  updatePrice: (code: string, price: number, changeRate: number, marketState?: string) => void;
 }
 
 export const useStore = create<IdeState>()(
@@ -73,8 +74,8 @@ export const useStore = create<IdeState>()(
         };
       }),
       setActiveTabId: (tabId) => set({ activeTabId: tabId }),
-      updatePrice: (code, price, changeRate) => set((state) => ({
-        prices: { ...state.prices, [code]: { price, changeRate } }
+      updatePrice: (code, price, changeRate, marketState) => set((state) => ({
+        prices: { ...state.prices, [code]: { price, changeRate, marketState } }
       }))
     }),
     {

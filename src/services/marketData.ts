@@ -81,7 +81,7 @@ export const startMarketStream = () => {
       if (!response.ok) return;
       const data = await response.json();
       data.forEach((stock: any) => {
-        useStore.getState().updatePrice(stock.symbol, stock.price, stock.changeRate);
+        useStore.getState().updatePrice(stock.symbol, stock.price, stock.changeRate, stock.marketState);
       });
     } catch (e) {
       console.error('Failed to fetch real stock data:', e);
