@@ -13,7 +13,23 @@ export function Terminal() {
   
   const { addStock, removeStock, portfolio } = useStore();
 
-  const MAPPING: Record<string, string> = {};
+  const MAPPING: Record<string, string> = {
+    '비트코인': 'KRW-BTC',
+    '이더리움': 'KRW-ETH',
+    '리플': 'KRW-XRP',
+    '솔라나': 'KRW-SOL',
+    '도지코인': 'KRW-DOGE',
+    '도지': 'KRW-DOGE',
+    '애플': 'AAPL',
+    'Apple': 'AAPL',
+    '테슬라': 'TSLA',
+    'Tesla': 'TSLA',
+    '엔비디아': 'NVDA',
+    'NVIDIA': 'NVDA',
+    '나스닥': '^IXIC',
+    '코스피': '^KS11',
+    '코스닥': '^KQ11'
+  };
   [...DOMESTIC_LIST, ...GLOBAL_LIST, ...CRYPTO_LIST].forEach(item => {
     MAPPING[item.name] = item.code;
   });

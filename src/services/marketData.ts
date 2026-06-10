@@ -18,9 +18,9 @@ export const GLOBAL_LIST = [
   { code: '^DJI', name: '다우' },
   { code: 'TQQQ', name: 'TQQQ' },
   { code: 'SOXL', name: 'SOXL' },
-  { code: 'NVDA', name: 'NVIDIA' },
-  { code: 'TSLA', name: 'Tesla' },
-  { code: 'AAPL', name: 'Apple' },
+  { code: 'NVDA', name: '엔비디아' },
+  { code: 'TSLA', name: '테슬라' },
+  { code: 'AAPL', name: '애플' },
   { code: 'CL=F', name: 'WTI 원유' },
   { code: 'ZN=F', name: '미국채 10년' },
 ];
