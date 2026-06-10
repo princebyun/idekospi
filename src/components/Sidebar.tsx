@@ -2,10 +2,10 @@ import { useStore } from '../store/useStore';
 import type { Tab } from '../store/useStore';
 
 export function Sidebar({ activeTab }: { activeTab: string }) {
-  const { openTab, activeTabId } = useStore();
+  const { openTab, activeTabId, portfolio } = useStore();
 
-  const handleOpenTab = (id: string, title: string, icon: string, color: string, type: Tab['type']) => {
-    openTab({ id, title, icon, color, type });
+  const handleOpenTab = (id: string, title: string, icon: string, color: string, type: string, code?: string) => {
+    openTab({ id, title, icon, color, type, code });
   };
 
   return (
@@ -27,6 +27,19 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
             <span className="text-[#007acc] w-4 mr-2 text-xs font-bold text-center">TS</span>Markets.ts
           </div>
           
+          <div className="py-1 px-2 hover:bg-[#37373d] cursor-pointer font-bold text-[#cccccc] flex items-center select-none text-[13px] mt-2">
+            <span className="mr-1 text-[10px]">▼</span> PORTFOLIO (CHARTS)
+          </div>
+
+          {portfolio.map((item) => (
+            <div 
+              key={item.id}
+              className={`pl-6 py-1 hover:bg-[#37373d] cursor-pointer text-[#cccccc] select-none flex items-center ${activeTabId === `chart_${item.code}` ? 'bg-[#37373d]' : ''}`}
+              onClick={() => handleOpenTab(`chart_${item.code}`, `${item.name}.chart`, '📈', '#ce9178', 'chart', item.code)}
+            >
+              <span className="w-4 mr-2 text-xs text-center">📈</span>{item.name}.chart
+            </div>
+          ))}
         </div>
       )}
     </div>

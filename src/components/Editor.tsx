@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { DOMESTIC_LIST, GLOBAL_LIST, CRYPTO_LIST } from '../services/marketData';
+import { TradingViewWidget } from './TradingViewWidget';
 
 export function Editor() {
   const { portfolio, tabs, activeTabId, prices, closeTab, setActiveTabId } = useStore();
@@ -140,8 +141,18 @@ export function Editor() {
       </div>
 
       {/* Editor Content */}
-      <div className="flex-1 overflow-auto p-4 custom-scrollbar bg-[#1e1e1e]">
-        {activeTab?.type === 'markets_all' && renderAllMarkets()}
+      <div className="flex-1 overflow-auto custom-scrollbar bg-[#1e1e1e] relative">
+        {activeTab?.type === 'markets_all' && (
+          <div className="p-4">
+            {renderAllMarkets()}
+          </div>
+        )}
+
+        {activeTab?.type === 'chart' && activeTab.code && (
+          <div className="absolute inset-0">
+            <TradingViewWidget symbol={activeTab.code} />
+          </div>
+        )}
 
         {!activeTab && (
           <div className="h-full flex items-center justify-center text-[#858585] select-none">

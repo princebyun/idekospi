@@ -12,7 +12,8 @@ export interface Tab {
   title: string;
   icon: string;
   color: string;
-  type: 'markets_all' | 'patchnotes';
+  type: string;
+  code?: string;
 }
 
 export interface MarketPrices {

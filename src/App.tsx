@@ -7,6 +7,7 @@ import { Terminal } from './components/Terminal';
 import { StatusBar } from './components/StatusBar';
 import { QuickOpen } from './components/QuickOpen';
 import { startMarketStream } from './services/marketData';
+import { ChatPanel } from './components/ChatPanel';
 
 function App() {
   const [activeTab, setActiveTab] = useState('explorer');
@@ -39,17 +40,26 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const handleTabClick = (tab: string) => {
+    if (activeTab === tab && isSidebarOpen) {
+      setIsSidebarOpen(false);
+    } else {
+      setActiveTab(tab);
+      setIsSidebarOpen(true);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen w-screen bg-[#1e1e1e] text-[#d4d4d4] overflow-hidden selection:bg-[#264f78]">
       <QuickOpen isOpen={isQuickOpenOpen} onClose={() => setIsQuickOpenOpen(false)} />
       <div className="flex flex-1 overflow-hidden">
-        <ActivityBar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <ActivityBar activeTab={activeTab} setActiveTab={handleTabClick} />
         
         <PanelGroup orientation="horizontal" className="flex-1">
           {isSidebarOpen && (
             <>
               <Panel defaultSize={18} minSize={10} maxSize={30} className="bg-[#252526] flex flex-col border-r border-[#2b2b2b]">
-                <Sidebar activeTab={activeTab} />
+                {activeTab === 'chat' ? <ChatPanel /> : <Sidebar activeTab={activeTab} />}
               </Panel>
               <PanelResizeHandle className="w-[1px] bg-[#2b2b2b] hover:bg-[#007acc] active:bg-[#007acc] transition-colors z-10" />
             </>

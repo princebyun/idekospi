@@ -1,4 +1,4 @@
-import { Files, Search, Settings } from 'lucide-react';
+import { Files, Search, Settings, MessageSquare } from 'lucide-react';
 
 interface ActivityBarProps {
   activeTab: string;
@@ -14,8 +14,11 @@ export function ActivityBar({ activeTab, setActiveTab }: ActivityBarProps) {
       <div className={iconClass('explorer')} onClick={() => setActiveTab('explorer')} title="Explorer">
         <Files size={24} strokeWidth={1.5} />
       </div>
-      <div className={iconClass('search')} onClick={() => setActiveTab('search')} title="Search">
+      <div className={iconClass('search')} onClick={() => setActiveTab('search')} title="Search (Quick Open)">
         <Search size={24} strokeWidth={1.5} />
+      </div>
+      <div className={iconClass('chat')} onClick={() => setActiveTab('chat')} title="Discussion (Output)">
+        <MessageSquare size={24} strokeWidth={1.5} />
       </div>
       <div className="flex-1"></div>
       <div className={iconClass('settings')} onClick={() => setActiveTab('settings')} title="Settings">
