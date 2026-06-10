@@ -38,7 +38,29 @@ export function Editor() {
           if (isProfit) changeColor = 'text-[#ff9d9d]';
           if (isLoss) changeColor = 'text-[#8cb4ff]';
           
-          const priceStr = info.price.toLocaleString(undefined, { maximumFractionDigits: 2 });
+          const exchangeRate = prices['KRW=X']?.price || 1400; // 환율 미수신 시 임시값
+          
+          const isDomestic = title.includes('국장') || DOMESTIC_LIST.some(i => i.code === item.code) || item.code.endsWith('.KS') || item.code.endsWith('.KQ');
+          const isCrypto = title.includes('코인') || item.code.startsWith('KRW-');
+          const isIndex = item.code.startsWith('^') || item.code.includes('=X');
+          
+          let priceStr = '';
+          let isString = false;
+          
+          if (isIndex) {
+            priceStr = info.price.toLocaleString(undefined, { maximumFractionDigits: 2 });
+          } else if (isDomestic || isCrypto) {
+            const krwStr = `₩${info.price.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+            const usdPrice = info.price / exchangeRate;
+            priceStr = `'${krwStr} ($${usdPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })})'`;
+            isString = true;
+          } else {
+            const usdStr = `$${info.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+            const krwPrice = info.price * exchangeRate;
+            priceStr = `'${usdStr} (₩${krwPrice.toLocaleString(undefined, { maximumFractionDigits: 0 })})'`;
+            isString = true;
+          }
+
           const changeStr = ((isProfit ? '+' : '') + info.changeRate.toFixed(2) + '%');
           const statusText = getMarketStatus(title, item.code, info.marketState);
           
@@ -46,7 +68,7 @@ export function Editor() {
             <div key={item.code} className="transition-opacity duration-300 pl-8 pt-2 pb-3 hover:bg-[#2a2d2e] select-text">
               <span className="text-[#569cd6]">function</span> <span className="text-[#dcdcaa]">{item.name.replace(/ /g, '_')}</span><span className="text-[#d4d4d4]">() {'{'} </span><br/>
               <div className="pl-8 py-1">
-                <span className="text-[#9cdcfe]">price</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{priceStr}</span><span className="text-[#d4d4d4]">,</span><br/>
+                <span className="text-[#9cdcfe]">price</span><span className="text-[#d4d4d4]">:</span> <span className={isString ? 'text-[#ce9178]' : 'text-[#b5cea8]'}>{priceStr}</span><span className="text-[#d4d4d4]">,</span><br/>
                 <span className="text-[#9cdcfe]">change</span><span className="text-[#d4d4d4]">:</span> <span className={changeColor}>'{changeStr}'</span><span className="text-[#d4d4d4]">,</span><br/>
                 <span className="text-[#9cdcfe]">status</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#ce9178]">{statusText}</span><br/><br/>
                 <span className="text-[#c586c0]">return</span><span className="text-[#d4d4d4]">;</span>
