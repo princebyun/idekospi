@@ -1,105 +1,121 @@
 import { useState, useRef, useEffect } from 'react';
+import { Terminal as TerminalIcon } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { DOMESTIC_LIST, GLOBAL_LIST, CRYPTO_LIST } from '../services/marketData';
 
 export function Terminal() {
-  const { addStock, portfolio } = useStore();
-  const [command, setCommand] = useState('');
-  const [logs, setLogs] = useState([
-    { type: 'info', text: '[IDE-KOSPI] Starting market data stream...' },
-    { type: 'success', text: 'Connected to realtime socket (Upbit WS / Mock Stock).' },
-    { type: 'info', text: 'Tip: 종목을 추가하려면 터미널에 "buy [종목코드] [평단가] [수량]" 을 입력하세요. (예: buy KRW-BTC 90000000 0.5)' },
-    { type: 'info', text: 'Tip: 종목을 삭제하려면 "rm -rf [종목코드]" 을 입력하세요.' }
+  const [history, setHistory] = useState<{ type: 'input' | 'output' | 'error', text: string }[]>([
+    { type: 'output', text: 'Welcome to IDE-KOSPI Terminal.' },
+    { type: 'output', text: 'Type "help" to see available commands.' }
   ]);
-  
+  const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
+  
+  const { addStock, removeStock, portfolio } = useStore();
+
+  const MAPPING: Record<string, string> = {};
+  [...DOMESTIC_LIST, ...GLOBAL_LIST, ...CRYPTO_LIST].forEach(item => {
+    MAPPING[item.name] = item.code;
+  });
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs]);
+  }, [history]);
 
-  const handleCommand = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && command.trim() !== '') {
-      const args = command.trim().split(' ');
-      const newLogs = [...logs, { type: 'cmd', text: `> ${command}` }];
-      
-      if (args[0] === 'buy' && args.length >= 4) {
-        const code = args[1]; // e.g. KRW-BTC
-        const averagePrice = parseFloat(args[2].replace(/,/g, ''));
-        const quantity = parseFloat(args[3].replace(/,/g, ''));
-        
-        if (!isNaN(averagePrice) && !isNaN(quantity)) {
-          const predefinedNames: Record<string, string> = { '005930': '삼성전자', '000660': 'SK하이닉스', '035420': 'NAVER', 'KRW-BTC': '비트코인', 'KRW-ETH': '이더리움', 'KRW-XRP': '리플' };
-          const name = predefinedNames[code] || code;
-          addStock({ name, code, averagePrice, quantity }); 
-          newLogs.push({ type: 'success', text: `Successfully added ${code} to Portfolio.js` });
-        } else {
-          newLogs.push({ type: 'error', text: 'Invalid arguments. Usage: buy [code] [price] [quantity]' });
-        }
-      } else if (args[0] === 'rm' && args.length >= 2) {
-        const targetCodeOrName = args.slice(1).join(' ').replace('-rf', '').trim();
-        const state = useStore.getState();
-        const stock = state.portfolio.find(s => s.code === targetCodeOrName || s.name === targetCodeOrName);
-        
-        if (stock) {
-          state.removeStock(stock.id);
-          newLogs.push({ type: 'success', text: `Successfully deleted ${targetCodeOrName} from Portfolio.js` });
-        } else {
-          newLogs.push({ type: 'error', text: `rm: cannot remove '${targetCodeOrName}': No such file or directory` });
-        }
-      } else if (args[0] === 'sell' || args[0] === 'npm' || args[0] === 'git') {
-         newLogs.push({ type: 'info', text: `Executing mock command: ${command}` });
-      } else {
-        newLogs.push({ type: 'error', text: `Command not found: ${args[0]}` });
-      }
-      
-      setLogs(newLogs as any);
-      setCommand('');
+  const handleCommand = (cmd: string) => {
+    const args = cmd.trim().split(/\s+/);
+    const command = args[0].toLowerCase();
+
+    if (command === 'help') {
+      return [
+        'Available commands:',
+        '  buy <name> <price> <amount>  : Add stock to portfolio (e.g. buy 삼성전자 75000 100)',
+        '  rm <name>                    : Remove stock from portfolio (e.g. rm 삼성전자)',
+        '  clear                        : Clear terminal',
+      ];
     }
+
+    if (command === 'clear') {
+      setHistory([]);
+      return [];
+    }
+
+    if (command === 'buy') {
+      if (args.length !== 4) return ['Error: Usage: buy <name> <price> <amount>'];
+      const name = args[1];
+      const price = parseFloat(args[2]);
+      const amount = parseFloat(args[3]);
+      
+      if (isNaN(price) || isNaN(amount)) return ['Error: Invalid price or amount'];
+
+      const code = MAPPING[name] || name; // MAPPING에 없으면 입력한 이름 그대로 코드 사용
+      addStock({ name, code, averagePrice: price, quantity: amount });
+      return [`Successfully added ${name} (${code}) to portfolio.`];
+    }
+
+    if (command === 'rm' || command === 'rm-rf' || command === 'rm -rf') {
+      const name = args.slice(1).join(' ');
+      if (!name) return ['Error: Usage: rm <name>'];
+      
+      const target = portfolio.find(s => s.name === name || s.code === name);
+      if (target) {
+        removeStock(target.id);
+        return [`Successfully removed ${target.name} from portfolio.`];
+      }
+      return [`Error: Could not find ${name} in portfolio.`];
+    }
+
+    return [`Command not found: ${command}`];
+  };
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    const newHistory = [...history, { type: 'input' as const, text: input }];
+    const outputLines = handleCommand(input);
+    
+    if (outputLines.length > 0) {
+      outputLines.forEach(line => {
+        newHistory.push({
+          type: line.startsWith('Error') ? 'error' : 'output',
+          text: line
+        });
+      });
+    }
+
+    setHistory(newHistory);
+    setInput('');
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#1e1e1e]">
-      {/* Terminal Tabs */}
-      <div className="flex text-[11px] border-b border-[#2b2b2b] uppercase tracking-wide flex-shrink-0 select-none">
-        <div className="px-4 py-2 text-[#e7e7e7] border-b-[1px] border-[#e7e7e7] cursor-pointer">Terminal</div>
-        <div className="px-4 py-2 text-[#858585] hover:text-[#e7e7e7] cursor-pointer">Problems</div>
-        <div className="px-4 py-2 text-[#858585] hover:text-[#e7e7e7] cursor-pointer">Output</div>
-        <div className="px-4 py-2 text-[#858585] hover:text-[#e7e7e7] cursor-pointer">Debug Console</div>
+    <div className="h-full flex flex-col bg-[#1e1e1e] font-mono text-[13px] border-t border-[#404040]">
+      <div className="flex items-center px-4 h-8 text-[#e7e7e7] uppercase tracking-wider text-xs font-semibold select-none bg-[#252526]">
+        <TerminalIcon size={14} className="mr-2" />
+        Terminal
       </div>
       
-      {/* Terminal Output */}
-      <div className="flex-1 p-3 font-mono text-[13px] overflow-y-auto text-[#cccccc] flex flex-col">
-        <div className="flex-1">
-          {logs.map((log: any, i) => (
-            <div key={i} className={`flex ${log.type === 'chat' ? 'mt-3' : ''} mb-1 items-start leading-relaxed`}>
-               {log.type === 'info' && <><span className="text-[#3b8eea] w-20 shrink-0 text-right pr-2 font-bold">Info</span><span>{log.text}</span></>}
-               {log.type === 'success' && <><span className="text-[#4ec9b0] w-20 shrink-0 text-right pr-2 font-bold">Success</span><span>{log.text}</span></>}
-               {log.type === 'error' && <><span className="text-[#f48771] w-20 shrink-0 text-right pr-2 font-bold">Error</span><span>{log.text}</span></>}
-               {log.type === 'cmd' && <><span className="text-[#dcdcaa] w-20 shrink-0 text-right pr-2 font-bold">Exec</span><span className="text-[#dcdcaa]">{log.text}</span></>}
-               {log.type === 'chat' && (
-                 <>
-                   <span className="text-[#ce9178] mr-2 w-20 shrink-0 text-right">[{log.time}]</span>
-                   <span className="text-[#4fc1ff] font-bold">@{log.user}:</span>
-                   <span className="ml-2">{log.text}</span>
-                 </>
-               )}
-            </div>
-          ))}
-          <div ref={bottomRef} />
-        </div>
+      <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+        {history.map((line, i) => (
+          <div key={i} className={`mb-1 ${line.type === 'error' ? 'text-[#f48771]' : line.type === 'input' ? 'text-[#cccccc]' : 'text-[#858585]'}`}>
+            {line.type === 'input' && <span className="text-[#519657] mr-2">➜</span>}
+            {line.text}
+          </div>
+        ))}
         
-        <div className="flex mt-3 items-center">
-          <span className="text-[#a6e22e] mr-2">C:\idekospi&gt;</span>
-          <input 
-            type="text" 
-            value={command}
-            onChange={(e) => setCommand(e.target.value)}
-            onKeyDown={handleCommand}
-            className="flex-1 bg-transparent outline-none border-none text-[#cccccc] font-mono text-[13px]"
-            spellCheck={false}
+        <form onSubmit={onSubmit} className="flex items-center mt-2">
+          <span className="text-[#519657] mr-2">➜</span>
+          <span className="text-[#4fc1ff] mr-2">~</span>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            className="flex-1 bg-transparent outline-none text-[#cccccc]"
             autoFocus
+            spellCheck={false}
           />
-        </div>
+        </form>
+        <div ref={bottomRef} />
       </div>
     </div>
   );

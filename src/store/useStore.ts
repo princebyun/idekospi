@@ -14,7 +14,7 @@ export interface Tab {
   title: string;
   icon: string;
   color: string;
-  type: 'portfolio' | 'market' | 'patchnotes';
+  type: 'portfolio' | 'market_domestic' | 'market_global' | 'market_crypto' | 'patchnotes';
 }
 
 export interface MarketPrices {
@@ -42,24 +42,17 @@ export const useStore = create<IdeState>()(
   persist(
     (set) => ({
       portfolio: [
-        { id: '1', name: '삼성전자', code: '005930', averagePrice: 75000, quantity: 100 },
-        { id: '2', name: '비트코인', code: 'KRW-BTC', averagePrice: 95000000, quantity: 0.1 },
+        { id: '1', name: '삼성전자', code: '005930.KS', averagePrice: 75000, quantity: 100 },
+        { id: '2', name: 'BTC', code: 'KRW-BTC', averagePrice: 95000000, quantity: 0.1 },
       ],
       tabs: [
+        { id: 'domestic', title: 'DomesticMarket.ts', icon: 'TS', color: '#007acc', type: 'market_domestic' },
+        { id: 'global', title: 'GlobalMarket.ts', icon: 'TS', color: '#007acc', type: 'market_global' },
+        { id: 'crypto', title: 'CryptoMarket.ts', icon: 'TS', color: '#007acc', type: 'market_crypto' },
         { id: 'portfolio', title: 'Portfolio.js', icon: 'JS', color: '#e3c75b', type: 'portfolio' },
-        { id: 'market', title: 'MarketService.ts', icon: 'TS', color: '#007acc', type: 'market' },
-        { id: 'patchnotes', title: 'ReleaseNotes.java', icon: '{}', color: '#e36e5b', type: 'patchnotes' },
       ],
-      activeTabId: 'portfolio',
-      prices: {
-        '005930': { price: 81000, changeRate: 1.5 },
-        '000660': { price: 175000, changeRate: 2.1 },
-        '035420': { price: 195000, changeRate: -0.8 },
-        'AAPL': { price: 190, changeRate: 0.8 },
-        'KRW-BTC': { price: 98000000, changeRate: 3.4 },
-        'KRW-ETH': { price: 5000000, changeRate: 1.2 },
-        'KRW-XRP': { price: 800, changeRate: -0.5 },
-      },
+      activeTabId: 'domestic',
+      prices: {},
       addStock: (stock) => set((state) => ({ 
         portfolio: [...state.portfolio, { ...stock, id: Date.now().toString() }] 
       })),
@@ -91,7 +84,7 @@ export const useStore = create<IdeState>()(
     }),
     {
       name: 'ide-kospi-storage',
-      partialize: (state) => ({ portfolio: state.portfolio, tabs: state.tabs, activeTabId: state.activeTabId }), // Do not persist prices
+      partialize: (state) => ({ portfolio: state.portfolio, tabs: state.tabs, activeTabId: state.activeTabId }),
     }
   )
 );

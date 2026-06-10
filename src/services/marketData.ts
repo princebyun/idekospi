@@ -3,26 +3,54 @@ import { useStore } from '../store/useStore';
 let upbitWs: WebSocket | null = null;
 let mockInterval: any = null;
 
-// CORS 우회를 위해 국내/해외 주식은 가상의 등락을 발생시킴 (프론트엔드 전용 구성)
-const MOCK_STOCKS = [
-  { code: '005930', name: '삼성전자', basePrice: 81000 },
-  { code: '000660', name: 'SK하이닉스', basePrice: 175000 },
-  { code: '035420', name: 'NAVER', basePrice: 195000 },
-  { code: 'AAPL', name: 'Apple Inc.', basePrice: 190 },
+export const DOMESTIC_LIST = [
+  { code: '005930.KS', name: '삼성전자' },
+  { code: '000660.KS', name: 'SK하이닉스' },
+  { code: '005380.KS', name: '현대차' },
+  { code: '^KS11', name: '코스피' },
+  { code: '^KQ11', name: '코스닥' },
+  { code: 'KRW=X', name: '원/달러' },
+];
+
+export const GLOBAL_LIST = [
+  { code: '^IXIC', name: '나스닥' },
+  { code: '^GSPC', name: 'S&P500' },
+  { code: '^DJI', name: '다우' },
+  { code: 'TQQQ', name: 'TQQQ' },
+  { code: 'SOXL', name: 'SOXL' },
+  { code: 'NVDA', name: 'NVIDIA' },
+  { code: 'TSLA', name: 'Tesla' },
+  { code: 'AAPL', name: 'Apple' },
+  { code: 'CL=F', name: 'WTI 원유' },
+  { code: 'ZN=F', name: '미국채 10년' },
+];
+
+export const CRYPTO_LIST = [
+  { code: 'KRW-BTC', name: 'BTC' },
+  { code: 'KRW-ETH', name: 'ETH' },
+  { code: 'KRW-XRP', name: 'XRP' },
+  { code: 'KRW-SOL', name: 'SOL' },
+  { code: 'KRW-DOGE', name: 'DOGE' },
+  { code: 'KRW-ADA', name: 'ADA' },
+  { code: 'KRW-TRX', name: 'TRX' },
+  { code: 'KRW-SUI', name: 'SUI' },
+  { code: 'KRW-XLM', name: 'XLM' },
+  { code: 'KRW-LINK', name: 'LINK' },
 ];
 
 export const startMarketStream = () => {
   if (upbitWs) upbitWs.close();
   if (mockInterval) clearInterval(mockInterval);
   
-  // 1. Upbit 웹소켓 연결 (암호화폐 실시간 시세 - CORS 없이 브라우저에서 직접 연결 가능)
+  // 1. Upbit 웹소켓 연결 (암호화폐)
   upbitWs = new WebSocket('wss://api.upbit.com/websocket/v1');
   upbitWs.binaryType = 'blob';
   
   upbitWs.onopen = () => {
+    const cryptoCodes = CRYPTO_LIST.map(c => c.code);
     upbitWs?.send(JSON.stringify([
       { ticket: "ide-kospi" },
-      { type: "ticker", codes: ["KRW-BTC", "KRW-ETH", "KRW-XRP", "KRW-SOL", "KRW-DOGE"] }
+      { type: "ticker", codes: cryptoCodes }
     ]));
   };
 
@@ -42,14 +70,15 @@ export const startMarketStream = () => {
     }
   };
 
-  // 2. 백엔드 프록시 서버를 통한 실제 주식 실시간 시세 (5초 주기 폴링)
+  // 2. 백엔드 프록시 서버를 통한 실제 주식/지수 시세 (5초 주기 폴링)
   const fetchStockData = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/stocks');
+      const allStocks = [...DOMESTIC_LIST, ...GLOBAL_LIST].map(s => s.code).join(',');
+      const response = await fetch(`http://localhost:3001/api/stocks?symbols=${allStocks}`);
       if (!response.ok) return;
       const data = await response.json();
       data.forEach((stock: any) => {
-        useStore.getState().updatePrice(stock.code, stock.price, stock.changeRate);
+        useStore.getState().updatePrice(stock.symbol, stock.price, stock.changeRate);
       });
     } catch (e) {
       console.error('Failed to fetch real stock data:', e);
