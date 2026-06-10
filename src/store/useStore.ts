@@ -81,7 +81,7 @@ export const useStore = create<IdeState>()(
       }))
     }),
     {
-      name: 'ide-kospi-storage',
+      name: 'ide-kospi-storage-v2',
       partialize: (state) => ({ portfolio: state.portfolio, tabs: state.tabs, activeTabId: state.activeTabId }),
     }
   )

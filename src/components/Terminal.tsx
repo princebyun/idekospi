@@ -60,8 +60,13 @@ export function Terminal() {
       if (args.length < 2) return ['Error: Usage: add <name>'];
       const name = args.slice(1).join(' ');
       
-      const code = MAPPING[name] || name;
-      addStock({ name, code });
+      const code = MAPPING[name] || MAPPING[name.toUpperCase()];
+      
+      if (!code) {
+        return [`Error: "${name}" 은(는) 지원되지 않는 종목입니다. 사전에 정의된 종목(예: 테슬라, QQQ 등)만 추가 가능합니다.`];
+      }
+      
+      addStock({ name: name, code });
       return [`Successfully added ${name} (${code}) to portfolio.`];
     }
 

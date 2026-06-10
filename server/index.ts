@@ -39,4 +39,6 @@ app.get('/api/stocks', async (req, res) => {
 const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`Stock proxy server running on http://localhost:${PORT}`);
+  // 강제로 프로세스가 죽지 않도록 방지
+  setInterval(() => {}, 1000 * 60 * 60);
 });
