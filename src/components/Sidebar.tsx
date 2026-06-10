@@ -42,6 +42,46 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
           ))}
         </div>
       )}
+
+      {activeTab === 'search' && (
+        <div className="flex-1 overflow-y-auto p-4 text-[#cccccc]">
+          <div className="mb-2 text-[11px] text-[#858585] uppercase">Search Market</div>
+          <div className="text-[12px] mb-4 leading-relaxed">
+            빠른 종목 검색은 단축키 <span className="text-[#007acc] font-mono">Ctrl + P</span> 를 사용해 주세요. (전 세계 주식/코인 실시간 검색 지원)
+          </div>
+          <button 
+            onClick={() => {
+              const event = new KeyboardEvent('keydown', { key: 'p', ctrlKey: true });
+              window.dispatchEvent(event);
+            }}
+            className="w-full bg-[#3c3c3c] hover:bg-[#4d4d4d] text-white py-1.5 rounded text-[12px] transition-colors"
+          >
+            Open Global Search
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'settings' && (
+        <div className="flex-1 overflow-y-auto p-4 text-[#cccccc]">
+          <div className="mb-6">
+            <div className="mb-2 text-[11px] text-[#858585] uppercase">Theme</div>
+            <select className="w-full bg-[#3c3c3c] border border-[#3c3c3c] rounded p-1 text-[12px] outline-none cursor-not-allowed opacity-50" disabled>
+              <option>VSCode Dark (Default)</option>
+              <option>IntelliJ Darcula (Soon)</option>
+              <option>Light Theme (Soon)</option>
+            </select>
+          </div>
+
+          <div className="mb-6">
+            <div className="mb-2 text-[11px] text-[#858585] uppercase">Legal Notice & Policy</div>
+            <div className="text-[11px] text-[#858585] leading-relaxed bg-[#1e1e1e] p-2 rounded border border-[#2b2b2b]">
+              본 서비스는 정보 제공 목적이며 실제 투자 권유를 의미하지 않습니다.<br/><br/>
+              야후 파이낸스 API 특성상 한국 시장(국장) 데이터는 15~20분 지연될 수 있습니다.<br/><br/>
+              서버에 개인정보를 평문으로 저장하지 않으며 브라우저 LocalStorage를 활용합니다.
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
