@@ -4,9 +4,9 @@ import { persist } from 'zustand/middleware';
 export interface StockItem {
   id: string;
   name: string;
+  code: string;
   averagePrice: number;
   quantity: number;
-  currentPrice: number;
 }
 
 export interface Tab {
@@ -17,24 +17,33 @@ export interface Tab {
   type: 'portfolio' | 'market' | 'patchnotes';
 }
 
+export interface MarketPrices {
+  [code: string]: {
+    price: number;
+    changeRate: number;
+  }
+}
+
 interface IdeState {
   portfolio: StockItem[];
   tabs: Tab[];
   activeTabId: string;
+  prices: MarketPrices;
   addStock: (stock: Omit<StockItem, 'id'>) => void;
   updateStock: (id: string, updates: Partial<StockItem>) => void;
   removeStock: (id: string) => void;
   openTab: (tab: Tab) => void;
   closeTab: (tabId: string) => void;
   setActiveTabId: (tabId: string) => void;
+  updatePrice: (code: string, price: number, changeRate: number) => void;
 }
 
 export const useStore = create<IdeState>()(
   persist(
     (set) => ({
       portfolio: [
-        { id: '1', name: '삼성전자', averagePrice: 75000, quantity: 100, currentPrice: 81000 },
-        { id: '2', name: 'SK하이닉스', averagePrice: 150000, quantity: 50, currentPrice: 175000 },
+        { id: '1', name: '삼성전자', code: '005930', averagePrice: 75000, quantity: 100 },
+        { id: '2', name: '비트코인', code: 'KRW-BTC', averagePrice: 95000000, quantity: 0.1 },
       ],
       tabs: [
         { id: 'portfolio', title: 'Portfolio.js', icon: 'JS', color: '#e3c75b', type: 'portfolio' },
@@ -42,6 +51,15 @@ export const useStore = create<IdeState>()(
         { id: 'patchnotes', title: 'ReleaseNotes.java', icon: '{}', color: '#e36e5b', type: 'patchnotes' },
       ],
       activeTabId: 'portfolio',
+      prices: {
+        '005930': { price: 81000, changeRate: 1.5 },
+        '000660': { price: 175000, changeRate: 2.1 },
+        '035420': { price: 195000, changeRate: -0.8 },
+        'AAPL': { price: 190, changeRate: 0.8 },
+        'KRW-BTC': { price: 98000000, changeRate: 3.4 },
+        'KRW-ETH': { price: 5000000, changeRate: 1.2 },
+        'KRW-XRP': { price: 800, changeRate: -0.5 },
+      },
       addStock: (stock) => set((state) => ({ 
         portfolio: [...state.portfolio, { ...stock, id: Date.now().toString() }] 
       })),
@@ -67,9 +85,13 @@ export const useStore = create<IdeState>()(
         };
       }),
       setActiveTabId: (tabId) => set({ activeTabId: tabId }),
+      updatePrice: (code, price, changeRate) => set((state) => ({
+        prices: { ...state.prices, [code]: { price, changeRate } }
+      }))
     }),
     {
       name: 'ide-kospi-storage',
+      partialize: (state) => ({ portfolio: state.portfolio, tabs: state.tabs, activeTabId: state.activeTabId }), // Do not persist prices
     }
   )
 );

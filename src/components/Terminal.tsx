@@ -2,14 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 
 export function Terminal() {
-  const { addStock } = useStore();
+  const { addStock, portfolio } = useStore();
   const [command, setCommand] = useState('');
   const [logs, setLogs] = useState([
     { type: 'info', text: '[IDE-KOSPI] Starting market data stream...' },
-    { type: 'success', text: 'Connected to realtime socket.' },
-    { type: 'chat', time: '14:30:00', user: 'UserA', text: '삼성전자 지금 들어가도 되나요?' },
-    { type: 'chat', time: '14:30:15', user: 'UserB', text: '외인 매수세 들어오는 중이라 괜찮을듯 ㅋㅋ' },
-    { type: 'info', text: 'Tip: 종목을 추가하려면 터미널에 "buy [종목명] [평단가] [수량]" 을 입력하세요. (예: buy 삼성전자 75000 100)' }
+    { type: 'success', text: 'Connected to realtime socket (Upbit WS / Mock Stock).' },
+    { type: 'info', text: 'Tip: 종목을 추가하려면 터미널에 "buy [종목코드] [평단가] [수량]" 을 입력하세요. (예: buy KRW-BTC 90000000 0.5)' },
+    { type: 'info', text: 'Tip: 종목을 삭제하려면 "rm -rf [종목코드]" 을 입력하세요.' }
   ]);
   
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -24,26 +23,28 @@ export function Terminal() {
       const newLogs = [...logs, { type: 'cmd', text: `> ${command}` }];
       
       if (args[0] === 'buy' && args.length >= 4) {
-        const name = args[1];
-        const averagePrice = parseInt(args[2].replace(/,/g, ''), 10);
-        const quantity = parseInt(args[3].replace(/,/g, ''), 10);
+        const code = args[1]; // e.g. KRW-BTC
+        const averagePrice = parseFloat(args[2].replace(/,/g, ''));
+        const quantity = parseFloat(args[3].replace(/,/g, ''));
         
         if (!isNaN(averagePrice) && !isNaN(quantity)) {
-          addStock({ name, averagePrice, quantity, currentPrice: averagePrice }); 
-          newLogs.push({ type: 'success', text: `Successfully compiled and added ${name} to Portfolio.js` });
+          const predefinedNames: Record<string, string> = { '005930': '삼성전자', '000660': 'SK하이닉스', '035420': 'NAVER', 'KRW-BTC': '비트코인', 'KRW-ETH': '이더리움', 'KRW-XRP': '리플' };
+          const name = predefinedNames[code] || code;
+          addStock({ name, code, averagePrice, quantity }); 
+          newLogs.push({ type: 'success', text: `Successfully added ${code} to Portfolio.js` });
         } else {
-          newLogs.push({ type: 'error', text: 'Invalid arguments. Usage: buy [name] [price] [quantity]' });
+          newLogs.push({ type: 'error', text: 'Invalid arguments. Usage: buy [code] [price] [quantity]' });
         }
       } else if (args[0] === 'rm' && args.length >= 2) {
-        const targetName = args.slice(1).join(' ').replace('-rf', '').trim();
+        const targetCodeOrName = args.slice(1).join(' ').replace('-rf', '').trim();
         const state = useStore.getState();
-        const stock = state.portfolio.find(s => s.name === targetName);
+        const stock = state.portfolio.find(s => s.code === targetCodeOrName || s.name === targetCodeOrName);
         
         if (stock) {
           state.removeStock(stock.id);
-          newLogs.push({ type: 'success', text: `Successfully deleted ${targetName} from Portfolio.js` });
+          newLogs.push({ type: 'success', text: `Successfully deleted ${targetCodeOrName} from Portfolio.js` });
         } else {
-          newLogs.push({ type: 'error', text: `rm: cannot remove '${targetName}': No such file or directory` });
+          newLogs.push({ type: 'error', text: `rm: cannot remove '${targetCodeOrName}': No such file or directory` });
         }
       } else if (args[0] === 'sell' || args[0] === 'npm' || args[0] === 'git') {
          newLogs.push({ type: 'info', text: `Executing mock command: ${command}` });

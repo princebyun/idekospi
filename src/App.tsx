@@ -1,13 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels';
 import { ActivityBar } from './components/ActivityBar';
 import { Sidebar } from './components/Sidebar';
 import { Editor } from './components/Editor';
 import { Terminal } from './components/Terminal';
 import { StatusBar } from './components/StatusBar';
+import { startMarketStream } from './services/marketData';
 
 function App() {
   const [activeTab, setActiveTab] = useState('explorer');
+
+  useEffect(() => {
+    startMarketStream();
+  }, []);
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[#1e1e1e] text-[#d4d4d4] overflow-hidden selection:bg-[#264f78]">

@@ -1,17 +1,24 @@
 import { Info, Bell, CheckCheck } from 'lucide-react';
+import { useStore } from '../store/useStore';
 
 export function StatusBar() {
+  const prices = useStore(state => state.prices);
+  
+  const btc = prices['KRW-BTC'];
+  const ss = prices['005930'];
+  const aapl = prices['AAPL'];
+
   return (
     <div className="h-[22px] bg-[#007acc] text-white text-[11px] flex items-center justify-between px-2 select-none flex-shrink-0 cursor-default">
       <div className="flex items-center space-x-3">
-        <div className="flex items-center space-x-1 hover:bg-[#1f8ad2] px-2 py-0.5 rounded transition-colors">
+        <div className="flex items-center space-x-1 hover:bg-[#1f8ad2] px-2 py-0.5 rounded transition-colors" title="Crypto: Upbit WebSocket / Stocks: Mocked Volatility">
           <Info size={13} />
-          <span>Not for real trading (15min delayed)</span>
+          <span>Real-time Stream Connected</span>
         </div>
         <div className="flex items-center space-x-3 bg-[#1f8ad2] px-2 rounded h-full py-0.5">
-          <span>KOSPI: 2,750.12 <span className="text-[#ff9d9d]">(-0.5%)</span></span>
-          <span>NASDAQ: 16,300.45 <span className="text-[#a6e22e]">(+1.2%)</span></span>
-          <span>BTC: 98,000,000 <span className="text-[#a6e22e]">(+3.4%)</span></span>
+          {ss && <span>삼성전자: {ss.price.toLocaleString()} <span className={ss.changeRate >= 0 ? "text-[#ff9d9d]" : "text-[#8cb4ff]"}>({ss.changeRate >= 0 ? '+' : ''}{ss.changeRate.toFixed(2)}%)</span></span>}
+          {aapl && <span>AAPL: ${aapl.price.toLocaleString()} <span className={aapl.changeRate >= 0 ? "text-[#ff9d9d]" : "text-[#8cb4ff]"}>({aapl.changeRate >= 0 ? '+' : ''}{aapl.changeRate.toFixed(2)}%)</span></span>}
+          {btc && <span>BTC: {btc.price.toLocaleString()} <span className={btc.changeRate >= 0 ? "text-[#ff9d9d]" : "text-[#8cb4ff]"}>({btc.changeRate >= 0 ? '+' : ''}{btc.changeRate.toFixed(2)}%)</span></span>}
         </div>
       </div>
       
