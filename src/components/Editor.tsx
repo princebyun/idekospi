@@ -4,29 +4,55 @@ import { DOMESTIC_LIST, GLOBAL_LIST, CRYPTO_LIST } from '../services/marketData'
 
 export function Editor() {
   const { portfolio, tabs, activeTabId, prices, closeTab, setActiveTabId } = useStore();
-  
   const activeTab = tabs.find((t) => t.id === activeTabId);
+  
+  const getMarketStatus = (title: string) => {
+    const hour = new Date().getHours();
+    const minute = new Date().getMinutes();
+    const time = hour * 100 + minute;
+    
+    if (title.includes('국장')) {
+      if (time >= 900 && time < 1530) return "'현재 국장이 열려있습니다.'";
+      return "'국장이 마감되었습니다.'";
+    }
+    if (title.includes('미장')) {
+      if (time >= 2230 || time < 600) return "'현재 미장이 열려있습니다.'";
+      return "'현재 미장 개장 전(또는 마감)입니다.'";
+    }
+    if (title.includes('코인')) {
+      return "'24시간 거래 중입니다.'";
+    }
+    return "'보유 종목 모니터링 중...'";
+  };
 
   const renderMarketMethod = (methodName: string, title: string, list: { code: string; name: string }[]) => {
+    const statusText = getMarketStatus(title);
+
     return (
-      <div className="mb-6">
+      <div className="mb-8">
         <span className="text-[#6a9955] pl-4">/** {title} 실시간 시세 */</span><br/>
         <span className="text-[#569cd6] pl-4">public async</span> <span className="text-[#dcdcaa]">{methodName}</span><span className="text-[#d4d4d4]">() {'{'}</span><br/>
         {list.map(item => {
           const info = prices[item.code] || { price: 0, changeRate: 0 };
           const isProfit = info.changeRate > 0;
           const isLoss = info.changeRate < 0;
-          let changeColor = 'text-[#ce9178]'; // default string color
-          if (isProfit) changeColor = 'text-[#ff9d9d]'; // red
-          if (isLoss) changeColor = 'text-[#8cb4ff]'; // blue
+          let changeColor = 'text-[#ce9178]';
+          if (isProfit) changeColor = 'text-[#ff9d9d]';
+          if (isLoss) changeColor = 'text-[#8cb4ff]';
           
           const priceStr = info.price.toLocaleString(undefined, { maximumFractionDigits: 2 });
           const changeStr = ((isProfit ? '+' : '') + info.changeRate.toFixed(2) + '%');
           
           return (
-            <div key={item.code} className="transition-opacity duration-300 pl-8 py-0.5 hover:bg-[#2a2d2e] select-text">
-              <span className="text-[#569cd6]">function</span> <span className="text-[#dcdcaa]">{item.name.replace(/ /g, '_')}</span><span className="text-[#d4d4d4]">() {'{'} </span>
-              <span className="text-[#c586c0]">return</span> <span className="text-[#d4d4d4]">{'{'}</span> <span className="text-[#9cdcfe]">price:</span> <span className="text-[#b5cea8]">{priceStr}</span>, <span className="text-[#9cdcfe]">change:</span> <span className={changeColor}>'{changeStr}'</span> <span className="text-[#d4d4d4]">{'}; }'}</span>
+            <div key={item.code} className="transition-opacity duration-300 pl-8 pt-2 pb-3 hover:bg-[#2a2d2e] select-text">
+              <span className="text-[#569cd6]">function</span> <span className="text-[#dcdcaa]">{item.name.replace(/ /g, '_')}</span><span className="text-[#d4d4d4]">() {'{'} </span><br/>
+              <div className="pl-8 py-1">
+                <span className="text-[#9cdcfe]">price</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{priceStr}</span><span className="text-[#d4d4d4]">,</span><br/>
+                <span className="text-[#9cdcfe]">change</span><span className="text-[#d4d4d4]">:</span> <span className={changeColor}>'{changeStr}'</span><span className="text-[#d4d4d4]">,</span><br/>
+                <span className="text-[#9cdcfe]">status</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#ce9178]">{statusText}</span><br/><br/>
+                <span className="text-[#c586c0]">return</span><span className="text-[#d4d4d4]">;</span>
+              </div>
+              <span className="text-[#d4d4d4]">{'}'}</span><br/>
             </div>
           );
         })}
@@ -36,7 +62,8 @@ export function Editor() {
   };
 
   const renderAllMarkets = () => {
-    const totalLines = 6 + portfolio.length + DOMESTIC_LIST.length + GLOBAL_LIST.length + CRYPTO_LIST.length + 20;
+    const totalItems = portfolio.length + DOMESTIC_LIST.length + GLOBAL_LIST.length + CRYPTO_LIST.length;
+    const totalLines = 15 + (totalItems * 10); // 1 item = ~10 lines
 
     return (
       <div className="flex">
