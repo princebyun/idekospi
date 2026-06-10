@@ -6,28 +6,30 @@ export function Editor() {
   const { portfolio, tabs, activeTabId, prices, closeTab, setActiveTabId } = useStore();
   const activeTab = tabs.find((t) => t.id === activeTabId);
   
-  const getMarketStatus = (title: string) => {
+  const getMarketStatus = (title: string, code: string) => {
     const hour = new Date().getHours();
     const minute = new Date().getMinutes();
     const time = hour * 100 + minute;
     
-    if (title.includes('국장')) {
+    const isDomestic = title.includes('국장') || DOMESTIC_LIST.some(i => i.code === code) || code.endsWith('.KS') || code.endsWith('.KQ');
+    const isGlobal = title.includes('미장') || GLOBAL_LIST.some(i => i.code === code) || (!code.startsWith('KRW-') && !code.endsWith('.KS') && !code.endsWith('.KQ') && /^[A-Z0-9=^]+$/.test(code));
+    const isCrypto = title.includes('코인') || CRYPTO_LIST.some(i => i.code === code) || code.startsWith('KRW-');
+    
+    if (isDomestic) {
       if (time >= 900 && time < 1530) return "'현재 국장이 열려있습니다.'";
       return "'국장이 마감되었습니다.'";
     }
-    if (title.includes('미장')) {
+    if (isGlobal) {
       if (time >= 2230 || time < 600) return "'현재 미장이 열려있습니다.'";
       return "'현재 미장 개장 전(또는 마감)입니다.'";
     }
-    if (title.includes('코인')) {
+    if (isCrypto) {
       return "'24시간 거래 중입니다.'";
     }
     return "'보유 종목 모니터링 중...'";
   };
 
   const renderMarketMethod = (methodName: string, title: string, list: { code: string; name: string }[]) => {
-    const statusText = getMarketStatus(title);
-
     return (
       <div className="mb-8">
         <span className="text-[#6a9955] pl-4">/** {title} 실시간 시세 */</span><br/>
@@ -42,6 +44,7 @@ export function Editor() {
           
           const priceStr = info.price.toLocaleString(undefined, { maximumFractionDigits: 2 });
           const changeStr = ((isProfit ? '+' : '') + info.changeRate.toFixed(2) + '%');
+          const statusText = getMarketStatus(title, item.code);
           
           return (
             <div key={item.code} className="transition-opacity duration-300 pl-8 pt-2 pb-3 hover:bg-[#2a2d2e] select-text">
