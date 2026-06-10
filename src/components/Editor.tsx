@@ -65,7 +65,7 @@ export function Editor() {
     const totalLines = 15 + (totalItems * 10); // 1 item = ~10 lines
 
     return (
-      <div className="flex">
+      <div className="flex text-[14px]">
         <div className="text-[#858585] text-right pr-4 select-none w-12 shrink-0 border-r border-[#404040] mr-4">
           {Array.from({ length: totalLines }).map((_, i) => <div key={i}>{i + 1}</div>)}
         </div>
