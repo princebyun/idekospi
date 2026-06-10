@@ -65,6 +65,10 @@ export function Terminal() {
       if (!code) {
         return [`Error: "${name}" 은(는) 지원되지 않는 종목입니다. 사전에 정의된 종목(예: 테슬라, QQQ 등)만 추가 가능합니다.`];
       }
+
+      if (portfolio.some(s => s.code === code)) {
+        return [`Error: "${name}" (${code}) 은(는) 이미 내 관심 종목(포트폴리오)에 존재합니다.`];
+      }
       
       addStock({ name: name, code });
       return [`Successfully added ${name} (${code}) to portfolio.`];
