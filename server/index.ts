@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
-import yahooFinance from 'yahoo-finance2';
+import YahooFinance from 'yahoo-finance2';
+
+const yahooFinance = new YahooFinance();
 
 const app = express();
 app.use(cors());
@@ -20,7 +22,8 @@ app.get('/api/stocks', async (req, res) => {
           changeRate: quote.regularMarketChangePercent
         };
       } catch (err) {
-        console.error(`Failed to fetch ${symbol}:`, err);
+        console.error(`Failed to fetch ${symbol}:`);
+        console.error(err);
         return null;
       }
     });
