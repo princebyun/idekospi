@@ -61,8 +61,9 @@ function App() {
               <Panel defaultSize={18} minSize={10} maxSize={30} className="bg-[#252526] flex flex-col border-r border-[#2b2b2b]">
                 {activeTab === 'chat' ? <ChatPanel /> : <Sidebar activeTab={activeTab} />}
               </Panel>
-              <PanelResizeHandle className="w-2 relative flex justify-center group cursor-col-resize z-10">
-                <div className="w-[1px] h-full bg-[#2b2b2b] group-hover:bg-[#007acc] group-active:bg-[#007acc] transition-colors" />
+              {/* 사이드바 가로 크기 조절 핸들 (Hit Area 확대) */}
+              <PanelResizeHandle className="w-[1px] bg-[#2b2b2b] hover:bg-[#007acc] active:bg-[#007acc] transition-colors relative z-20 cursor-col-resize group">
+                <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
               </PanelResizeHandle>
             </>
           )}
@@ -75,8 +76,9 @@ function App() {
               
               {isTerminalOpen && (
                 <>
-                  <PanelResizeHandle className="h-2 relative flex flex-col justify-center group cursor-row-resize z-10">
-                    <div className="h-[1px] w-full bg-[#2b2b2b] group-hover:bg-[#007acc] group-active:bg-[#007acc] transition-colors" />
+                  {/* 터미널 세로 크기 조절 핸들 (Hit Area 확대) */}
+                  <PanelResizeHandle className="h-[1px] bg-[#2b2b2b] hover:bg-[#007acc] active:bg-[#007acc] transition-colors relative z-20 cursor-row-resize group">
+                    <div className="absolute inset-x-0 -top-1.5 -bottom-1.5" />
                   </PanelResizeHandle>
                   <Panel defaultSize={30} minSize={15} className="bg-[#1e1e1e] flex flex-col z-0">
                     <Terminal />
