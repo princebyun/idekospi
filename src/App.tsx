@@ -12,13 +12,13 @@ import { useStore } from './store/useStore';
 
 function App() {
   const { 
-    isTerminalOpen, setIsTerminalOpen, 
-    isSidebarOpen, setIsSidebarOpen,
     sidebarWidth, setSidebarWidth,
     terminalHeight, setTerminalHeight
   } = useStore();
   
   const [activeTab, setActiveTab] = useState('explorer');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isTerminalOpen, setIsTerminalOpen] = useState(true);
   const [isQuickOpenOpen, setIsQuickOpenOpen] = useState(false);
 
   useEffect(() => {
@@ -33,12 +33,12 @@ function App() {
       // Ctrl + B (Mac: Cmd + B)
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
         e.preventDefault();
-        setIsSidebarOpen(!useStore.getState().isSidebarOpen);
+        setIsSidebarOpen(prev => !prev);
       }
       // Ctrl + \ (Mac: Cmd + \)
       if ((e.ctrlKey || e.metaKey) && e.key === '\\') {
         e.preventDefault();
-        setIsTerminalOpen(!useStore.getState().isTerminalOpen);
+        setIsTerminalOpen(prev => !prev);
       }
     };
 
