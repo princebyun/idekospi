@@ -7,7 +7,7 @@ export function Terminal() {
   const [history, setHistory] = useState<{ type: 'input' | 'output' | 'error' | 'system', text: string }[]>([]);
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
-  
+
   const { addStock, removeStock, portfolio } = useStore();
 
   const MAPPING: Record<string, string> = {
@@ -48,18 +48,18 @@ export function Terminal() {
       // 포트폴리오에서 랜덤으로 하나 선택
       const randomItem = currentPortfolio[Math.floor(Math.random() * currentPortfolio.length)];
       const priceData = currentPrices[randomItem.code];
-      
+
       if (priceData) {
         const now = new Date();
         const timeStr = now.toTimeString().split(' ')[0]; // HH:MM:SS
-        
+
         // 부호에 따른 기호 및 상태 문자열
         const prefix = priceData.changeRate > 0 ? '+' : '';
         const status = priceData.changeRate > 0 ? 'UPTREND' : priceData.changeRate < 0 ? 'DOWNTREND' : 'STABLE';
-        
+
         const marketTag = priceData.marketState === 'PRE' ? '[PRE] ' : (priceData.marketState === 'POST' || priceData.marketState === 'CLOSED' ? '[AFT] ' : '');
         const logText = `[INFO] [${timeStr}] SYSTEM_FETCH: ${randomItem.name} (${randomItem.code}) Connection OK. Tick: ${priceData.price.toLocaleString()} (${marketTag}${prefix}${priceData.changeRate.toFixed(2)}%) - ${status}`;
-        
+
         setHistory(prev => {
           const next = [...prev, { type: 'system' as const, text: logText }];
           // 100개 이상이면 오래된 것 삭제하여 메모리 최적화
@@ -98,10 +98,10 @@ export function Terminal() {
     if (command === 'buy' || command === 'add') {
       if (args.length < 2) return ['Error: Usage: add <name>'];
       const name = args.slice(1).join(' ');
-      
+
       let code = MAPPING[name] || MAPPING[name.toUpperCase()];
       let finalName = name;
-      
+
       if (!code) {
         // 로컬에 없으면 API 검색
         try {
@@ -127,7 +127,7 @@ export function Terminal() {
       if (portfolio.some(s => s.code === code)) {
         return [`Error: "${finalName}" (${code}) 은(는) 이미 내 관심 종목(포트폴리오)에 존재합니다.`];
       }
-      
+
       addStock({ name: finalName, code });
       return [`Successfully added ${finalName} (${code}) to portfolio.`];
     }
@@ -135,10 +135,10 @@ export function Terminal() {
     if (command === 'rm' || command === 'rm-rf' || command === 'rm -rf') {
       const name = args.slice(1).join(' ');
       if (!name) return ['Error: Usage: rm <name>'];
-      
-      const target = portfolio.find(s => 
-        s.name === name || 
-        s.code === name || 
+
+      const target = portfolio.find(s =>
+        s.name === name ||
+        s.code === name ||
         s.name.replace(/ /g, '_') === name
       );
       if (target) {
@@ -161,7 +161,7 @@ export function Terminal() {
     setInput('');
 
     const outputLines = await handleCommand(input);
-    
+
     if (outputLines.length > 0) {
       setHistory(prev => {
         const next = [...prev];
@@ -182,12 +182,12 @@ export function Terminal() {
         <TerminalIcon size={14} className="mr-2" />
         Terminal
       </div>
-      
+
       <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col">
         {/* 상단 고정 도움말 (Sticky Header) - 패딩과 배경색을 확실히 지정하여 스크롤 오버랩 방지 */}
         <div className="sticky top-0 bg-ide-bg z-10 px-4 py-3 border-b border-ide-border shrink-0 shadow-sm">
           <div className="text-ide-text-muted font-bold mb-1">IDE-KOSPI 터미널에 오신 것을 환영합니다.</div>
-          <div className="text-ide-text-muted">IDE-KOSPI의 사용법을 보려면 "help"를 입력하세요.</div>
+          <div className="text-ide-text-muted">IDE-KOSPI의 사용법을 보려면 터미널에 help를 입력해보세요.</div>
         </div>
 
         <div className="p-4 flex-1">
@@ -197,20 +197,20 @@ export function Terminal() {
               {line.text}
             </div>
           ))}
-          
+
           <form onSubmit={onSubmit} className="flex items-center mt-2">
-          <span className="text-[#519657] mr-2">➜</span>
-          <span className="text-[#4fc1ff] mr-2">~</span>
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="flex-1 bg-transparent outline-none text-ide-text"
-            autoFocus
-            spellCheck={false}
-          />
-        </form>
-        <div ref={bottomRef} />
+            <span className="text-[#519657] mr-2">➜</span>
+            <span className="text-[#4fc1ff] mr-2">~</span>
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className="flex-1 bg-transparent outline-none text-ide-text"
+              autoFocus
+              spellCheck={false}
+            />
+          </form>
+          <div ref={bottomRef} />
         </div>
       </div>
     </div>
