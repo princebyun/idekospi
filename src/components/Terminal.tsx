@@ -38,12 +38,16 @@ export function Terminal() {
 
   // 실시간 포트폴리오 스트리밍 로직
   useEffect(() => {
-    if (portfolio.length === 0) return;
-
     const intervalId = setInterval(() => {
+      // 최신 상태를 useStore.getState()로 직접 가져옴 (의존성 초기화 방지)
+      const currentPortfolio = useStore.getState().portfolio;
+      const currentPrices = useStore.getState().prices;
+
+      if (currentPortfolio.length === 0) return;
+
       // 포트폴리오에서 랜덤으로 하나 선택
-      const randomItem = portfolio[Math.floor(Math.random() * portfolio.length)];
-      const priceData = prices[randomItem.code];
+      const randomItem = currentPortfolio[Math.floor(Math.random() * currentPortfolio.length)];
+      const priceData = currentPrices[randomItem.code];
       
       if (priceData) {
         const now = new Date();
@@ -66,7 +70,7 @@ export function Terminal() {
     }, 4500); // 4.5초마다 하나씩 로그 찍음
 
     return () => clearInterval(intervalId);
-  }, [portfolio, prices]);
+  }, []);
 
   const handleCommand = async (cmd: string): Promise<string[]> => {
     const args = cmd.trim().split(/\s+/);
