@@ -1,6 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/terminal-square.svg" alt="IDE-KOSPI Logo" width="100" height="100" />
-  <h1>📈 IDE-KOSPI</h1>
+  <h1 align="center">🕵️‍♂️ IDE-KOSPI 📈</h1>
   <p><strong>가장 전문적인 척하는 실시간 주식/코인 모니터링 시스템</strong></p>
   <p><i>"코딩하는 줄 알았지? 떡상 가즈아!"</i></p>
   
