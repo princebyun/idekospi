@@ -12,7 +12,7 @@ interface ChatMessage {
 export function ChatPanel() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
-  const [author, setAuthor] = useState(() => localStorage.getItem('chat_author') || `User_${Math.floor(Math.random() * 10000)}`);
+  const [author, setAuthor] = useState(() => localStorage.getItem('chat_author') || `월급루팡개발자_${Math.floor(Math.random() * 10000)}`);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { setIsRightPanelOpen } = useStore();
 
@@ -133,50 +133,57 @@ export function ChatPanel() {
 
       <div className="p-4 bg-[#1e1e1e]">
         <form onSubmit={sendMessage} className="relative group">
-          <div className="mb-2 flex items-center space-x-2 px-1">
-            <User size={12} className="text-[#858585]" />
-            <input 
-              type="text" 
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-              placeholder="Your nickname"
-              title="채팅방에서 사용할 닉네임"
-              className="bg-transparent border-b border-[#3c3c3c] hover:border-[#555555] focus:border-[#007acc] focus:outline-none text-[11px] text-[#cccccc] w-24 pb-0.5 transition-colors placeholder-[#555555]"
+          <div className="flex items-center bg-[#1e1e1e] border border-[#3c3c3c] rounded-md focus-within:border-[#007acc] focus-within:ring-1 focus-within:ring-[#007acc] transition-all px-2 py-1.5 shadow-sm">
+            <button type="button" className="p-1 text-[#858585] hover:text-[#cccccc] transition-colors rounded-sm hover:bg-[#2d2d2d] ml-0.5 mr-2 flex-shrink-0">
+              <span className="text-[16px] leading-none block font-mono">+</span>
+            </button>
+            <textarea
+              id="chat-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage(e);
+                }
+              }}
+              placeholder="Ask anything, @ to mention, / for workflows"
+              className="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none text-[13px] text-[#cccccc] resize-none custom-scrollbar py-1"
+              rows={1}
+              spellCheck={false}
+              style={{ minHeight: '22px', maxHeight: '150px' }}
             />
-            <span className="text-[10px] text-[#555555]">
-              (This name will be visible to others)
-            </span>
+            <button
+              type="submit"
+              disabled={!input.trim()}
+              className={`p-1.5 ml-2 mr-0.5 rounded-sm transition-colors flex-shrink-0 ${
+                input.trim() 
+                  ? 'bg-transparent text-[#cccccc] hover:bg-[#2d2d2d]' 
+                  : 'bg-transparent text-[#555555]'
+              }`}
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M8 1.5l7 7-7 7-1.06-1.06L12.88 8.5H1v-1h11.88L6.94 2.56 8 1.5z"></path></svg>
+            </button>
           </div>
-          <textarea
-            id="chat-input"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage(e);
-              }
-            }}
-            placeholder="Discuss the market or ask anything..."
-            className="w-full bg-[#1e1e1e] border border-[#3c3c3c] rounded-lg focus:border-[#007acc] focus:ring-1 focus:ring-[#007acc] focus:outline-none py-3 pl-3 pr-10 text-[13px] resize-none custom-scrollbar transition-all shadow-sm"
-            rows={2}
-            spellCheck={false}
-          />
-          <button
-            type="submit"
-            disabled={!input.trim()}
-            className="absolute right-2 bottom-3 p-1.5 bg-[#007acc] text-white hover:bg-[#005f9e] disabled:opacity-30 disabled:hover:bg-[#007acc] transition-colors rounded-md"
-          >
-            <ArrowUp size={14} strokeWidth={3} />
-          </button>
+          
+          <div className="mt-3 flex items-center justify-between text-[10px] text-[#555555] select-none">
+            <div className="flex items-center space-x-2">
+              <User size={12} className="text-[#858585]" />
+              <input 
+                type="text" 
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                placeholder="Your nickname"
+                title="채팅방에서 사용할 닉네임"
+                className="bg-transparent border-b border-transparent hover:border-[#3c3c3c] focus:border-[#007acc] focus:outline-none text-[10px] text-[#858585] focus:text-[#cccccc] w-32 pb-0.5 transition-colors placeholder-[#555555]"
+              />
+            </div>
+            <div className="flex items-center space-x-1">
+              <TerminalSquare size={12} />
+              <span>Use <kbd className="bg-[#2d2d2d] px-1 rounded border border-[#3c3c3c]">Ctrl+L</kbd> to toggle</span>
+            </div>
+          </div>
         </form>
-        <div className="mt-2 flex items-center justify-between text-[10px] text-[#555555] select-none">
-          <div className="flex items-center space-x-1">
-            <TerminalSquare size={12} />
-            <span>Use <kbd className="bg-[#2d2d2d] px-1 rounded border border-[#3c3c3c]">Ctrl+L</kbd> to toggle chat</span>
-          </div>
-          <span>Public Discussion</span>
-        </div>
       </div>
     </div>
   );
