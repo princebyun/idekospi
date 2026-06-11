@@ -183,21 +183,22 @@ export function Terminal() {
         Terminal
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 custom-scrollbar relative">
-        {/* 상단 고정 도움말 (Sticky Header) */}
-        <div className="sticky top-0 bg-ide-bg/95 backdrop-blur-sm z-10 pb-2 mb-2 border-b border-ide-border">
-          <div className="text-ide-text-muted">IDE-KOSPI 터미널에 오신 것을 환영합니다.</div>
+      <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col">
+        {/* 상단 고정 도움말 (Sticky Header) - 패딩과 배경색을 확실히 지정하여 스크롤 오버랩 방지 */}
+        <div className="sticky top-0 bg-ide-bg z-10 px-4 py-3 border-b border-ide-border shrink-0 shadow-sm">
+          <div className="text-ide-text-muted font-bold mb-1">IDE-KOSPI 터미널에 오신 것을 환영합니다.</div>
           <div className="text-ide-text-muted">IDE-KOSPI의 사용법을 보려면 "help"를 입력하세요.</div>
         </div>
 
-        {history.map((line, i) => (
-          <div key={i} className={`mb-1 ${line.type === 'error' ? 'text-[#f48771]' : line.type === 'input' ? 'text-ide-text' : line.type === 'system' ? 'text-code-comment' : 'text-ide-text-muted'}`}>
-            {line.type === 'input' && <span className="text-[#519657] mr-2">➜</span>}
-            {line.text}
-          </div>
-        ))}
-        
-        <form onSubmit={onSubmit} className="flex items-center mt-2">
+        <div className="p-4 flex-1">
+          {history.map((line, i) => (
+            <div key={i} className={`mb-1 ${line.type === 'error' ? 'text-[#f48771]' : line.type === 'input' ? 'text-ide-text' : line.type === 'system' ? 'text-code-comment' : 'text-ide-text-muted'}`}>
+              {line.type === 'input' && <span className="text-[#519657] mr-2">➜</span>}
+              {line.text}
+            </div>
+          ))}
+          
+          <form onSubmit={onSubmit} className="flex items-center mt-2">
           <span className="text-[#519657] mr-2">➜</span>
           <span className="text-[#4fc1ff] mr-2">~</span>
           <input
@@ -210,6 +211,7 @@ export function Terminal() {
           />
         </form>
         <div ref={bottomRef} />
+        </div>
       </div>
     </div>
   );
