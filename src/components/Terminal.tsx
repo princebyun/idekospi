@@ -87,6 +87,7 @@ export function Terminal() {
         '  Ctrl + P      : 종목 빠른 검색 및 추가 (Quick Open)',
         '  Ctrl + B      : 좌측 탐색기(사이드바) 열기/닫기',
         '  Ctrl + \\      : 하단 터미널 열기/닫기',
+        '  ESC (2번 연속): 보스 모드 (진짜 개발 화면으로 위장)',
       ];
     }
 
