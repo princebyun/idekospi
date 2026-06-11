@@ -10,8 +10,8 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
   return (
     <div className="flex flex-col h-full text-sm">
-      {/* Main Content Area (Top Half) */}
-      <div className="flex-1 flex flex-col min-h-0">
+      {/* Main Content Area (Top 70%) */}
+      <div className="flex-[7] flex flex-col min-h-0">
         <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#cccccc] flex-shrink-0">
           {activeTab === 'explorer' ? 'Explorer' : activeTab === 'search' ? 'Search' : 'Settings'}
         </div>
@@ -102,9 +102,9 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
         )}
       </div>
 
-      {/* Source Control Panel (Bottom Half) - Always Visible except settings */}
+      {/* Source Control Panel (Bottom 30%) - Always Visible except settings */}
       {activeTab !== 'settings' && activeTab !== 'git' && (
-        <div className="flex-1 border-t border-[#2b2b2b] flex flex-col min-h-0 overflow-hidden text-[#cccccc] text-[12px] shrink-0">
+        <div className="flex-[3] border-t border-[#2b2b2b] flex flex-col min-h-0 overflow-hidden text-[#cccccc] text-[12px] shrink-0">
           <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#cccccc] flex-shrink-0 bg-[#252526] border-b border-[#2b2b2b]">
             소스 제어
           </div>
