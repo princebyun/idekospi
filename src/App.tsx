@@ -89,6 +89,11 @@ function App() {
     };
   }, [setIsSidebarOpen, setIsTerminalOpen, setIsRightPanelOpen]);
 
+  // 테마가 변경될 때 HTML 최상위 태그에 클래스 적용
+  useEffect(() => {
+    document.documentElement.className = `theme-${theme}`;
+  }, [theme]);
+
   const handleTabClick = (tab: string) => {
     if (tab === 'chat') {
       setIsRightPanelOpen(!useStore.getState().isRightPanelOpen);
