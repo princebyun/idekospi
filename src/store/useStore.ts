@@ -88,7 +88,7 @@ export const useStore = create<IdeState>()(
       })),
       sidebarWidth: 250,
       terminalHeight: 300,
-      isRightPanelOpen: false,
+      isRightPanelOpen: true, // 채팅창 기본 오픈
       rightPanelWidth: 350,
       setSidebarWidth: (width) => set({ sidebarWidth: width }),
       setTerminalHeight: (height) => set({ terminalHeight: height }),
@@ -96,7 +96,7 @@ export const useStore = create<IdeState>()(
       setRightPanelWidth: (width) => set({ rightPanelWidth: width }),
     }),
     {
-      name: 'ide-kospi-storage-v3',
+      name: 'ide-kospi-storage-v4', // 캐시 무효화 및 새로운 기본값 적용
       partialize: (state) => ({ 
         portfolio: state.portfolio, 
         tabs: state.tabs, 
