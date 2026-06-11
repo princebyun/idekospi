@@ -22,6 +22,25 @@ app.get('/api/git/log', async (req, res) => {
   }
 });
 
+// ReleaseNotes 렌더링용 Git 로그 (해시, 날짜 포함)
+app.get('/api/git/releases', async (req, res) => {
+  try {
+    const { stdout } = await execPromise('git log -n 20 --pretty=format:"%h|%cd|%s" --date=short');
+    const releases = stdout.split('\n').filter(line => line.trim().length > 0).map(line => {
+      const [hash, date, ...msgParts] = line.split('|');
+      return {
+        hash,
+        date,
+        message: msgParts.join('|').replace(/"/g, "'") // 따옴표 이스케이프 방지
+      };
+    });
+    res.json({ releases });
+  } catch (error) {
+    console.error('Failed to get git releases', error);
+    res.status(500).json({ error: 'Failed to get git releases', releases: [] });
+  }
+});
+
 app.get('/api/stocks', async (req, res) => {
   try {
     const symbolsParam = req.query.symbols as string;
