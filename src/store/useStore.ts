@@ -29,6 +29,7 @@ interface IdeState {
   tabs: Tab[];
   activeTabId: string;
   prices: MarketPrices;
+  theme: 'vscode-dark' | 'intellij' | 'light';
   addStock: (stock: Omit<StockItem, 'id'>) => void;
   updateStock: (id: string, updates: Partial<StockItem>) => void;
   removeStock: (id: string) => void;
@@ -44,11 +45,13 @@ interface IdeState {
   setTerminalHeight: (height: number) => void;
   setIsRightPanelOpen: (isOpen: boolean) => void;
   setRightPanelWidth: (width: number) => void;
+  setTheme: (theme: 'vscode-dark' | 'intellij' | 'light') => void;
 }
 
 export const useStore = create<IdeState>()(
   persist(
     (set) => ({
+      theme: 'vscode-dark',
       portfolio: [
         { id: '1', name: '삼성전자', code: '005930.KS' },
         { id: '2', name: 'BTC', code: 'KRW-BTC' },
@@ -94,10 +97,12 @@ export const useStore = create<IdeState>()(
       setTerminalHeight: (height) => set({ terminalHeight: height }),
       setIsRightPanelOpen: (isOpen) => set({ isRightPanelOpen: isOpen }),
       setRightPanelWidth: (width) => set({ rightPanelWidth: width }),
+      setTheme: (theme) => set({ theme }),
     }),
     {
-      name: 'ide-kospi-storage-v4', // 캐시 무효화 및 새로운 기본값 적용
+      name: 'ide-kospi-storage-v5', // 캐시 무효화 및 새로운 기본값 적용
       partialize: (state) => ({ 
+        theme: state.theme,
         portfolio: state.portfolio, 
         tabs: state.tabs, 
         activeTabId: state.activeTabId,

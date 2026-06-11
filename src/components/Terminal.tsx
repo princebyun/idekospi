@@ -177,21 +177,21 @@ export function Terminal() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-[#1e1e1e] font-mono text-[13px] border-t border-[#404040]">
-      <div className="flex items-center px-4 h-8 text-[#e7e7e7] uppercase tracking-wider text-xs font-semibold select-none bg-[#252526]">
+    <div className="h-full flex flex-col bg-ide-bg font-mono text-[13px] border-t border-ide-border">
+      <div className="flex items-center px-4 h-8 text-[#e7e7e7] uppercase tracking-wider text-xs font-semibold select-none bg-ide-sidebar">
         <TerminalIcon size={14} className="mr-2" />
         Terminal
       </div>
       
       <div className="flex-1 overflow-y-auto p-4 custom-scrollbar relative">
         {/* 상단 고정 도움말 (Sticky Header) */}
-        <div className="sticky top-0 bg-[#1e1e1e]/95 backdrop-blur-sm z-10 pb-2 mb-2 border-b border-[#333333]">
-          <div className="text-[#858585]">IDE-KOSPI 터미널에 오신 것을 환영합니다.</div>
-          <div className="text-[#858585]">IDE-KOSPI의 사용법을 보려면 "help"를 입력하세요.</div>
+        <div className="sticky top-0 bg-ide-bg/95 backdrop-blur-sm z-10 pb-2 mb-2 border-b border-ide-border">
+          <div className="text-ide-text-muted">IDE-KOSPI 터미널에 오신 것을 환영합니다.</div>
+          <div className="text-ide-text-muted">IDE-KOSPI의 사용법을 보려면 "help"를 입력하세요.</div>
         </div>
 
         {history.map((line, i) => (
-          <div key={i} className={`mb-1 ${line.type === 'error' ? 'text-[#f48771]' : line.type === 'input' ? 'text-[#cccccc]' : line.type === 'system' ? 'text-[#6a9955]' : 'text-[#858585]'}`}>
+          <div key={i} className={`mb-1 ${line.type === 'error' ? 'text-[#f48771]' : line.type === 'input' ? 'text-ide-text' : line.type === 'system' ? 'text-code-comment' : 'text-ide-text-muted'}`}>
             {line.type === 'input' && <span className="text-[#519657] mr-2">➜</span>}
             {line.text}
           </div>
@@ -204,7 +204,7 @@ export function Terminal() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="flex-1 bg-transparent outline-none text-[#cccccc]"
+            className="flex-1 bg-transparent outline-none text-ide-text"
             autoFocus
             spellCheck={false}
           />

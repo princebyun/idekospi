@@ -56,18 +56,18 @@ function TradingViewWidgetComponent({ symbol }: TradingViewWidgetProps) {
 
   if (isKrx) {
     return (
-      <div className="w-full h-full bg-[#1e1e1e] flex items-center justify-center font-mono text-sm">
+      <div className="w-full h-full bg-ide-bg flex items-center justify-center font-mono text-sm">
         <div className="text-left border border-[#841c1c] bg-[#2d0000] p-6 rounded-md shadow-lg max-w-lg">
           <div className="text-[#f14c4c] font-bold mb-4 flex items-center">
             <span className="mr-2">❌</span> ERROR: MODULE_RESTRICTED_BY_POLICY
           </div>
-          <div className="text-[#cccccc] mb-2">
-            Symbol: <span className="text-[#ce9178]">"{symbol}"</span>
+          <div className="text-ide-text mb-2">
+            Symbol: <span className="text-code-string">"{symbol}"</span>
           </div>
-          <div className="text-[#cccccc] mb-6 leading-relaxed">
+          <div className="text-ide-text mb-6 leading-relaxed">
             The requested KRX (Korea Exchange) data visualization module has been blocked by the third-party provider's licensing policy. External embedding is strictly prohibited.
           </div>
-          <div className="text-[#858585] border-t border-[#841c1c] pt-4 text-xs">
+          <div className="text-ide-text-muted border-t border-[#841c1c] pt-4 text-xs">
             {'>'} ACTION REQUIRED: Please use the [Code View] in the Explorer to monitor the real-time market data for this symbol instead.
           </div>
         </div>

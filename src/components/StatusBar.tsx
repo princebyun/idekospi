@@ -33,7 +33,7 @@ export function StatusBar() {
   const currentGroup = tickerGroups[tickerIndex];
 
   return (
-    <div className="h-[22px] bg-[#007acc] text-white text-[11px] flex items-center justify-between px-2 select-none flex-shrink-0 cursor-default">
+    <div className="h-[22px] bg-ide-primary text-white text-[11px] flex items-center justify-between px-2 select-none flex-shrink-0 cursor-default">
       <div className="flex items-center space-x-3">
         {/* 경고 아이콘 */}
         <div className="flex items-center space-x-1 hover:bg-[#1f8ad2] px-2 py-0.5 rounded transition-colors cursor-help" title="Crypto is real-time">
@@ -45,7 +45,7 @@ export function StatusBar() {
         <div className="flex items-center space-x-4 bg-[#1f8ad2] px-3 rounded h-[18px] min-w-[250px] transition-all duration-500 overflow-hidden relative">
           {currentGroup.map((item, idx) => {
             const data = prices[item.code];
-            if (!data) return <span key={item.code} className="w-1/2 flex items-center justify-center text-[#cccccc] animate-pulse">Loading {item.label}...</span>;
+            if (!data) return <span key={item.code} className="w-1/2 flex items-center justify-center text-ide-text animate-pulse">Loading {item.label}...</span>;
             
             const isUp = data.changeRate >= 0;
             const colorClass = isUp ? "text-[#ff9d9d]" : "text-[#8cb4ff]";
@@ -68,7 +68,7 @@ export function StatusBar() {
       
       <div className="flex items-center space-x-1">
         <div className="hover:bg-[#1f8ad2] px-2 py-0.5 rounded transition-colors" title="This software is for demonstration only. Not for real trading.">
-          <span className="text-[#cccccc]">Not for Trading</span>
+          <span className="text-ide-text">Not for Trading</span>
         </div>
         <div className="hover:bg-[#1f8ad2] px-2 py-0.5 rounded flex items-center space-x-1 transition-colors">
           <CheckCheck size={13} />

@@ -16,7 +16,8 @@ function App() {
     isRightPanelOpen, setIsRightPanelOpen,
     sidebarWidth, setSidebarWidth,
     terminalHeight, setTerminalHeight,
-    rightPanelWidth, setRightPanelWidth
+    rightPanelWidth, setRightPanelWidth,
+    theme
   } = useStore();
   
   const [activeTab, setActiveTab] = useState('explorer');
@@ -103,7 +104,7 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-[#1e1e1e] text-[#d4d4d4] overflow-hidden selection:bg-[#264f78] relative">
+    <div className={`flex flex-col h-screen w-screen bg-ide-bg text-ide-text overflow-hidden selection:bg-[#264f78] relative theme-${theme}`}>
       <TopMenuBar />
       <QuickOpen isOpen={isQuickOpenOpen} onClose={() => setIsQuickOpenOpen(false)} />
       
@@ -111,7 +112,7 @@ function App() {
       {!isFullscreen && !isAlertDismissed && (
         <div className="fixed bottom-10 right-10 z-50 bg-[#d7ba7d] text-[#1e1e1e] px-4 py-3 rounded-md font-bold text-[13px] shadow-[0_4px_12px_rgba(0,0,0,0.5)] flex items-center space-x-2 animate-bounce border border-[#a8905e]">
           <span className="text-[16px]">⚠️</span>
-          <span>완벽한 위장 모드를 위해 키보드의 <kbd className="bg-[#1e1e1e] text-[#d7ba7d] px-1.5 py-0.5 rounded mx-1 font-mono text-[11px] shadow-sm">F11</kbd> 키를 눌러주세요!</span>
+          <span>완벽한 위장 모드를 위해 키보드의 <kbd className="bg-ide-bg text-[#d7ba7d] px-1.5 py-0.5 rounded mx-1 font-mono text-[11px] shadow-sm">F11</kbd> 키를 눌러주세요!</span>
           <button 
             onClick={() => setIsAlertDismissed(true)} 
             className="ml-3 text-[#1e1e1e] hover:text-white hover:bg-black/20 p-1 rounded transition-colors"
@@ -131,7 +132,7 @@ function App() {
           <>
             <div 
               style={{ width: `${sidebarWidth}px` }} 
-              className="bg-[#252526] flex flex-col border-r border-[#2b2b2b] shrink-0"
+              className="bg-ide-sidebar flex flex-col border-r border-ide-border shrink-0"
             >
               <Sidebar activeTab={activeTab} />
             </div>
@@ -161,7 +162,7 @@ function App() {
               />
               <div 
                 style={{ height: `${terminalHeight}px` }} 
-                className="bg-[#1e1e1e] flex flex-col z-0 shrink-0"
+                className="bg-ide-bg flex flex-col z-0 shrink-0"
               >
                 <Terminal />
               </div>
@@ -181,7 +182,7 @@ function App() {
             />
             <div 
               style={{ width: `${rightPanelWidth}px` }} 
-              className="bg-[#1e1e1e] flex flex-col border-l border-[#2b2b2b] shrink-0 z-10"
+              className="bg-ide-bg flex flex-col border-l border-ide-border shrink-0 z-10"
             >
               <ChatPanel />
             </div>

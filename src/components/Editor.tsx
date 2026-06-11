@@ -31,13 +31,13 @@ export function Editor() {
   const renderMarketMethod = (methodName: string, title: string, list: { code: string; name: string }[]) => {
     return (
       <div className="mb-8">
-        <span className="text-[#6a9955] pl-4">/** {title} 실시간 시세 */</span><br/>
-        <span className="text-[#569cd6] pl-4">public async</span> <span className="text-[#dcdcaa]">{methodName}</span><span className="text-[#d4d4d4]">() {'{'}</span><br/>
+        <span className="text-code-comment pl-4">/** {title} 실시간 시세 */</span><br/>
+        <span className="text-code-keyword pl-4">public async</span> <span className="text-code-function">{methodName}</span><span className="text-ide-text">() {'{'}</span><br/>
         {list.map(item => {
           const info = prices[item.code] || { price: 0, changeRate: 0 };
           const isProfit = info.changeRate > 0;
           const isLoss = info.changeRate < 0;
-          let changeColor = 'text-[#ce9178]';
+          let changeColor = 'text-code-string';
           if (isProfit) changeColor = 'text-[#ff9d9d]';
           if (isLoss) changeColor = 'text-[#8cb4ff]';
           
@@ -69,18 +69,18 @@ export function Editor() {
           
           return (
             <div key={item.code} className="transition-opacity duration-300 pl-8 pt-2 pb-3 hover:bg-[#2a2d2e] select-text">
-              <span className="text-[#569cd6]">function</span> <span className="text-[#dcdcaa]">{item.name.replace(/ /g, '_')}</span><span className="text-[#d4d4d4]">() {'{'} </span><br/>
+              <span className="text-code-keyword">function</span> <span className="text-code-function">{item.name.replace(/ /g, '_')}</span><span className="text-ide-text">() {'{'} </span><br/>
               <div className="pl-8 py-1">
-                <span className="text-[#9cdcfe]">price</span><span className="text-[#d4d4d4]">:</span> <span className={isString ? 'text-[#ce9178]' : 'text-[#b5cea8]'}>{priceStr}</span><span className="text-[#d4d4d4]">,</span><br/>
-                <span className="text-[#9cdcfe]">change</span><span className="text-[#d4d4d4]">:</span> <span className={changeColor}>'{changeStr}'</span><span className="text-[#d4d4d4]">,</span><br/>
-                <span className="text-[#9cdcfe]">status</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#ce9178]">{statusText}</span><br/><br/>
-                <span className="text-[#c586c0]">return</span><span className="text-[#d4d4d4]">;</span>
+                <span className="text-code-variable">price</span><span className="text-ide-text">:</span> <span className={isString ? 'text-code-string' : 'text-code-number'}>{priceStr}</span><span className="text-ide-text">,</span><br/>
+                <span className="text-code-variable">change</span><span className="text-ide-text">:</span> <span className={changeColor}>'{changeStr}'</span><span className="text-ide-text">,</span><br/>
+                <span className="text-code-variable">status</span><span className="text-ide-text">:</span> <span className="text-code-string">{statusText}</span><br/><br/>
+                <span className="text-code-keyword2">return</span><span className="text-ide-text">;</span>
               </div>
-              <span className="text-[#d4d4d4]">{'}'}</span><br/>
+              <span className="text-ide-text">{'}'}</span><br/>
             </div>
           );
         })}
-        <span className="text-[#d4d4d4] pl-4">{'}'}</span>
+        <span className="text-ide-text pl-4">{'}'}</span>
       </div>
     );
   };
@@ -91,33 +91,33 @@ export function Editor() {
 
     return (
       <div className="flex text-[14px]">
-        <div className="text-[#858585] text-right pr-4 select-none w-12 shrink-0 border-r border-[#404040] mr-4">
+        <div className="text-ide-text-muted text-right pr-4 select-none w-12 shrink-0 border-r border-ide-border mr-4">
           {Array.from({ length: totalLines }).map((_, i) => <div key={i}>{i + 1}</div>)}
         </div>
-        <div className="text-[#d4d4d4] whitespace-pre font-mono pb-20">
-          <span className="text-[#c586c0]">export class</span> <span className="text-[#4ec9b0]">MarketDashboard</span> <span className="text-[#d4d4d4]"> {'{'}</span><br/><br/>
+        <div className="text-ide-text whitespace-pre font-mono pb-20">
+          <span className="text-code-keyword2">export class</span> <span className="text-code-class">MarketDashboard</span> <span className="text-ide-text"> {'{'}</span><br/><br/>
           
           {renderMarketMethod('getMyPortfolio', '내 관심 종목 (포트폴리오)', portfolio)}
           {renderMarketMethod('getDomesticMarket', '국내주식 (국장)', DOMESTIC_LIST)}
           {renderMarketMethod('getGlobalMarket', '해외주식 (미장)', GLOBAL_LIST)}
           {renderMarketMethod('getCryptoMarket', '가상화폐 (코인)', CRYPTO_LIST)}
           
-          <span className="text-[#d4d4d4]">{'}'}</span>
+          <span className="text-ide-text">{'}'}</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#1e1e1e]">
+    <div className="flex flex-col h-full bg-ide-bg">
       {/* Tabs */}
-      <div className="flex bg-[#252526] overflow-x-auto custom-scrollbar select-none">
+      <div className="flex bg-ide-sidebar overflow-x-auto custom-scrollbar select-none">
         {tabs.map((tab) => (
           <div
             key={tab.id}
             onClick={() => setActiveTabId(tab.id)}
             className={`group flex items-center h-[35px] px-3 cursor-pointer border-r border-[#2d2d2d] min-w-fit
-              ${activeTabId === tab.id ? 'bg-[#1e1e1e] border-t border-t-[#007acc] text-white' : 'bg-[#2d2d2d] text-[#969696] hover:bg-[#2b2b2b]'}`}
+              ${activeTabId === tab.id ? 'bg-ide-bg border-t border-t-ide-primary text-white' : 'bg-ide-tab-inactive text-ide-text-muted hover:bg-ide-hover'}`}
           >
             <span className="mr-2 text-[10px] font-bold" style={{ color: tab.color }}>
               {tab.icon}
@@ -125,7 +125,7 @@ export function Editor() {
             <span className="text-sm mr-2">{tab.title}</span>
             <button
               onClick={(e) => { e.stopPropagation(); closeTab(tab.id); }}
-              className={`p-0.5 rounded-md hover:bg-[#333333] ${activeTabId === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+              className={`p-0.5 rounded-md hover:bg-ide-activity ${activeTabId === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
             >
               <X size={14} />
             </button>
@@ -134,7 +134,7 @@ export function Editor() {
       </div>
 
       {/* Breadcrumbs */}
-      <div className="h-[22px] bg-[#1e1e1e] flex items-center px-4 text-[13px] text-[#969696] select-none shadow-sm">
+      <div className="h-[22px] bg-ide-bg flex items-center px-4 text-[13px] text-ide-text-muted select-none shadow-sm">
         <span>src</span>
         <span className="mx-1">›</span>
         <span>{activeTab?.type.startsWith('market') ? 'markets' : 'portfolio'}</span>
@@ -143,7 +143,7 @@ export function Editor() {
       </div>
 
       {/* Editor Content */}
-      <div className="flex-1 overflow-auto custom-scrollbar bg-[#1e1e1e] relative">
+      <div className="flex-1 overflow-auto custom-scrollbar bg-ide-bg relative">
         {activeTab?.type === 'markets_all' && (
           <div className="p-4">
             {renderAllMarkets()}
@@ -155,7 +155,7 @@ export function Editor() {
         )}
 
         {activeTab?.type === 'chart' && activeTab.code && (
-          <div className="w-full h-full p-1 bg-[#1e1e1e]">
+          <div className="w-full h-full p-1 bg-ide-bg">
             <TradingViewWidget symbol={activeTab.code} />
           </div>
         )}
@@ -165,9 +165,9 @@ export function Editor() {
         )}
 
         {!activeTab && (
-          <div className="flex items-center justify-center h-full text-[#858585] select-none flex-col">
+          <div className="flex items-center justify-center h-full text-ide-text-muted select-none flex-col">
             <div className="mb-4 text-center">
-              <div className="w-32 h-32 mx-auto mb-4 border-2 border-dashed border-[#3c3c3c] rounded flex items-center justify-center opacity-50">
+              <div className="w-32 h-32 mx-auto mb-4 border-2 border-dashed border-ide-border rounded flex items-center justify-center opacity-50">
                 IDE-KOSPI
               </div>
               <p className="text-sm">종목을 선택하거나 <kbd className="bg-[#333] px-1 rounded mx-1">Ctrl+P</kbd>로 빠른 검색을 실행하세요.</p>

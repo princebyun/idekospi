@@ -106,12 +106,12 @@ export function QuickOpen({ isOpen, onClose }: QuickOpenProps) {
   return (
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="fixed top-[15%] left-1/2 -translate-x-1/2 w-[600px] bg-[#252526] border border-[#454545] rounded-md shadow-2xl z-50 flex flex-col font-mono">
+      <div className="fixed top-[15%] left-1/2 -translate-x-1/2 w-[600px] bg-ide-sidebar border border-[#454545] rounded-md shadow-2xl z-50 flex flex-col font-mono">
         <div className="p-2 border-b border-[#454545]">
           <input
             ref={inputRef}
             type="text"
-            className="w-full bg-[#3c3c3c] text-[#cccccc] px-3 py-1.5 outline-none border border-transparent focus:border-[#007acc]"
+            className="w-full bg-ide-border text-ide-text px-3 py-1.5 outline-none border border-transparent focus:border-ide-primary"
             placeholder="Type a stock name or code to add to portfolio..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -122,27 +122,27 @@ export function QuickOpen({ isOpen, onClose }: QuickOpenProps) {
         <div className="max-h-[300px] overflow-y-auto py-1 custom-scrollbar relative">
           {isSearching && (
             <div className="absolute top-0 left-0 right-0 h-0.5 overflow-hidden">
-              <div className="w-full h-full bg-[#007acc] animate-pulse"></div>
+              <div className="w-full h-full bg-ide-primary animate-pulse"></div>
             </div>
           )}
           {allItems.length === 0 && !isSearching ? (
-            <div className="px-4 py-2 text-[#858585] text-sm">No matching results</div>
+            <div className="px-4 py-2 text-ide-text-muted text-sm">No matching results</div>
           ) : (
             allItems.map((item, idx) => (
               <div
                 key={item.code}
                 className={`px-4 py-1.5 flex items-center justify-between cursor-pointer text-[13px]
-                  ${idx === selectedIndex ? 'bg-[#04395e] text-white' : 'text-[#cccccc] hover:bg-[#2a2d2e]'}`}
+                  ${idx === selectedIndex ? 'bg-[#04395e] text-white' : 'text-ide-text hover:bg-[#2a2d2e]'}`}
                 onClick={() => handleSelect(item)}
                 onMouseEnter={() => setSelectedIndex(idx)}
               >
                 <div className="flex items-center">
-                  <span className="text-[#007acc] w-6 mr-2">TS</span>
+                  <span className="text-ide-primary w-6 mr-2">TS</span>
                   <span>{item.name}</span>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <span className="text-[#858585]">{item.code}</span>
-                  {item.inPortfolio && <span className="text-[#6a9955] text-[11px]">In Portfolio</span>}
+                  <span className="text-ide-text-muted">{item.code}</span>
+                  {item.inPortfolio && <span className="text-code-comment text-[11px]">In Portfolio</span>}
                 </div>
               </div>
             ))

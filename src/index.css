@@ -1,8 +1,100 @@
 @import "tailwindcss";
 
+@theme {
+  --color-ide-bg: var(--ide-bg);
+  --color-ide-activity: var(--ide-activity);
+  --color-ide-sidebar: var(--ide-sidebar);
+  --color-ide-border: var(--ide-border);
+  --color-ide-text: var(--ide-text);
+  --color-ide-text-muted: var(--ide-text-muted);
+  --color-ide-primary: var(--ide-primary);
+  --color-ide-tab-active: var(--ide-tab-active);
+  --color-ide-tab-inactive: var(--ide-tab-inactive);
+  --color-ide-hover: var(--ide-hover);
+
+  --color-code-keyword: var(--code-keyword);
+  --color-code-keyword2: var(--code-keyword2);
+  --color-code-function: var(--code-function);
+  --color-code-string: var(--code-string);
+  --color-code-comment: var(--code-comment);
+  --color-code-number: var(--code-number);
+  --color-code-class: var(--code-class);
+  --color-code-variable: var(--code-variable);
+}
+
 @layer base {
+  :root {
+    /* Default is VSCode Dark */
+    --ide-bg: #1e1e1e;
+    --ide-activity: #333333;
+    --ide-sidebar: #252526;
+    --ide-border: #3c3c3c;
+    --ide-text: #cccccc;
+    --ide-text-muted: #858585;
+    --ide-primary: #007acc;
+    --ide-tab-active: #1e1e1e;
+    --ide-tab-inactive: #2d2d2d;
+    --ide-hover: #2b2d31;
+
+    /* Syntax */
+    --code-keyword: #569cd6;
+    --code-keyword2: #c586c0;
+    --code-function: #dcdcaa;
+    --code-string: #ce9178;
+    --code-comment: #6a9955;
+    --code-number: #b5cea8;
+    --code-class: #4ec9b0;
+    --code-variable: #9cdcfe;
+  }
+
+  .theme-intellij {
+    --ide-bg: #2b2b2b;
+    --ide-activity: #313335;
+    --ide-sidebar: #3c3f41;
+    --ide-border: #323232;
+    --ide-text: #a9b7c6;
+    --ide-text-muted: #808080;
+    --ide-primary: #214283;
+    --ide-tab-active: #2b2b2b;
+    --ide-tab-inactive: #4d4d4d;
+    --ide-hover: #4e5254;
+
+    /* Syntax Darcula */
+    --code-keyword: #cc7832;
+    --code-keyword2: #cc7832;
+    --code-function: #ffc66d;
+    --code-string: #6a8759;
+    --code-comment: #808080;
+    --code-number: #6897bb;
+    --code-class: #a9b7c6;
+    --code-variable: #9876aa;
+  }
+
+  .theme-light {
+    --ide-bg: #ffffff;
+    --ide-activity: #2c2c2c;
+    --ide-sidebar: #f3f3f3;
+    --ide-border: #e4e4e4;
+    --ide-text: #333333;
+    --ide-text-muted: #666666;
+    --ide-primary: #007acc;
+    --ide-tab-active: #ffffff;
+    --ide-tab-inactive: #e4e4e4;
+    --ide-hover: #e8e8e8;
+
+    /* Syntax Light */
+    --code-keyword: #0000ff;
+    --code-keyword2: #af00db;
+    --code-function: #795e26;
+    --code-string: #a31515;
+    --code-comment: #008000;
+    --code-number: #098658;
+    --code-class: #267f99;
+    --code-variable: #001080;
+  }
+
   body {
-    @apply bg-[#1e1e1e] text-[#d4d4d4];
+    @apply bg-ide-bg text-ide-text;
     font-family: 'Consolas', 'Courier New', monospace;
   }
 }

@@ -63,7 +63,7 @@ export function ResizeHandle({ orientation, onResize, minSize, maxSize }: Resize
         onMouseDown={handleMouseDown}
         className="w-[11px] -mx-[5px] z-50 flex justify-center bg-transparent cursor-col-resize group outline-none shrink-0"
       >
-        <div className="w-[1px] h-full bg-[#2b2b2b] group-hover:bg-[#007acc] group-active:bg-[#007acc] transition-colors" />
+        <div className="w-[1px] h-full bg-ide-hover group-hover:bg-ide-primary group-active:bg-ide-primary transition-colors" />
       </div>
     );
   }
@@ -73,7 +73,7 @@ export function ResizeHandle({ orientation, onResize, minSize, maxSize }: Resize
       onMouseDown={handleMouseDown}
       className="h-[11px] -my-[5px] z-50 flex flex-col justify-center bg-transparent cursor-row-resize group outline-none shrink-0"
     >
-      <div className="h-[1px] w-full bg-[#2b2b2b] group-hover:bg-[#007acc] group-active:bg-[#007acc] transition-colors" />
+      <div className="h-[1px] w-full bg-ide-hover group-hover:bg-ide-primary group-active:bg-ide-primary transition-colors" />
     </div>
   );
 }

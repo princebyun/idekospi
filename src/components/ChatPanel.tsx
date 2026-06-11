@@ -62,15 +62,15 @@ export function ChatPanel() {
   };
 
   return (
-    <div className="w-full h-full bg-[#1e1e1e] flex flex-col text-[#cccccc] font-sans">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-[#2b2b2b] flex-shrink-0 select-none">
-        <div className="flex items-center text-[12px] font-semibold text-[#cccccc]">
+    <div className="w-full h-full bg-ide-bg flex flex-col text-ide-text font-sans">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-ide-border flex-shrink-0 select-none">
+        <div className="flex items-center text-[12px] font-semibold text-ide-text">
           DISCUSSION CHAT
         </div>
         <div className="flex items-center space-x-2">
           <button 
             onClick={() => setIsRightPanelOpen(false)}
-            className="p-1 hover:bg-[#2d2d2d] rounded-md transition-colors text-[#858585] hover:text-[#cccccc]"
+            className="p-1 hover:bg-ide-tab-inactive rounded-md transition-colors text-ide-text-muted hover:text-ide-text"
           >
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.707L8 8.707z"></path></svg>
           </button>
@@ -79,8 +79,8 @@ export function ChatPanel() {
       
       <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center text-[#858585] select-none space-y-4">
-            <Sparkles size={32} className="text-[#007acc] opacity-50" />
+          <div className="flex flex-col items-center justify-center h-full text-center text-ide-text-muted select-none space-y-4">
+            <Sparkles size={32} className="text-ide-primary opacity-50" />
             <div className="text-[13px]">
               Hi! I'm ready to discuss the market with you.<br/>
               What do you want to talk about?
@@ -94,11 +94,11 @@ export function ChatPanel() {
                 {/* AI 응답 위장 (타인의 메시지) */}
                 {!isMe && (
                   <div className="flex items-center space-x-2 mb-1">
-                    <Sparkles size={14} className="text-[#007acc]" />
-                    <span className="text-[12px] font-semibold text-[#cccccc]">
+                    <Sparkles size={14} className="text-ide-primary" />
+                    <span className="text-[12px] font-semibold text-ide-text">
                       {msg.author}
                     </span>
-                    <span className="text-[10px] text-[#555555]">
+                    <span className="text-[10px] text-ide-text-muted">
                       {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
@@ -107,10 +107,10 @@ export function ChatPanel() {
                 {/* 나의 메시지 위장 (사용자 프롬프트) */}
                 {isMe && (
                   <div className="flex items-center space-x-2 mb-1">
-                    <span className="text-[10px] text-[#555555]">
+                    <span className="text-[10px] text-ide-text-muted">
                       {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
-                    <span className="text-[12px] font-semibold text-[#858585]">You</span>
+                    <span className="text-[12px] font-semibold text-ide-text-muted">You</span>
                   </div>
                 )}
 
@@ -118,8 +118,8 @@ export function ChatPanel() {
                 <div 
                   className={`text-[13px] leading-relaxed break-words px-3 py-2 ${
                     isMe 
-                      ? 'bg-[#2b2d31] text-[#cccccc] rounded-2xl rounded-tr-sm max-w-[85%] border border-[#3c3c3c]' 
-                      : 'bg-transparent text-[#d4d4d4] w-full'
+                      ? 'bg-[#2b2d31] text-ide-text rounded-2xl rounded-tr-sm max-w-[85%] border border-ide-border' 
+                      : 'bg-transparent text-ide-text w-full'
                   }`}
                 >
                   {msg.text}
@@ -131,10 +131,10 @@ export function ChatPanel() {
         <div ref={bottomRef} />
       </div>
 
-      <div className="p-4 bg-[#1e1e1e]">
+      <div className="p-4 bg-ide-bg">
         <form onSubmit={sendMessage} className="relative group">
-          <div className="flex items-center bg-[#1e1e1e] border border-[#3c3c3c] rounded-md focus-within:border-[#007acc] focus-within:ring-1 focus-within:ring-[#007acc] transition-all px-2 py-1.5 shadow-sm">
-            <button type="button" className="p-1 text-[#858585] hover:text-[#cccccc] transition-colors rounded-sm hover:bg-[#2d2d2d] ml-0.5 mr-2 flex-shrink-0">
+          <div className="flex items-center bg-ide-bg border border-ide-border rounded-md focus-within:border-ide-primary focus-within:ring-1 focus-within:ring-ide-primary transition-all px-2 py-1.5 shadow-sm">
+            <button type="button" className="p-1 text-ide-text-muted hover:text-ide-text transition-colors rounded-sm hover:bg-ide-tab-inactive ml-0.5 mr-2 flex-shrink-0">
               <span className="text-[16px] leading-none block font-mono">+</span>
             </button>
             <textarea
@@ -148,7 +148,7 @@ export function ChatPanel() {
                 }
               }}
               placeholder="Ask anything, @ to mention, / for workflows"
-              className="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none text-[13px] text-[#cccccc] resize-none custom-scrollbar py-1"
+              className="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none text-[13px] text-ide-text resize-none custom-scrollbar py-1"
               rows={1}
               spellCheck={false}
               style={{ minHeight: '22px', maxHeight: '150px' }}
@@ -158,29 +158,29 @@ export function ChatPanel() {
               disabled={!input.trim()}
               className={`p-1.5 ml-2 mr-0.5 rounded-sm transition-colors flex-shrink-0 ${
                 input.trim() 
-                  ? 'bg-transparent text-[#cccccc] hover:bg-[#2d2d2d]' 
-                  : 'bg-transparent text-[#555555]'
+                  ? 'bg-transparent text-ide-text hover:bg-ide-tab-inactive' 
+                  : 'bg-transparent text-ide-text-muted'
               }`}
             >
               <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M8 1.5l7 7-7 7-1.06-1.06L12.88 8.5H1v-1h11.88L6.94 2.56 8 1.5z"></path></svg>
             </button>
           </div>
           
-          <div className="mt-3 flex items-center justify-between text-[10px] text-[#555555] select-none">
+          <div className="mt-3 flex items-center justify-between text-[10px] text-ide-text-muted select-none">
             <div className="flex items-center space-x-2">
-              <User size={12} className="text-[#858585]" />
+              <User size={12} className="text-ide-text-muted" />
               <input 
                 type="text" 
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
                 placeholder="Your nickname"
                 title="채팅방에서 사용할 닉네임"
-                className="bg-transparent border-b border-transparent hover:border-[#3c3c3c] focus:border-[#007acc] focus:outline-none text-[10px] text-[#858585] focus:text-[#cccccc] w-32 pb-0.5 transition-colors placeholder-[#555555]"
+                className="bg-transparent border-b border-transparent hover:border-ide-border focus:border-ide-primary focus:outline-none text-[10px] text-ide-text-muted focus:text-ide-text w-32 pb-0.5 transition-colors placeholder-[#555555]"
               />
             </div>
             <div className="flex items-center space-x-1">
               <TerminalSquare size={12} />
-              <span>Use <kbd className="bg-[#2d2d2d] px-1 rounded border border-[#3c3c3c]">Ctrl+L</kbd> to toggle</span>
+              <span>Use <kbd className="bg-ide-tab-inactive px-1 rounded border border-ide-border">Ctrl+L</kbd> to toggle</span>
             </div>
           </div>
         </form>

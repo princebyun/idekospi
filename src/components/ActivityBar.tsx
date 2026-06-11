@@ -7,10 +7,10 @@ interface ActivityBarProps {
 
 export function ActivityBar({ activeTab, setActiveTab }: ActivityBarProps) {
   const iconClass = (tab: string) => 
-    `p-3 cursor-pointer ${activeTab === tab ? 'text-white border-l-2 border-[#007acc]' : 'text-[#858585] hover:text-white border-l-2 border-transparent'}`;
+    `p-3 cursor-pointer ${activeTab === tab ? 'text-white border-l-2 border-ide-primary' : 'text-ide-text-muted hover:text-white border-l-2 border-transparent'}`;
 
   return (
-    <div className="w-12 bg-[#333333] flex flex-col items-center py-2 flex-shrink-0">
+    <div className="w-12 bg-ide-activity flex flex-col items-center py-2 flex-shrink-0">
       <div className={iconClass('explorer')} onClick={() => setActiveTab('explorer')} title="Explorer">
         <Files size={24} strokeWidth={1.5} />
       </div>
