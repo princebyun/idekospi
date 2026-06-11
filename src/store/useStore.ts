@@ -38,8 +38,12 @@ interface IdeState {
   updatePrice: (code: string, price: number, changeRate: number, marketState?: string) => void;
   sidebarWidth: number;
   terminalHeight: number;
+  isRightPanelOpen: boolean;
+  rightPanelWidth: number;
   setSidebarWidth: (width: number) => void;
   setTerminalHeight: (height: number) => void;
+  setIsRightPanelOpen: (isOpen: boolean) => void;
+  setRightPanelWidth: (width: number) => void;
 }
 
 export const useStore = create<IdeState>()(
@@ -84,8 +88,12 @@ export const useStore = create<IdeState>()(
       })),
       sidebarWidth: 250,
       terminalHeight: 300,
+      isRightPanelOpen: false,
+      rightPanelWidth: 350,
       setSidebarWidth: (width) => set({ sidebarWidth: width }),
       setTerminalHeight: (height) => set({ terminalHeight: height }),
+      setIsRightPanelOpen: (isOpen) => set({ isRightPanelOpen: isOpen }),
+      setRightPanelWidth: (width) => set({ rightPanelWidth: width }),
     }),
     {
       name: 'ide-kospi-storage-v3',
@@ -94,7 +102,9 @@ export const useStore = create<IdeState>()(
         tabs: state.tabs, 
         activeTabId: state.activeTabId,
         sidebarWidth: state.sidebarWidth,
-        terminalHeight: state.terminalHeight
+        terminalHeight: state.terminalHeight,
+        isRightPanelOpen: state.isRightPanelOpen,
+        rightPanelWidth: state.rightPanelWidth
       }),
     }
   )

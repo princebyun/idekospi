@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Send } from 'lucide-react';
+import { MessageSquare, Send, Sparkles, User, TerminalSquare, ArrowUp } from 'lucide-react';
+import { useStore } from '../store/useStore';
 
 interface ChatMessage {
   id: string;
@@ -13,6 +14,7 @@ export function ChatPanel() {
   const [input, setInput] = useState('');
   const [author, setAuthor] = useState(() => localStorage.getItem('chat_author') || `User_${Math.floor(Math.random() * 10000)}`);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { setIsRightPanelOpen } = useStore();
 
   useEffect(() => {
     localStorage.setItem('chat_author', author);
@@ -60,41 +62,86 @@ export function ChatPanel() {
   };
 
   return (
-    <div className="w-full h-full bg-[#252526] flex flex-col text-[#cccccc] font-sans">
-      <div className="flex items-center px-4 py-2 border-b border-[#3c3c3c] bg-[#2d2d2d] uppercase text-[11px] tracking-wider font-semibold flex-shrink-0">
-        <MessageSquare size={14} className="mr-2" />
-        DISCUSSION (OUTPUT)
+    <div className="w-full h-full bg-[#1e1e1e] flex flex-col text-[#cccccc] font-sans">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-[#2b2b2b] flex-shrink-0 select-none">
+        <div className="flex items-center text-[12px] font-semibold text-[#cccccc]">
+          CHAT
+        </div>
+        <div className="flex items-center space-x-2">
+          <input 
+            type="text" 
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            title="닉네임 (AI 모델명으로 위장됨)"
+            className="bg-transparent border-b border-transparent hover:border-[#3c3c3c] focus:border-[#007acc] focus:outline-none text-right w-20 text-[10px] text-[#858585] transition-colors"
+          />
+          <button 
+            onClick={() => setIsRightPanelOpen(false)}
+            className="p-1 hover:bg-[#2d2d2d] rounded-md transition-colors"
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.707L8 8.707z"></path></svg>
+          </button>
+        </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
         {messages.length === 0 ? (
-          <div className="text-[#858585] text-sm text-center mt-10">
-            실시간 종목 토론방에 오신 것을 환영합니다.<br/>
-            자유롭게 의견을 나누세요.
+          <div className="flex flex-col items-center justify-center h-full text-center text-[#858585] select-none space-y-4">
+            <Sparkles size={32} className="text-[#007acc] opacity-50" />
+            <div className="text-[13px]">
+              Hi! I'm ready to discuss the market with you.<br/>
+              What do you want to talk about?
+            </div>
           </div>
         ) : (
-          messages.map((msg) => (
-            <div key={msg.id} className="flex flex-col">
-              <div className="flex items-baseline space-x-2 mb-1">
-                <span className={`text-[12px] font-bold ${msg.author === author ? 'text-[#4fc1ff]' : 'text-[#c586c0]'}`}>
-                  {msg.author}
-                </span>
-                <span className="text-[10px] text-[#858585]">
-                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
+          messages.map((msg) => {
+            const isMe = msg.author === author;
+            return (
+              <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                {/* AI 응답 위장 (타인의 메시지) */}
+                {!isMe && (
+                  <div className="flex items-center space-x-2 mb-1">
+                    <Sparkles size={14} className="text-[#007acc]" />
+                    <span className="text-[12px] font-semibold text-[#cccccc]">
+                      {msg.author}
+                    </span>
+                    <span className="text-[10px] text-[#555555]">
+                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                )}
+                
+                {/* 나의 메시지 위장 (사용자 프롬프트) */}
+                {isMe && (
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className="text-[10px] text-[#555555]">
+                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <span className="text-[12px] font-semibold text-[#858585]">You</span>
+                  </div>
+                )}
+
+                {/* 메시지 본문 */}
+                <div 
+                  className={`text-[13px] leading-relaxed break-words px-3 py-2 ${
+                    isMe 
+                      ? 'bg-[#2b2d31] text-[#cccccc] rounded-2xl rounded-tr-sm max-w-[85%] border border-[#3c3c3c]' 
+                      : 'bg-transparent text-[#d4d4d4] w-full'
+                  }`}
+                >
+                  {msg.text}
+                </div>
               </div>
-              <div className="text-[13px] leading-relaxed break-words text-[#d4d4d4] bg-[#2d2d2d] p-2 rounded-r-md rounded-bl-md border border-[#3c3c3c]">
-                {msg.text}
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
         <div ref={bottomRef} />
       </div>
 
-      <div className="p-3 border-t border-[#3c3c3c] bg-[#252526]">
-        <form onSubmit={sendMessage} className="relative">
+      <div className="p-4 bg-[#1e1e1e]">
+        <form onSubmit={sendMessage} className="relative group">
           <textarea
+            id="chat-input"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
@@ -103,27 +150,25 @@ export function ChatPanel() {
                 sendMessage(e);
               }
             }}
-            placeholder="메시지를 입력하세요 (Enter로 전송)"
-            className="w-full bg-[#3c3c3c] border border-[#3c3c3c] rounded focus:border-[#007acc] focus:outline-none p-2 pr-10 text-[13px] resize-none custom-scrollbar"
-            rows={3}
+            placeholder="Ask anything (e.g. how is AAPL today?)"
+            className="w-full bg-[#1e1e1e] border border-[#3c3c3c] rounded-lg focus:border-[#007acc] focus:ring-1 focus:ring-[#007acc] focus:outline-none py-3 pl-3 pr-10 text-[13px] resize-none custom-scrollbar transition-all shadow-sm"
+            rows={2}
             spellCheck={false}
           />
           <button
             type="submit"
             disabled={!input.trim()}
-            className="absolute right-2 bottom-2 p-1.5 text-[#cccccc] hover:text-white disabled:opacity-50 disabled:hover:text-[#cccccc] bg-[#007acc] rounded"
+            className="absolute right-2 bottom-3 p-1.5 bg-[#007acc] text-white hover:bg-[#005f9e] disabled:opacity-30 disabled:hover:bg-[#007acc] transition-colors rounded-md"
           >
-            <Send size={14} />
+            <ArrowUp size={14} strokeWidth={3} />
           </button>
         </form>
-        <div className="mt-2 flex items-center justify-between text-[11px] text-[#858585]">
-          <span>익명 닉네임:</span>
-          <input 
-            type="text" 
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            className="bg-transparent border-b border-[#3c3c3c] focus:border-[#007acc] focus:outline-none text-right w-24 text-[#cccccc]"
-          />
+        <div className="mt-2 flex items-center justify-between text-[10px] text-[#555555] select-none">
+          <div className="flex items-center space-x-1">
+            <TerminalSquare size={12} />
+            <span>Use <kbd className="bg-[#2d2d2d] px-1 rounded border border-[#3c3c3c]">Ctrl+L</kbd> to toggle chat</span>
+          </div>
+          <span>AI Chat Mode</span>
         </div>
       </div>
     </div>

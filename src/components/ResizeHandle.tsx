@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 
 interface ResizeHandleProps {
-  orientation: 'horizontal' | 'vertical';
+  orientation: 'horizontal' | 'vertical' | 'right-vertical';
   onResize: (newSize: number) => void;
   minSize: number;
   maxSize: number;
@@ -14,8 +14,14 @@ export function ResizeHandle({ orientation, onResize, minSize, maxSize }: Resize
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging.current) return;
       if (orientation === 'vertical') {
-        // 사이드바 조절 (X축)
+        // 좌측 사이드바 조절 (X축)
         let newWidth = e.clientX - 48; // ActivityBar(48px) 제외한 너비
+        if (newWidth < minSize) newWidth = minSize;
+        if (newWidth > maxSize) newWidth = maxSize;
+        onResize(newWidth);
+      } else if (orientation === 'right-vertical') {
+        // 우측 패널 조절 (X축, 화면 우측에서부터의 거리)
+        let newWidth = window.innerWidth - e.clientX;
         if (newWidth < minSize) newWidth = minSize;
         if (newWidth > maxSize) newWidth = maxSize;
         onResize(newWidth);
@@ -47,11 +53,11 @@ export function ResizeHandle({ orientation, onResize, minSize, maxSize }: Resize
 
   const handleMouseDown = () => {
     isDragging.current = true;
-    document.body.style.cursor = orientation === 'vertical' ? 'col-resize' : 'row-resize';
+    document.body.style.cursor = orientation === 'horizontal' ? 'row-resize' : 'col-resize';
     document.body.style.userSelect = 'none'; // 드래그 시 텍스트 선택 방지
   };
 
-  if (orientation === 'vertical') {
+  if (orientation === 'vertical' || orientation === 'right-vertical') {
     return (
       <div 
         onMouseDown={handleMouseDown}

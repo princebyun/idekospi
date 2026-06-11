@@ -6,9 +6,12 @@ interface TradingViewWidgetProps {
 
 function TradingViewWidgetComponent({ symbol }: TradingViewWidgetProps) {
   const container = useRef<HTMLDivElement>(null);
+  
+  // 국장 판별
+  const isKrx = symbol.endsWith('.KS') || symbol.endsWith('.KQ') || symbol.startsWith('KRX:');
 
   useEffect(() => {
-    if (!container.current) return;
+    if (!container.current || isKrx) return;
 
     // Clear previous widget
     container.current.innerHTML = '';
@@ -20,10 +23,7 @@ function TradingViewWidgetComponent({ symbol }: TradingViewWidgetProps) {
       if (typeof window !== 'undefined' && (window as any).TradingView) {
         
         let tvSymbol = symbol;
-        // Transform symbol for TradingView
-        if (symbol.endsWith('.KS') || symbol.endsWith('.KQ')) {
-          tvSymbol = `KRX:${symbol.replace(/\.K[SQ]/, '')}`;
-        } else if (symbol.startsWith('KRW-')) {
+        if (symbol.startsWith('KRW-')) {
           tvSymbol = `UPBIT:${symbol.replace('KRW-', '')}KRW`;
         }
 
@@ -52,7 +52,28 @@ function TradingViewWidgetComponent({ symbol }: TradingViewWidgetProps) {
         script.parentNode.removeChild(script);
       }
     };
-  }, [symbol]);
+  }, [symbol, isKrx]);
+
+  if (isKrx) {
+    return (
+      <div className="w-full h-full bg-[#1e1e1e] flex items-center justify-center font-mono text-sm">
+        <div className="text-left border border-[#841c1c] bg-[#2d0000] p-6 rounded-md shadow-lg max-w-lg">
+          <div className="text-[#f14c4c] font-bold mb-4 flex items-center">
+            <span className="mr-2">❌</span> ERROR: MODULE_RESTRICTED_BY_POLICY
+          </div>
+          <div className="text-[#cccccc] mb-2">
+            Symbol: <span className="text-[#ce9178]">"{symbol}"</span>
+          </div>
+          <div className="text-[#cccccc] mb-6 leading-relaxed">
+            The requested KRX (Korea Exchange) data visualization module has been blocked by the third-party provider's licensing policy. External embedding is strictly prohibited.
+          </div>
+          <div className="text-[#858585] border-t border-[#841c1c] pt-4 text-xs">
+            {'>'} ACTION REQUIRED: Please use the [Code View] in the Explorer to monitor the real-time market data for this symbol instead.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full" id={`tv_${symbol.replace(/[^a-zA-Z0-9]/g, '')}`} ref={container} />
