@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../store/useStore';
-import type { Tab } from '../store/useStore';
 
 export function Sidebar({ activeTab }: { activeTab: string }) {
   const { openTab, activeTabId, portfolio, theme, setTheme } = useStore();

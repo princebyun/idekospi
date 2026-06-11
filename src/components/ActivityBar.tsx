@@ -1,4 +1,4 @@
-import { Files, Search, Settings, MessageSquare, GitBranch } from 'lucide-react';
+import { Files, Search, Settings, MessageSquare } from 'lucide-react';
 
 interface ActivityBarProps {
   activeTab: string;

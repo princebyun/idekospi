@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Release {
   hash: string;
@@ -44,7 +44,7 @@ export function ReleaseNotesView() {
         <span className="text-code-keyword">import</span> <span className="text-ide-text">java.util.List;</span><br/><br/>
         <span className="text-code-keyword2">public class</span> <span className="text-code-class">ReleaseNotes</span> <span className="text-ide-text"> {'{'}</span><br/><br/>
         
-        {releases.map((r, i) => {
+        {releases.map((r) => {
           // 커밋 메시지에서 첫 번째 : 전까지를 함수명으로 쓰거나 hash를 씁니다
           const msgParts = r.message.split(':');
           const type = msgParts.length > 1 ? msgParts[0].replace(/[^a-zA-Z]/g, '') : 'update';

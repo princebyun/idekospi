@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, memo } from 'react';
+import { useEffect, useRef, memo } from 'react';
 
 interface TradingViewWidgetProps {
   symbol: string;
@@ -20,7 +20,7 @@ function TradingViewWidgetComponent({ symbol }: TradingViewWidgetProps) {
     script.src = 'https://s3.tradingview.com/tv.js';
     script.async = true;
     script.onload = () => {
-      if (typeof window !== 'undefined' && (window as any).TradingView) {
+      if (typeof window !== 'undefined' && (window as any).TradingView && container.current) {
         
         let tvSymbol = symbol;
         if (symbol.startsWith('KRW-')) {
@@ -41,7 +41,7 @@ function TradingViewWidgetComponent({ symbol }: TradingViewWidgetProps) {
           hide_top_toolbar: false,
           hide_legend: false,
           save_image: false,
-          container_id: container.current.id,
+          container_id: container.current?.id,
         });
       }
     };

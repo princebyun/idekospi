@@ -1,4 +1,4 @@
-import { Info, Bell, CheckCheck, AlertTriangle } from 'lucide-react';
+import { Bell, AlertTriangle, Check } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { useState, useEffect } from 'react';
 
@@ -43,7 +43,7 @@ export function StatusBar() {
         
         {/* 지수 롤링 표시 */}
         <div className="flex items-center space-x-4 bg-[#1f8ad2] px-3 rounded h-[18px] min-w-[250px] transition-all duration-500 overflow-hidden relative">
-          {currentGroup.map((item, idx) => {
+          {currentGroup.map((item) => {
             const data = prices[item.code];
             if (!data) return <span key={item.code} className="w-1/2 flex items-center justify-center text-ide-text animate-pulse">Loading {item.label}...</span>;
             
@@ -72,7 +72,7 @@ export function StatusBar() {
           <span className="text-ide-text">Not for Trading</span>
         </div>
         <div className="hover:bg-[#1f8ad2] px-2 py-0.5 rounded flex items-center space-x-1 transition-colors">
-          <CheckCheck size={13} />
+          <Check size={14} className="mr-1" />
           <span>Prettier</span>
         </div>
         <div className="hover:bg-[#1f8ad2] px-2 py-0.5 rounded transition-colors">UTF-8</div>

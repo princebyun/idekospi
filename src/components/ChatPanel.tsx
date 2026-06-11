@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Send, Sparkles, User, TerminalSquare, ArrowUp } from 'lucide-react';
+import { Sparkles, User, TerminalSquare } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
 interface ChatMessage {

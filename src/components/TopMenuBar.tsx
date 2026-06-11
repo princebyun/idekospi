@@ -1,5 +1,3 @@
-import React from 'react';
-
 export function TopMenuBar() {
   return (
     <div className="h-[30px] flex items-center px-2 bg-ide-border border-b border-ide-border text-ide-text text-[13px] select-none flex-shrink-0">

@@ -58,7 +58,7 @@ function App() {
       if (e.key === 'Escape') {
         const now = Date.now();
         if (now - lastEscTime < 500) {
-          useStore.getState().togglePanicMode();
+          togglePanicMode();
           lastEscTime = 0; // 리셋
         } else {
           lastEscTime = now;

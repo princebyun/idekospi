@@ -8,7 +8,7 @@ export function Terminal() {
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
   
-  const { addStock, removeStock, portfolio, prices } = useStore();
+  const { addStock, removeStock, portfolio } = useStore();
 
   const MAPPING: Record<string, string> = {
     '비트코인': 'KRW-BTC',
@@ -61,7 +61,7 @@ export function Terminal() {
         const logText = `[INFO] [${timeStr}] SYSTEM_FETCH: ${randomItem.name} (${randomItem.code}) Connection OK. Tick: ${priceData.price.toLocaleString()} (${marketTag}${prefix}${priceData.changeRate.toFixed(2)}%) - ${status}`;
         
         setHistory(prev => {
-          const next = [...prev, { type: 'system', text: logText }];
+          const next = [...prev, { type: 'system' as const, text: logText }];
           // 100개 이상이면 오래된 것 삭제하여 메모리 최적화
           if (next.length > 100) return next.slice(next.length - 100);
           return next;

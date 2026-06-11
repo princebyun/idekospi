@@ -1,4 +1,3 @@
-import React from 'react';
 import { Terminal as TerminalIcon, FileCode, FolderOpen, AlertCircle } from 'lucide-react';
 
 export function FakeSidebar() {
@@ -85,13 +84,13 @@ export function FakeEditor() {
           <span className="text-code-function pl-8">@Bean</span><br/>
           <span className="text-code-keyword pl-8">public</span> <span className="text-code-class">SecurityFilterChain</span> <span className="text-code-function">filterChain</span><span className="text-ide-text">(</span><span className="text-code-class">HttpSecurity</span> <span className="text-code-variable">http</span><span className="text-ide-text">)</span> <span className="text-code-keyword">throws</span> <span className="text-code-class">Exception</span> <span className="text-ide-text">{'{'}</span><br/>
           <span className="text-ide-text pl-12">http</span><br/>
-          <span className="text-ide-text pl-16">.csrf(csrf -> csrf.disable())</span><br/>
-          <span className="text-ide-text pl-16">.authorizeHttpRequests(auth -> auth</span><br/>
+          <span className="text-ide-text pl-16">.csrf(csrf -&gt; csrf.disable())</span><br/>
+          <span className="text-ide-text pl-16">.authorizeHttpRequests(auth -&gt; auth</span><br/>
           <span className="text-ide-text pl-20">.requestMatchers(</span><span className="text-code-string">"/api/public/**"</span><span className="text-ide-text">).permitAll()</span><br/>
           <span className="text-ide-text pl-20">.requestMatchers(</span><span className="text-code-string">"/api/admin/**"</span><span className="text-ide-text">).hasRole(</span><span className="text-code-string">"ADMIN"</span><span className="text-ide-text">)</span><br/>
           <span className="text-ide-text pl-20">.anyRequest().authenticated()</span><br/>
           <span className="text-ide-text pl-16">)</span><br/>
-          <span className="text-ide-text pl-16">.sessionManagement(session -> session</span><br/>
+          <span className="text-ide-text pl-16">.sessionManagement(session -&gt; session</span><br/>
           <span className="text-ide-text pl-20">.sessionCreationPolicy(SessionCreationPolicy.STATELESS)</span><br/>
           <span className="text-ide-text pl-16">);</span><br/><br/>
           
@@ -124,15 +123,15 @@ export function FakeTerminal() {
       <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
         <div className="text-ide-text-muted mb-2">➜  IDE-KOSPI-CORE git:(main) ✗ ./gradlew build</div>
         <div className="text-ide-text mb-1">Starting a Gradle Daemon (subsequent builds will be faster)</div>
-        <div className="text-ide-text mb-1">> Task :compileJava</div>
-        <div className="text-ide-text mb-1">> Task :processResources</div>
-        <div className="text-ide-text mb-1">> Task :classes</div>
-        <div className="text-ide-text mb-1">> Task :bootJar</div>
-        <div className="text-ide-text mb-1">> Task :jar</div>
-        <div className="text-ide-text mb-1">> Task :assemble</div>
-        <div className="text-ide-text mb-1">> Task :compileTestJava</div>
-        <div className="text-ide-text mb-1">> Task :processTestResources</div>
-        <div className="text-ide-text mb-1">> Task :testClasses</div>
+        <div className="text-ide-text mb-1">&gt; Task :compileJava</div>
+        <div className="text-ide-text mb-1">&gt; Task :processResources</div>
+        <div className="text-ide-text mb-1">&gt; Task :classes</div>
+        <div className="text-ide-text mb-1">&gt; Task :bootJar</div>
+        <div className="text-ide-text mb-1">&gt; Task :jar</div>
+        <div className="text-ide-text mb-1">&gt; Task :assemble</div>
+        <div className="text-ide-text mb-1">&gt; Task :compileTestJava</div>
+        <div className="text-ide-text mb-1">&gt; Task :processTestResources</div>
+        <div className="text-ide-text mb-1">&gt; Task :testClasses</div>
         <div className="text-[#ff9d9d] mb-1">
           <AlertCircle size={12} className="inline mr-1" />
           Note: Some input files use or override a deprecated API.
