@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { DOMESTIC_LIST, GLOBAL_LIST, CRYPTO_LIST } from '../services/marketData';
 import { TradingViewWidget } from './TradingViewWidget';
+import { SingleCodeView } from './SingleCodeView';
 
 export function Editor() {
   const { portfolio, tabs, activeTabId, prices, closeTab, setActiveTabId } = useStore();
@@ -149,17 +150,7 @@ export function Editor() {
         )}
 
         {activeTab?.type === 'code_single' && activeTab.code && (
-          <div className="p-4 flex text-[14px]">
-            <div className="text-[#858585] text-right pr-4 select-none w-12 shrink-0 border-r border-[#404040] mr-4">
-              {Array.from({ length: 25 }).map((_, i) => <div key={i}>{i + 1}</div>)}
-            </div>
-            <div className="text-[#d4d4d4] whitespace-pre font-mono pb-20">
-              <span className="text-[#6a9955] pl-4">/** 단일 종목 실시간 시세 모니터링 모듈 */</span><br/>
-              <span className="text-[#c586c0]">export class</span> <span className="text-[#4ec9b0]">{activeTab.title.replace('.ts', '')}DataStream</span> <span className="text-[#d4d4d4]"> {'{'}</span><br/><br/>
-              {renderMarketMethod('fetchRealTimeData', activeTab.title.replace('.ts', ''), [{ code: activeTab.code, name: activeTab.title.replace('.ts', '') }])}
-              <span className="text-[#d4d4d4]">{'}'}</span>
-            </div>
-          </div>
+          <SingleCodeView code={activeTab.code} title={activeTab.title} />
         )}
 
         {activeTab?.type === 'chart' && activeTab.code && (

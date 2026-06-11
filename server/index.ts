@@ -50,6 +50,74 @@ app.get('/api/stocks', async (req, res) => {
   }
 });
 
+app.get('/api/stock/details', async (req, res) => {
+  try {
+    const symbol = req.query.symbol as string;
+    if (!symbol) return res.status(400).json({ error: 'Symbol required' });
+
+    const quote = await yahooFinance.quote(symbol);
+    
+    // 기간별 수익률 계산을 위한 히스토리 (최대 5년)
+    const now = new Date();
+    const period1 = new Date();
+    period1.setFullYear(now.getFullYear() - 5);
+    
+    let history: any[] = [];
+    try {
+      history = await yahooFinance.historical(symbol, { period1, period2: now, interval: '1d' });
+    } catch (e) {
+      console.error('Failed to fetch history for', symbol);
+    }
+
+    const currentPrice = quote.regularMarketPrice || 0;
+    
+    const getReturnRate = (daysAgo: number) => {
+      if (history.length === 0 || currentPrice === 0) return 0;
+      const targetDate = new Date();
+      targetDate.setDate(now.getDate() - daysAgo);
+      
+      // 가장 가까운 과거 날짜의 종가 찾기
+      let closest = history[0];
+      let minDiff = Infinity;
+      
+      for (const h of history) {
+        const diff = Math.abs(h.date.getTime() - targetDate.getTime());
+        if (diff < minDiff && h.date.getTime() <= targetDate.getTime()) {
+          minDiff = diff;
+          closest = h;
+        }
+      }
+      
+      if (!closest || !closest.close) return 0;
+      return ((currentPrice - closest.close) / closest.close) * 100;
+    };
+
+    res.json({
+      symbol,
+      price: currentPrice,
+      changeRate: quote.regularMarketChangePercent || 0,
+      open: quote.regularMarketOpen,
+      high: quote.regularMarketDayHigh,
+      low: quote.regularMarketDayLow,
+      volume: quote.regularMarketVolume,
+      marketCap: quote.marketCap,
+      fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh,
+      fiftyTwoWeekLow: quote.fiftyTwoWeekLow,
+      returns: {
+        '1D': quote.regularMarketChangePercent || 0,
+        '1W': getReturnRate(7),
+        '1M': getReturnRate(30),
+        '3M': getReturnRate(90),
+        '1Y': getReturnRate(365),
+        '5Y': getReturnRate(365 * 5),
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching stock details:', error);
+    res.status(500).json({ error: 'Failed to fetch stock details' });
+  }
+});
+
 app.get('/api/search', async (req, res) => {
   try {
     const query = req.query.q as string;
