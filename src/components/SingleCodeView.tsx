@@ -51,9 +51,9 @@ export function SingleCodeView({ code, title }: { code: string, title: string })
 
   const formatNumber = (num: number) => {
     if (!num) return '0';
-    if (num >= 1000000000000) return (num / 1000000000000).toFixed(2) + 'T';
-    if (num >= 1000000000) return (num / 1000000000).toFixed(2) + 'B';
-    if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+    if (num >= 1000000000000) return (num / 1000000000000).toFixed(2) + '조';
+    if (num >= 100000000) return (num / 100000000).toFixed(2) + '억';
+    if (num >= 10000) return (num / 10000).toFixed(2) + '만';
     return num.toLocaleString();
   };
 
@@ -90,28 +90,28 @@ export function SingleCodeView({ code, title }: { code: string, title: string })
           <>
             <span className="text-[#569cd6] pl-8">public</span> <span className="text-[#9cdcfe]">marketData</span> <span className="text-[#d4d4d4]">= {'{'}</span><br/>
             <div className="pl-12 py-0.5">
-              <span className="text-[#9cdcfe]">currentPrice</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{details.price.toLocaleString()}</span><span className="text-[#d4d4d4]">,</span>
+              <span className="text-[#9cdcfe]">현재가</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{details.price.toLocaleString()}</span><span className="text-[#d4d4d4]">,</span>
             </div>
             <div className="pl-12 py-0.5">
-              <span className="text-[#9cdcfe]">openPrice</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{details.open?.toLocaleString() || 'N/A'}</span><span className="text-[#d4d4d4]">,</span>
+              <span className="text-[#9cdcfe]">시가</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{details.open?.toLocaleString() || 'N/A'}</span><span className="text-[#d4d4d4]">,</span>
             </div>
             <div className="pl-12 py-0.5">
-              <span className="text-[#9cdcfe]">dayHigh</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{details.high?.toLocaleString() || 'N/A'}</span><span className="text-[#d4d4d4]">,</span>
+              <span className="text-[#9cdcfe]">고가</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{details.high?.toLocaleString() || 'N/A'}</span><span className="text-[#d4d4d4]">,</span>
             </div>
             <div className="pl-12 py-0.5">
-              <span className="text-[#9cdcfe]">dayLow</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{details.low?.toLocaleString() || 'N/A'}</span><span className="text-[#d4d4d4]">,</span>
+              <span className="text-[#9cdcfe]">저가</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{details.low?.toLocaleString() || 'N/A'}</span><span className="text-[#d4d4d4]">,</span>
             </div>
             <div className="pl-12 py-0.5">
-              <span className="text-[#9cdcfe]">volume</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{formatNumber(details.volume)}</span><span className="text-[#d4d4d4]">,</span>
+              <span className="text-[#9cdcfe]">거래량</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#ce9178]">'{formatNumber(details.volume)}'</span><span className="text-[#d4d4d4]">,</span>
             </div>
             <div className="pl-12 py-0.5">
-              <span className="text-[#9cdcfe]">marketCap</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#ce9178]">'{formatNumber(details.marketCap)}'</span><span className="text-[#d4d4d4]">,</span>
+              <span className="text-[#9cdcfe]">시가총액</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#ce9178]">'{formatNumber(details.marketCap)}'</span><span className="text-[#d4d4d4]">,</span>
             </div>
             <div className="pl-12 py-0.5">
-              <span className="text-[#9cdcfe]">week52High</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{details.fiftyTwoWeekHigh?.toLocaleString() || 'N/A'}</span><span className="text-[#d4d4d4]">,</span>
+              <span className="text-[#9cdcfe]">연중_최고가</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{details.fiftyTwoWeekHigh?.toLocaleString() || 'N/A'}</span><span className="text-[#d4d4d4]">,</span>
             </div>
             <div className="pl-12 py-0.5">
-              <span className="text-[#9cdcfe]">week52Low</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{details.fiftyTwoWeekLow?.toLocaleString() || 'N/A'}</span><span className="text-[#d4d4d4]">,</span>
+              <span className="text-[#9cdcfe]">연중_최저가</span><span className="text-[#d4d4d4]">:</span> <span className="text-[#b5cea8]">{details.fiftyTwoWeekLow?.toLocaleString() || 'N/A'}</span><span className="text-[#d4d4d4]">,</span>
             </div>
             <span className="text-[#d4d4d4] pl-8">{'}'};</span><br/><br/>
 
