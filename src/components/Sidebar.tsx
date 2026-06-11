@@ -31,15 +31,31 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
             <span className="mr-1 text-[10px]">▼</span> PORTFOLIO (CHARTS)
           </div>
 
-          {portfolio.map((item) => (
-            <div 
-              key={item.id}
-              className={`pl-6 py-1 hover:bg-[#37373d] cursor-pointer text-[#cccccc] select-none flex items-center ${activeTabId === `chart_${item.code}` ? 'bg-[#37373d]' : ''}`}
-              onClick={() => handleOpenTab(`chart_${item.code}`, `${item.name}.chart`, '📈', '#ce9178', 'chart', item.code)}
-            >
-              <span className="w-4 mr-2 text-xs text-center">📈</span>{item.name}.chart
-            </div>
-          ))}
+          {portfolio.map((item) => {
+            const isKrx = item.code.endsWith('.KS') || item.code.endsWith('.KQ') || item.code.startsWith('KRX:');
+            
+            if (isKrx) {
+              return (
+                <div 
+                  key={item.id}
+                  className={`pl-6 py-1 hover:bg-[#37373d] cursor-pointer text-[#cccccc] select-none flex items-center ${activeTabId === `code_${item.code}` ? 'bg-[#37373d]' : ''}`}
+                  onClick={() => handleOpenTab(`code_${item.code}`, `${item.name}.ts`, 'TS', '#007acc', 'code_single', item.code)}
+                >
+                  <span className="text-[#007acc] w-4 mr-2 text-xs font-bold text-center">TS</span>{item.name}.ts
+                </div>
+              );
+            }
+
+            return (
+              <div 
+                key={item.id}
+                className={`pl-6 py-1 hover:bg-[#37373d] cursor-pointer text-[#cccccc] select-none flex items-center ${activeTabId === `chart_${item.code}` ? 'bg-[#37373d]' : ''}`}
+                onClick={() => handleOpenTab(`chart_${item.code}`, `${item.name}.chart`, '📈', '#ce9178', 'chart', item.code)}
+              >
+                <span className="w-4 mr-2 text-xs text-center">📈</span>{item.name}.chart
+              </div>
+            );
+          })}
         </div>
       )}
 

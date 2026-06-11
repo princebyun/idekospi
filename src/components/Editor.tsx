@@ -148,17 +148,33 @@ export function Editor() {
           </div>
         )}
 
+        {activeTab?.type === 'code_single' && activeTab.code && (
+          <div className="p-4 flex text-[14px]">
+            <div className="text-[#858585] text-right pr-4 select-none w-12 shrink-0 border-r border-[#404040] mr-4">
+              {Array.from({ length: 25 }).map((_, i) => <div key={i}>{i + 1}</div>)}
+            </div>
+            <div className="text-[#d4d4d4] whitespace-pre font-mono pb-20">
+              <span className="text-[#6a9955] pl-4">/** 단일 종목 실시간 시세 모니터링 모듈 */</span><br/>
+              <span className="text-[#c586c0]">export class</span> <span className="text-[#4ec9b0]">{activeTab.title.replace('.ts', '')}DataStream</span> <span className="text-[#d4d4d4]"> {'{'}</span><br/><br/>
+              {renderMarketMethod('fetchRealTimeData', activeTab.title.replace('.ts', ''), [{ code: activeTab.code, name: activeTab.title.replace('.ts', '') }])}
+              <span className="text-[#d4d4d4]">{'}'}</span>
+            </div>
+          </div>
+        )}
+
         {activeTab?.type === 'chart' && activeTab.code && (
-          <div className="absolute inset-0">
+          <div className="w-full h-full p-1 bg-[#1e1e1e]">
             <TradingViewWidget symbol={activeTab.code} />
           </div>
         )}
 
         {!activeTab && (
-          <div className="h-full flex items-center justify-center text-[#858585] select-none">
-            <div className="text-center">
-              <div className="text-4xl mb-4">IDE-KOSPI</div>
-              <div>Select a file from the explorer to view</div>
+          <div className="flex items-center justify-center h-full text-[#858585] select-none flex-col">
+            <div className="mb-4 text-center">
+              <div className="w-32 h-32 mx-auto mb-4 border-2 border-dashed border-[#3c3c3c] rounded flex items-center justify-center opacity-50">
+                IDE-KOSPI
+              </div>
+              <p className="text-sm">종목을 선택하거나 <kbd className="bg-[#333] px-1 rounded mx-1">Ctrl+P</kbd>로 빠른 검색을 실행하세요.</p>
             </div>
           </div>
         )}
