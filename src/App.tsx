@@ -24,6 +24,7 @@ function App() {
   const [isTerminalOpen, setIsTerminalOpen] = useState(true);
   const [isQuickOpenOpen, setIsQuickOpenOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isAlertDismissed, setIsAlertDismissed] = useState(false);
 
   useEffect(() => {
     startMarketStream();
@@ -32,11 +33,22 @@ function App() {
       // 윈도우 창 높이와 실제 모니터 해상도 높이가 동일한지 확인 (오차 1px 허용)
       const isFull = Math.abs(window.innerHeight - window.screen.height) <= 1;
       setIsFullscreen(isFull);
+      if (isFull) {
+        setIsAlertDismissed(false); // 전체 화면 전환 시 닫힘 상태 초기화
+      }
     };
 
     checkFullscreen();
     window.addEventListener('resize', checkFullscreen);
     
+    // 1분(60초)마다 F11 상태 체크하여 다시 알림 띄우기
+    const alertInterval = setInterval(() => {
+      const isFull = Math.abs(window.innerHeight - window.screen.height) <= 1;
+      if (!isFull) {
+        setIsAlertDismissed(false);
+      }
+    }, 60000);
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl + P (Mac: Cmd + P)
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
@@ -72,6 +84,7 @@ function App() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('resize', checkFullscreen);
+      clearInterval(alertInterval);
     };
   }, [setIsSidebarOpen, setIsTerminalOpen, setIsRightPanelOpen]);
 
@@ -95,10 +108,17 @@ function App() {
       <QuickOpen isOpen={isQuickOpenOpen} onClose={() => setIsQuickOpenOpen(false)} />
       
       {/* F11 전체화면 유도 배너 */}
-      {!isFullscreen && (
+      {!isFullscreen && !isAlertDismissed && (
         <div className="fixed bottom-10 right-10 z-50 bg-[#d7ba7d] text-[#1e1e1e] px-4 py-3 rounded-md font-bold text-[13px] shadow-[0_4px_12px_rgba(0,0,0,0.5)] flex items-center space-x-2 animate-bounce border border-[#a8905e]">
           <span className="text-[16px]">⚠️</span>
           <span>완벽한 위장 모드를 위해 키보드의 <kbd className="bg-[#1e1e1e] text-[#d7ba7d] px-1.5 py-0.5 rounded mx-1 font-mono text-[11px] shadow-sm">F11</kbd> 키를 눌러주세요!</span>
+          <button 
+            onClick={() => setIsAlertDismissed(true)} 
+            className="ml-3 text-[#1e1e1e] hover:text-white hover:bg-black/20 p-1 rounded transition-colors"
+            title="닫기 (1분 후 다시 알림)"
+          >
+            ✕
+          </button>
         </div>
       )}
       
