@@ -10,6 +10,7 @@ import { ChatPanel } from './components/ChatPanel';
 import { ResizeHandle } from './components/ResizeHandle';
 import { useStore } from './store/useStore';
 import { TopMenuBar } from './components/TopMenuBar';
+import { FakeEditor, FakeSidebar, FakeTerminal, FakeStatusBar } from './components/FakeViews';
 
 function App() {
   const { 
@@ -17,7 +18,7 @@ function App() {
     sidebarWidth, setSidebarWidth,
     terminalHeight, setTerminalHeight,
     rightPanelWidth, setRightPanelWidth,
-    theme
+    theme, isPanicMode, togglePanicMode
   } = useStore();
   
   const [activeTab, setActiveTab] = useState('explorer');
@@ -50,7 +51,20 @@ function App() {
       }
     }, 60000);
 
+    let lastEscTime = 0;
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      // ESC 두 번 연속 입력 감지 (보스 모드)
+      if (e.key === 'Escape') {
+        const now = Date.now();
+        if (now - lastEscTime < 500) {
+          useStore.getState().togglePanicMode();
+          lastEscTime = 0; // 리셋
+        } else {
+          lastEscTime = now;
+        }
+      }
+
       // Ctrl + P (Mac: Cmd + P)
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
         e.preventDefault();
@@ -133,28 +147,28 @@ function App() {
         <ActivityBar activeTab={activeTab} setActiveTab={handleTabClick} />
         
         {/* Sidebar Area */}
-        {isSidebarOpen && (
-          <>
-            <div 
-              style={{ width: `${sidebarWidth}px` }} 
-              className="bg-ide-sidebar flex flex-col border-r border-ide-border shrink-0"
-            >
-              <Sidebar activeTab={activeTab} />
-            </div>
-            <ResizeHandle 
-              orientation="vertical" 
-              onResize={setSidebarWidth} 
-              minSize={150} 
-              maxSize={800} 
-            />
-          </>
-        )}
+          {isSidebarOpen && (
+            <>
+              <div 
+                style={{ width: `${sidebarWidth}px` }} 
+                className="bg-ide-sidebar flex flex-col border-r border-ide-border shrink-0"
+              >
+                {isPanicMode ? <FakeSidebar /> : <Sidebar activeTab={activeTab} />}
+              </div>
+              <ResizeHandle 
+                orientation="vertical" 
+                onResize={setSidebarWidth} 
+                minSize={150} 
+                maxSize={800} 
+              />
+            </>
+          )}
         
         {/* Main Editor & Terminal Area */}
         <div className="flex-1 flex flex-col min-w-0">
           
           <div className="flex-1 flex flex-col relative z-0 min-h-[100px]">
-            <Editor />
+            {isPanicMode ? <FakeEditor /> : <Editor />}
           </div>
           
           {isTerminalOpen && (
@@ -169,15 +183,15 @@ function App() {
                 style={{ height: `${terminalHeight}px` }} 
                 className="bg-ide-bg flex flex-col z-0 shrink-0"
               >
-                <Terminal />
+                {isPanicMode ? <FakeTerminal /> : <Terminal />}
               </div>
             </>
           )}
           
         </div>
 
-        {/* Right Panel (Chat) */}
-        {isRightPanelOpen && (
+        {/* Right Panel (Chat) - 패닉 모드 시 채팅창 완전히 숨김 */}
+        {isRightPanelOpen && !isPanicMode && (
           <>
             <ResizeHandle 
               orientation="right-vertical" 
@@ -195,7 +209,7 @@ function App() {
         )}
       </div>
       
-      <StatusBar />
+      {isPanicMode ? <FakeStatusBar /> : <StatusBar />}
     </div>
   );
 }

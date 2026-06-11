@@ -46,12 +46,15 @@ interface IdeState {
   setIsRightPanelOpen: (isOpen: boolean) => void;
   setRightPanelWidth: (width: number) => void;
   setTheme: (theme: 'vscode-dark' | 'intellij' | 'light') => void;
+  isPanicMode: boolean;
+  togglePanicMode: () => void;
 }
 
 export const useStore = create<IdeState>()(
   persist(
     (set) => ({
       theme: 'vscode-dark',
+      isPanicMode: false,
       portfolio: [
         { id: '1', name: '삼성전자', code: '005930.KS' },
         { id: '2', name: 'BTC', code: 'KRW-BTC' },
@@ -98,6 +101,7 @@ export const useStore = create<IdeState>()(
       setIsRightPanelOpen: (isOpen) => set({ isRightPanelOpen: isOpen }),
       setRightPanelWidth: (width) => set({ rightPanelWidth: width }),
       setTheme: (theme) => set({ theme }),
+      togglePanicMode: () => set((state) => ({ isPanicMode: !state.isPanicMode })),
     }),
     {
       name: 'ide-kospi-storage-v5', // 캐시 무효화 및 새로운 기본값 적용
