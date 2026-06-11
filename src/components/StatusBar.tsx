@@ -35,10 +35,10 @@ export function StatusBar() {
   return (
     <div className="h-[22px] bg-[#007acc] text-white text-[11px] flex items-center justify-between px-2 select-none flex-shrink-0 cursor-default">
       <div className="flex items-center space-x-3">
-        {/* 경고 아이콘 위장 */}
-        <div className="flex items-center space-x-1 hover:bg-[#1f8ad2] px-2 py-0.5 rounded transition-colors cursor-help" title="Data delayed 15 min. (Crypto is real-time)">
+        {/* 경고 아이콘 */}
+        <div className="flex items-center space-x-1 hover:bg-[#1f8ad2] px-2 py-0.5 rounded transition-colors cursor-help" title="Crypto is real-time">
           <AlertTriangle size={13} className="text-[#ffcc00]" />
-          <span>Delay: 15m (Mock Env)</span>
+          <span>현재 IDEKOSPI에 나오는 주식정보는 15분 지연된 서버에서 가져옵니다.</span>
         </div>
         
         {/* 지수 롤링 표시 */}
