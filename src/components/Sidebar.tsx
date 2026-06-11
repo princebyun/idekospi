@@ -11,7 +11,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
   return (
     <div className="flex flex-col h-full text-sm">
       <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#cccccc] flex-shrink-0">
-        {activeTab === 'explorer' ? 'Explorer' : activeTab === 'search' ? 'Search' : 'Settings'}
+        {activeTab === 'explorer' ? 'Explorer' : activeTab === 'search' ? 'Search' : activeTab === 'git' ? 'Source Control' : 'Settings'}
       </div>
       
       {activeTab === 'explorer' && (
@@ -74,6 +74,72 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
           >
             Open Global Search
           </button>
+        </div>
+      )}
+
+      {activeTab === 'git' && (
+        <div className="flex-1 flex flex-col overflow-hidden text-[#cccccc] text-[12px]">
+          {/* Commit Input Area */}
+          <div className="p-3 shrink-0 border-b border-[#2b2b2b]">
+            <div className="flex items-center justify-between mb-2 text-[11px] cursor-pointer hover:text-white">
+              <div className="flex items-center">
+                <span className="mr-1">▼</span> 변경 내용
+              </div>
+            </div>
+            <textarea 
+              className="w-full h-16 bg-[#3c3c3c] border border-[#3c3c3c] rounded p-1.5 text-[#cccccc] text-[12px] resize-none focus:outline-none focus:border-[#007acc]"
+              placeholder='메시지(Ctrl+Enter(으)로 "main"에 커밋)'
+              disabled
+            />
+            <div className="mt-2 flex">
+              <button className="flex-1 bg-[#007acc] hover:bg-[#005f9e] text-white py-1 rounded text-[12px] flex items-center justify-center transition-colors disabled:opacity-50">
+                ✓ 커밋
+              </button>
+            </div>
+          </div>
+          
+          {/* Git Graph Area */}
+          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
+            <div className="sticky top-0 bg-[#252526] p-2 flex items-center justify-between text-[11px] border-b border-[#2b2b2b] shrink-0 z-10">
+              <div className="flex items-center text-[#cccccc]">
+                <span className="mr-1">▼</span> 그래프
+              </div>
+              <div className="text-[#858585]">자동 ⊙ ⎇ ⟲ ↺ ...</div>
+            </div>
+            
+            <div className="p-2 space-y-1 relative">
+              <div className="absolute left-[15px] top-4 bottom-0 w-[1px] bg-[#007acc]"></div>
+              
+              {[
+                "feat: 한국 주식 단일 종목 코드 뷰에 개인/외국인/기관 당일 순매수 동향(수급) 연동 추가",
+                "fix: 단일 종목 코드 뷰(SingleCodeView)의 객체 키를 한국어(현재가, 시가총액 등)로 변경 및 단위 포맷 수정",
+                "feat: 단일 종목(한국 주식) 렌더링 시 기간별 상세 정보(1일, 1주, 1달 등)를 포함한 심화 코드 뷰 제공",
+                "feat: 한국 주식(KRX)은 차트 대신 단일 종목 코드 뷰(.ts)로 위장하여 열리도록 기능 개선",
+                "fix: 상태바 데이터 지연 안내 문구를 한국어로 명시적 변경",
+                "feat: 상태 표시줄 주요 지수 롤링 표시 및 15분 지연 경고 문구 추가",
+                "feat: 토론방 닉네임 입력란을 하단 채팅 입력창 상단으로 이동하여 UI/UX 고도화",
+                "fix: 앱 리팩토링 중 누락된 로컬 상태 변수(isSidebarOpen 등) 복구 및 단축키 안정화",
+                "feat: 토론방 우측 패널(Cursor AI 스타일) 분리 및 Public Discussion 컨셉 도입",
+                "fix: PanelResizeHandle 드래그 인식 영역 CSS 개선 및 확장",
+                "feat: UI/UX 디테일 및 액티비티 바 완성 (디자인 시스템 고도화)",
+                "feat: 트레이딩뷰 차트 탭 연동 및 실시간 종목 시세 차트 적용",
+                "fix: 한국 주식(국장) 야후 파이낸스 프리마켓 데이터 오류 보정",
+                "feat: 시세 표시 시 현지 통화 및 원화/달러 환산 가격 동시 지원 로직 추가",
+                "fix: QuickOpen 검색 모달 무반응 버그 수정 및 Z-index 최적화",
+                "feat: 진 세계 주식 자동완성 검색 및 터미널 명령어(add, remove 등) 연동"
+              ].map((msg, idx) => (
+                <div key={idx} className="flex items-center group cursor-pointer hover:bg-[#37373d] py-0.5 rounded px-1 relative z-10">
+                  <div className={`w-[9px] h-[9px] rounded-full border-2 ${idx === 0 ? 'border-[#569cd6] bg-[#1e1e1e]' : 'border-[#007acc] bg-[#007acc]'} flex-shrink-0 z-10 ml-[2px] mr-2`} />
+                  <div className="truncate text-[11.5px] text-[#cccccc] flex-1 mr-2" title={msg}>{msg}</div>
+                  {idx === 0 && (
+                    <div className="flex-shrink-0 flex items-center space-x-1">
+                      <span className="text-[9px] border border-[#569cd6] text-[#569cd6] px-1 rounded-sm">◎ main</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 

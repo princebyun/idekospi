@@ -9,6 +9,7 @@ import { startMarketStream } from './services/marketData';
 import { ChatPanel } from './components/ChatPanel';
 import { ResizeHandle } from './components/ResizeHandle';
 import { useStore } from './store/useStore';
+import { TopMenuBar } from './components/TopMenuBar';
 
 function App() {
   const { 
@@ -45,8 +46,9 @@ function App() {
       // Ctrl + L (Mac: Cmd + L) - Cursor AI 스타일 챗 오픈
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l') {
         e.preventDefault();
-        setIsRightPanelOpen(!useStore.getState().isRightPanelOpen);
-        if (!useStore.getState().isRightPanelOpen) {
+        const currentOpen = useStore.getState().isRightPanelOpen;
+        setIsRightPanelOpen(!currentOpen);
+        if (!currentOpen) {
           // 채팅창 열면서 포커스 이동 (ChatPanel 내부에 구현 필요)
           setTimeout(() => {
             const chatInput = document.getElementById('chat-input');
@@ -76,6 +78,7 @@ function App() {
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[#1e1e1e] text-[#d4d4d4] overflow-hidden selection:bg-[#264f78]">
+      <TopMenuBar />
       <QuickOpen isOpen={isQuickOpenOpen} onClose={() => setIsQuickOpenOpen(false)} />
       
       <div className="flex flex-1 overflow-hidden">
