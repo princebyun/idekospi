@@ -102,9 +102,9 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
         )}
       </div>
 
-      {/* Source Control Panel (Bottom Half) - Always Visible except settings maybe? Let's make it always visible if activeTab !== 'settings', or just always visible like in VSCode when dragged. */}
+      {/* Source Control Panel (Bottom Half) - Always Visible except settings */}
       {activeTab !== 'settings' && activeTab !== 'git' && (
-        <div className="h-[350px] border-t border-[#2b2b2b] flex flex-col overflow-hidden text-[#cccccc] text-[12px] shrink-0">
+        <div className="flex-1 border-t border-[#2b2b2b] flex flex-col min-h-0 overflow-hidden text-[#cccccc] text-[12px] shrink-0">
           <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#cccccc] flex-shrink-0 bg-[#252526] border-b border-[#2b2b2b]">
             소스 제어
           </div>
