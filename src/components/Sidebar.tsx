@@ -32,26 +32,54 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
       {/* Main Content Area (Top 30%) */}
       <div className="flex-[3] flex flex-col min-h-0">
         <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#cccccc] flex-shrink-0">
-          {activeTab === 'explorer' ? 'Explorer' : activeTab === 'search' ? 'Search' : 'Settings'}
+          {activeTab === 'explorer' ? '탐색기' : activeTab === 'search' ? 'Search' : 'Settings'}
         </div>
         
         {activeTab === 'explorer' && (
-          <div className="flex-1 overflow-y-auto">
-            <div className="py-1 px-2 hover:bg-[#37373d] cursor-pointer font-bold text-[#cccccc] flex items-center select-none text-[13px]">
-              <span className="mr-1 text-[10px]">▼</span> SRC
+          <div className="flex-1 overflow-y-auto font-mono text-[13px]">
+            {/* Root Folder */}
+            <div className="py-0.5 px-1 hover:bg-[#37373d] cursor-pointer text-[#cccccc] flex items-center select-none font-bold">
+              <span className="mr-1 text-[10px]">▼</span> idekospi
             </div>
             
+            {/* Fake Folders */}
+            <div className="py-0.5 px-1 pl-4 hover:bg-[#37373d] cursor-pointer text-[#cccccc] flex items-center select-none">
+              <span className="mr-1 text-[10px] text-[#858585]">▶</span> dist
+            </div>
+            <div className="py-0.5 px-1 pl-4 hover:bg-[#37373d] cursor-pointer text-[#cccccc] flex items-center select-none">
+              <span className="mr-1 text-[10px] text-[#858585]">▶</span> node_modules
+            </div>
+            <div className="py-0.5 px-1 pl-4 hover:bg-[#37373d] cursor-pointer text-[#cccccc] flex items-center select-none">
+              <span className="mr-1 text-[10px] text-[#858585]">▶</span> public
+            </div>
+            <div className="py-0.5 px-1 pl-4 hover:bg-[#37373d] cursor-pointer text-[#cccccc] flex items-center select-none">
+              <span className="mr-1 text-[10px] text-[#858585]">▶</span> server
+            </div>
+            
+            {/* src Folder */}
+            <div className="py-0.5 px-1 pl-4 hover:bg-[#37373d] cursor-pointer text-[#cccccc] flex items-center select-none">
+              <span className="mr-1 text-[10px]">▼</span> src
+            </div>
+            
+            {/* markets Folder */}
+            <div className="py-0.5 px-1 pl-7 hover:bg-[#37373d] cursor-pointer text-[#cccccc] flex items-center select-none">
+              <span className="mr-1 text-[10px]">▼</span> markets
+            </div>
+            
+            {/* Markets.ts */}
             <div 
-              className={`pl-6 py-1 hover:bg-[#37373d] cursor-pointer text-[#cccccc] select-none flex items-center ${activeTabId === 'markets' ? 'bg-[#37373d]' : ''}`}
+              className={`pl-11 py-0.5 hover:bg-[#37373d] cursor-pointer text-[#cccccc] select-none flex items-center ${activeTabId === 'markets' ? 'bg-[#37373d] text-white' : ''}`}
               onClick={() => handleOpenTab('markets', 'Markets.ts', 'TS', '#007acc', 'markets_all')}
             >
-              <span className="text-[#007acc] w-4 mr-2 text-xs font-bold text-center">TS</span>Markets.ts
-            </div>
-            
-            <div className="py-1 px-2 hover:bg-[#37373d] cursor-pointer font-bold text-[#cccccc] flex items-center select-none text-[13px] mt-2">
-              <span className="mr-1 text-[10px]">▼</span> PORTFOLIO (CHARTS)
+              <span className="text-[#007acc] w-4 mr-1 text-xs font-bold text-center">TS</span>Markets.ts
             </div>
 
+            {/* portfolio Folder */}
+            <div className="py-0.5 px-1 pl-7 hover:bg-[#37373d] cursor-pointer text-[#cccccc] flex items-center select-none mt-1">
+              <span className="mr-1 text-[10px]">▼</span> portfolio
+            </div>
+
+            {/* Portfolio Items */}
             {portfolio.map((item) => {
               const isKrx = item.code.endsWith('.KS') || item.code.endsWith('.KQ') || item.code.startsWith('KRX:');
               
@@ -59,10 +87,10 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
                 return (
                   <div 
                     key={item.id}
-                    className={`pl-6 py-1 hover:bg-[#37373d] cursor-pointer text-[#cccccc] select-none flex items-center ${activeTabId === `code_${item.code}` ? 'bg-[#37373d]' : ''}`}
+                    className={`pl-11 py-0.5 hover:bg-[#37373d] cursor-pointer text-[#cccccc] select-none flex items-center ${activeTabId === `code_${item.code}` ? 'bg-[#37373d] text-white' : ''}`}
                     onClick={() => handleOpenTab(`code_${item.code}`, `${item.name}.ts`, 'TS', '#007acc', 'code_single', item.code)}
                   >
-                    <span className="text-[#007acc] w-4 mr-2 text-xs font-bold text-center">TS</span>{item.name}.ts
+                    <span className="text-[#007acc] w-4 mr-1 text-xs font-bold text-center">TS</span>{item.name}.ts
                   </div>
                 );
               }
@@ -70,13 +98,27 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
               return (
                 <div 
                   key={item.id}
-                  className={`pl-6 py-1 hover:bg-[#37373d] cursor-pointer text-[#cccccc] select-none flex items-center ${activeTabId === `chart_${item.code}` ? 'bg-[#37373d]' : ''}`}
+                  className={`pl-11 py-0.5 hover:bg-[#37373d] cursor-pointer text-[#cccccc] select-none flex items-center ${activeTabId === `chart_${item.code}` ? 'bg-[#37373d] text-white' : ''}`}
                   onClick={() => handleOpenTab(`chart_${item.code}`, `${item.name}.chart`, '📈', '#ce9178', 'chart', item.code)}
                 >
-                  <span className="w-4 mr-2 text-xs text-center">📈</span>{item.name}.chart
+                  <span className="w-4 mr-1 text-[11px] text-center">📈</span>{item.name}.chart
                 </div>
               );
             })}
+            
+            {/* config files */}
+            <div className="py-0.5 px-1 pl-4 hover:bg-[#37373d] cursor-pointer text-[#cccccc] flex items-center select-none mt-2">
+              <span className="text-[#69b057] w-4 mr-1 text-[11px] text-center font-bold">{}</span>.gitignore
+            </div>
+            <div className="py-0.5 px-1 pl-4 hover:bg-[#37373d] cursor-pointer text-[#cccccc] flex items-center select-none">
+              <span className="text-[#f5c040] w-4 mr-1 text-xs text-center font-bold">JS</span>eslint.config.js
+            </div>
+            <div className="py-0.5 px-1 pl-4 hover:bg-[#37373d] cursor-pointer text-[#cccccc] flex items-center select-none">
+              <span className="text-[#f5c040] w-4 mr-1 text-xs text-center font-bold">{}</span>package.json
+            </div>
+            <div className="py-0.5 px-1 pl-4 hover:bg-[#37373d] cursor-pointer text-[#cccccc] flex items-center select-none">
+              <span className="text-[#007acc] w-4 mr-1 text-xs font-bold text-center">TS</span>tsconfig.json
+            </div>
           </div>
         )}
 
