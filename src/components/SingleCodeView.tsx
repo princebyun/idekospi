@@ -18,7 +18,12 @@ interface StockDetails {
     '3M': number;
     '1Y': number;
     '5Y': number;
-  }
+  };
+  investorTrend?: {
+    individual: string;
+    foreigner: string;
+    institution: string;
+  };
 }
 
 export function SingleCodeView({ code, title }: { code: string, title: string }) {
@@ -125,8 +130,25 @@ export function SingleCodeView({ code, title }: { code: string, title: string })
             {renderReturn('5Year (최근 5년)', details.returns['5Y'])}
             <span className="text-[#d4d4d4] pl-8">{'}'};</span><br/><br/>
             
+            {details.investorTrend && (
+              <>
+                <span className="text-[#6a9955] pl-8">/** 투자자별 당일 순매수 동향 (단위: 주) */</span><br/>
+                <span className="text-[#569cd6] pl-8">public</span> <span className="text-[#9cdcfe]">investorTrend</span> <span className="text-[#d4d4d4]">= {'{'}</span><br/>
+                <div className="pl-12 py-0.5">
+                  <span className="text-[#9cdcfe]">개인</span><span className="text-[#d4d4d4]">:</span> <span className={details.investorTrend.individual.startsWith('+') || !details.investorTrend.individual.startsWith('-') ? 'text-[#ff9d9d]' : 'text-[#8cb4ff]'}>'{details.investorTrend.individual}'</span><span className="text-[#d4d4d4]">,</span>
+                </div>
+                <div className="pl-12 py-0.5">
+                  <span className="text-[#9cdcfe]">외국인</span><span className="text-[#d4d4d4]">:</span> <span className={details.investorTrend.foreigner.startsWith('+') || !details.investorTrend.foreigner.startsWith('-') ? 'text-[#ff9d9d]' : 'text-[#8cb4ff]'}>'{details.investorTrend.foreigner}'</span><span className="text-[#d4d4d4]">,</span>
+                </div>
+                <div className="pl-12 py-0.5">
+                  <span className="text-[#9cdcfe]">기관</span><span className="text-[#d4d4d4]">:</span> <span className={details.investorTrend.institution.startsWith('+') || !details.investorTrend.institution.startsWith('-') ? 'text-[#ff9d9d]' : 'text-[#8cb4ff]'}>'{details.investorTrend.institution}'</span><span className="text-[#d4d4d4]">,</span>
+                </div>
+                <span className="text-[#d4d4d4] pl-8">{'}'};</span><br/><br/>
+              </>
+            )}
+
             <span className="text-[#569cd6] pl-8">public async</span> <span className="text-[#dcdcaa]">getSummary</span><span className="text-[#d4d4d4]">() {'{'}</span><br/>
-            <span className="text-[#c586c0] pl-12">return</span> <span className="text-[#ce9178]">'데이터 분석 완료. 위장 렌더링 정상 가동 중.'</span><span className="text-[#d4d4d4]">;</span><br/>
+            <span className="text-[#c586c0] pl-12">return</span> <span className="text-[#ce9178]">'데이터 분석 및 수급 동향 확인 완료. 위장 렌더링 정상 가동 중.'</span><span className="text-[#d4d4d4]">;</span><br/>
             <span className="text-[#d4d4d4] pl-8">{'}'}</span><br/>
           </>
         ) : (

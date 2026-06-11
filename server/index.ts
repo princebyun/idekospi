@@ -76,7 +76,6 @@ app.get('/api/stock/details', async (req, res) => {
       const targetDate = new Date();
       targetDate.setDate(now.getDate() - daysAgo);
       
-      // 가장 가까운 과거 날짜의 종가 찾기
       let closest = history[0];
       let minDiff = Infinity;
       
@@ -91,6 +90,29 @@ app.get('/api/stock/details', async (req, res) => {
       if (!closest || !closest.close) return 0;
       return ((currentPrice - closest.close) / closest.close) * 100;
     };
+
+    // 네이버 금융 API 연동을 통한 수급(투자자 동향) 가져오기
+    let investorTrend = null;
+    const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
+    if (isKorean) {
+      const codeOnly = symbol.replace('.KS', '').replace('.KQ', '');
+      try {
+        const naverRes = await fetch(`https://m.stock.naver.com/api/stock/${codeOnly}/integration`);
+        if (naverRes.ok) {
+          const naverData = await naverRes.json();
+          if (naverData.dealTrendInfos && naverData.dealTrendInfos.length > 0) {
+            const todayTrend = naverData.dealTrendInfos[0];
+            investorTrend = {
+              individual: todayTrend.individualPureBuyQuant,
+              foreigner: todayTrend.foreignerPureBuyQuant,
+              institution: todayTrend.organPureBuyQuant,
+            };
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch naver trend', err);
+      }
+    }
 
     res.json({
       symbol,
@@ -110,7 +132,8 @@ app.get('/api/stock/details', async (req, res) => {
         '3M': getReturnRate(90),
         '1Y': getReturnRate(365),
         '5Y': getReturnRate(365 * 5),
-      }
+      },
+      investorTrend
     });
   } catch (error) {
     console.error('Error fetching stock details:', error);
