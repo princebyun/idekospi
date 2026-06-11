@@ -1,28 +1,75 @@
-import { Info, Bell, CheckCheck } from 'lucide-react';
+import { Info, Bell, CheckCheck, AlertTriangle } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { useState, useEffect } from 'react';
 
 export function StatusBar() {
   const prices = useStore(state => state.prices);
   
-  const btc = prices['KRW-BTC'];
-  const ss = prices['005930'];
-  const aapl = prices['AAPL'];
+  const [tickerIndex, setTickerIndex] = useState(0);
+
+  // 표시할 지수/대표종목 그룹
+  const tickerGroups = [
+    [
+      { label: 'KOSPI', code: '^KS11', isCurrency: false },
+      { label: 'KOSDAQ', code: '^KQ11', isCurrency: false }
+    ],
+    [
+      { label: 'NASDAQ', code: '^IXIC', isCurrency: false },
+      { label: 'S&P500', code: '^GSPC', isCurrency: false }
+    ],
+    [
+      { label: 'USD/KRW', code: 'KRW=X', isCurrency: true },
+      { label: 'BTC', code: 'KRW-BTC', isCurrency: false }
+    ]
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTickerIndex(prev => (prev + 1) % tickerGroups.length);
+    }, 4000); // 4초마다 롤링
+    return () => clearInterval(interval);
+  }, [tickerGroups.length]);
+
+  const currentGroup = tickerGroups[tickerIndex];
 
   return (
     <div className="h-[22px] bg-[#007acc] text-white text-[11px] flex items-center justify-between px-2 select-none flex-shrink-0 cursor-default">
       <div className="flex items-center space-x-3">
-        <div className="flex items-center space-x-1 hover:bg-[#1f8ad2] px-2 py-0.5 rounded transition-colors" title="Crypto: Upbit WS / Stocks: Yahoo Finance API (Live)">
-          <Info size={13} />
-          <span>Real-time Stream Connected (Live)</span>
+        {/* 경고 아이콘 위장 */}
+        <div className="flex items-center space-x-1 hover:bg-[#1f8ad2] px-2 py-0.5 rounded transition-colors cursor-help" title="Data delayed 15 min. (Crypto is real-time)">
+          <AlertTriangle size={13} className="text-[#ffcc00]" />
+          <span>Delay: 15m (Mock Env)</span>
         </div>
-        <div className="flex items-center space-x-3 bg-[#1f8ad2] px-2 rounded h-full py-0.5">
-          {ss && <span>삼성전자: {ss.price.toLocaleString()} <span className={ss.changeRate >= 0 ? "text-[#ff9d9d]" : "text-[#8cb4ff]"}>({ss.changeRate >= 0 ? '+' : ''}{ss.changeRate.toFixed(2)}%)</span></span>}
-          {aapl && <span>AAPL: ${aapl.price.toLocaleString()} <span className={aapl.changeRate >= 0 ? "text-[#ff9d9d]" : "text-[#8cb4ff]"}>({aapl.changeRate >= 0 ? '+' : ''}{aapl.changeRate.toFixed(2)}%)</span></span>}
-          {btc && <span>BTC: {btc.price.toLocaleString()} <span className={btc.changeRate >= 0 ? "text-[#ff9d9d]" : "text-[#8cb4ff]"}>({btc.changeRate >= 0 ? '+' : ''}{btc.changeRate.toFixed(2)}%)</span></span>}
+        
+        {/* 지수 롤링 표시 */}
+        <div className="flex items-center space-x-4 bg-[#1f8ad2] px-3 rounded h-[18px] min-w-[250px] transition-all duration-500 overflow-hidden relative">
+          {currentGroup.map((item, idx) => {
+            const data = prices[item.code];
+            if (!data) return <span key={item.code} className="w-1/2 flex items-center justify-center text-[#cccccc] animate-pulse">Loading {item.label}...</span>;
+            
+            const isUp = data.changeRate >= 0;
+            const colorClass = isUp ? "text-[#ff9d9d]" : "text-[#8cb4ff]";
+            const prefix = isUp ? '+' : '';
+            
+            return (
+              <span key={item.code} className="w-1/2 flex items-center justify-start space-x-1 animate-fade-in">
+                <span className="font-semibold">{item.label}</span>
+                <span>
+                  {item.isCurrency ? data.price.toLocaleString(undefined, { minimumFractionDigits: 2 }) : data.price.toLocaleString()}
+                </span>
+                <span className={colorClass}>
+                  ({prefix}{data.changeRate.toFixed(2)}%)
+                </span>
+              </span>
+            );
+          })}
         </div>
       </div>
       
       <div className="flex items-center space-x-1">
+        <div className="hover:bg-[#1f8ad2] px-2 py-0.5 rounded transition-colors" title="This software is for demonstration only. Not for real trading.">
+          <span className="text-[#cccccc]">Not for Trading</span>
+        </div>
         <div className="hover:bg-[#1f8ad2] px-2 py-0.5 rounded flex items-center space-x-1 transition-colors">
           <CheckCheck size={13} />
           <span>Prettier</span>
