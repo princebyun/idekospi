@@ -4,14 +4,11 @@ import { useStore } from '../store/useStore';
 import { DOMESTIC_LIST, GLOBAL_LIST, CRYPTO_LIST } from '../services/marketData';
 
 export function Terminal() {
-  const [history, setHistory] = useState<{ type: 'input' | 'output' | 'error', text: string }[]>([
-    { type: 'output', text: 'IDE-KOSPI 터미널에 오신 것을 환영합니다.' },
-    { type: 'output', text: 'IDE-KOSPI의 사용법을 보려면 "help"를 입력하세요.' }
-  ]);
+  const [history, setHistory] = useState<{ type: 'input' | 'output' | 'error' | 'system', text: string }[]>([]);
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
   
-  const { addStock, removeStock, portfolio } = useStore();
+  const { addStock, removeStock, portfolio, prices } = useStore();
 
   const MAPPING: Record<string, string> = {
     '비트코인': 'KRW-BTC',
@@ -34,9 +31,42 @@ export function Terminal() {
     MAPPING[item.name] = item.code;
   });
 
+  // 하단 스크롤
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [history]);
+
+  // 실시간 포트폴리오 스트리밍 로직
+  useEffect(() => {
+    if (portfolio.length === 0) return;
+
+    const intervalId = setInterval(() => {
+      // 포트폴리오에서 랜덤으로 하나 선택
+      const randomItem = portfolio[Math.floor(Math.random() * portfolio.length)];
+      const priceData = prices[randomItem.code];
+      
+      if (priceData) {
+        const now = new Date();
+        const timeStr = now.toTimeString().split(' ')[0]; // HH:MM:SS
+        
+        // 부호에 따른 기호 및 상태 문자열
+        const prefix = priceData.changeRate > 0 ? '+' : '';
+        const status = priceData.changeRate > 0 ? 'UPTREND' : priceData.changeRate < 0 ? 'DOWNTREND' : 'STABLE';
+        
+        // 예: [INFO] [10:35:12] SYSTEM_FETCH: 삼성전자 (005930.KS) Connection OK. Tick: 85,000 KRW (+1.5%) - UPTREND
+        const logText = `[INFO] [${timeStr}] SYSTEM_FETCH: ${randomItem.name} (${randomItem.code}) Connection OK. Tick: ${priceData.price.toLocaleString()} (${prefix}${priceData.changeRate.toFixed(2)}%) - ${status}`;
+        
+        setHistory(prev => {
+          const next = [...prev, { type: 'system', text: logText }];
+          // 100개 이상이면 오래된 것 삭제하여 메모리 최적화
+          if (next.length > 100) return next.slice(next.length - 100);
+          return next;
+        });
+      }
+    }, 4500); // 4.5초마다 하나씩 로그 찍음
+
+    return () => clearInterval(intervalId);
+  }, [portfolio, prices]);
 
   const handleCommand = async (cmd: string): Promise<string[]> => {
     const args = cmd.trim().split(/\s+/);
@@ -149,9 +179,15 @@ export function Terminal() {
         Terminal
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-4 custom-scrollbar relative">
+        {/* 상단 고정 도움말 (Sticky Header) */}
+        <div className="sticky top-0 bg-[#1e1e1e]/95 backdrop-blur-sm z-10 pb-2 mb-2 border-b border-[#333333]">
+          <div className="text-[#858585]">IDE-KOSPI 터미널에 오신 것을 환영합니다.</div>
+          <div className="text-[#858585]">IDE-KOSPI의 사용법을 보려면 "help"를 입력하세요.</div>
+        </div>
+
         {history.map((line, i) => (
-          <div key={i} className={`mb-1 ${line.type === 'error' ? 'text-[#f48771]' : line.type === 'input' ? 'text-[#cccccc]' : 'text-[#858585]'}`}>
+          <div key={i} className={`mb-1 ${line.type === 'error' ? 'text-[#f48771]' : line.type === 'input' ? 'text-[#cccccc]' : line.type === 'system' ? 'text-[#6a9955]' : 'text-[#858585]'}`}>
             {line.type === 'input' && <span className="text-[#519657] mr-2">➜</span>}
             {line.text}
           </div>
