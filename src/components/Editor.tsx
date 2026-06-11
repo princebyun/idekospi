@@ -64,7 +64,8 @@ export function Editor() {
             isString = true;
           }
 
-          const changeStr = ((isProfit ? '+' : '') + info.changeRate.toFixed(2) + '%');
+          const marketTag = info.marketState === 'PRE' ? '[PRE] ' : (info.marketState === 'POST' || info.marketState === 'CLOSED' ? '[AFT] ' : '');
+          const changeStr = marketTag + ((isProfit ? '+' : '') + info.changeRate.toFixed(2) + '%');
           const statusText = getMarketStatus(title, item.code, info.marketState);
           
           return (

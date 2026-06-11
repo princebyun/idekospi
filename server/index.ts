@@ -129,10 +129,23 @@ app.get('/api/stock/details', async (req, res) => {
       }
     }
 
+    let displayPrice = quote.regularMarketPrice || 0;
+    let displayChange = quote.regularMarketChangePercent || 0;
+    const marketState = quote.marketState || 'REGULAR';
+    
+    if (marketState === 'PRE' && quote.preMarketPrice) {
+      displayPrice = quote.preMarketPrice;
+      displayChange = quote.preMarketChangePercent || 0;
+    } else if ((marketState === 'POST' || marketState === 'CLOSED') && quote.postMarketPrice) {
+      displayPrice = quote.postMarketPrice;
+      displayChange = quote.postMarketChangePercent || 0;
+    }
+
     res.json({
       symbol,
-      price: currentPrice,
-      changeRate: quote.regularMarketChangePercent || 0,
+      price: displayPrice,
+      changeRate: displayChange,
+      marketState: marketState,
       open: quote.regularMarketOpen,
       high: quote.regularMarketDayHigh,
       low: quote.regularMarketDayLow,

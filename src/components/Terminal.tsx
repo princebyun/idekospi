@@ -57,8 +57,8 @@ export function Terminal() {
         const prefix = priceData.changeRate > 0 ? '+' : '';
         const status = priceData.changeRate > 0 ? 'UPTREND' : priceData.changeRate < 0 ? 'DOWNTREND' : 'STABLE';
         
-        // 예: [INFO] [10:35:12] SYSTEM_FETCH: 삼성전자 (005930.KS) Connection OK. Tick: 85,000 KRW (+1.5%) - UPTREND
-        const logText = `[INFO] [${timeStr}] SYSTEM_FETCH: ${randomItem.name} (${randomItem.code}) Connection OK. Tick: ${priceData.price.toLocaleString()} (${prefix}${priceData.changeRate.toFixed(2)}%) - ${status}`;
+        const marketTag = priceData.marketState === 'PRE' ? '[PRE] ' : (priceData.marketState === 'POST' || priceData.marketState === 'CLOSED' ? '[AFT] ' : '');
+        const logText = `[INFO] [${timeStr}] SYSTEM_FETCH: ${randomItem.name} (${randomItem.code}) Connection OK. Tick: ${priceData.price.toLocaleString()} (${marketTag}${prefix}${priceData.changeRate.toFixed(2)}%) - ${status}`;
         
         setHistory(prev => {
           const next = [...prev, { type: 'system', text: logText }];

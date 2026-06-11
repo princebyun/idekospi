@@ -50,6 +50,7 @@ export function StatusBar() {
             const isUp = data.changeRate >= 0;
             const colorClass = isUp ? "text-[#ff9d9d]" : "text-[#8cb4ff]";
             const prefix = isUp ? '+' : '';
+            const marketTag = data.marketState === 'PRE' ? '[PRE] ' : (data.marketState === 'POST' || data.marketState === 'CLOSED' ? '[AFT] ' : '');
             
             return (
               <span key={item.code} className="w-1/2 flex items-center justify-start space-x-1 animate-fade-in">
@@ -58,7 +59,7 @@ export function StatusBar() {
                   {item.isCurrency ? data.price.toLocaleString(undefined, { minimumFractionDigits: 2 }) : data.price.toLocaleString()}
                 </span>
                 <span className={colorClass}>
-                  ({prefix}{data.changeRate.toFixed(2)}%)
+                  ({marketTag}{prefix}{data.changeRate.toFixed(2)}%)
                 </span>
               </span>
             );

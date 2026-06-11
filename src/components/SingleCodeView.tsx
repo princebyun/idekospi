@@ -24,6 +24,7 @@ interface StockDetails {
     foreigner: string;
     institution: string;
   };
+  marketState?: string;
 }
 
 export function SingleCodeView({ code, title }: { code: string, title: string }) {
@@ -96,6 +97,11 @@ export function SingleCodeView({ code, title }: { code: string, title: string })
             <span className="text-code-keyword pl-8">public</span> <span className="text-code-variable">marketData</span> <span className="text-ide-text">= {'{'}</span><br/>
             <div className="pl-12 py-0.5">
               <span className="text-code-variable">현재가</span><span className="text-ide-text">:</span> <span className="text-code-number">{details.price.toLocaleString()}</span><span className="text-ide-text">,</span>
+            </div>
+            <div className="pl-12 py-0.5">
+              <span className="text-code-variable">등락률</span><span className="text-ide-text">:</span> <span className={details.changeRate > 0 ? 'text-[#ff9d9d]' : details.changeRate < 0 ? 'text-[#8cb4ff]' : 'text-code-string'}>
+                '{details.marketState === 'PRE' ? '[PRE] ' : (details.marketState === 'POST' || details.marketState === 'CLOSED' ? '[AFT] ' : '')}{details.changeRate > 0 ? '+' : ''}{details.changeRate.toFixed(2)}%'
+              </span><span className="text-ide-text">,</span>
             </div>
             <div className="pl-12 py-0.5">
               <span className="text-code-variable">시가</span><span className="text-ide-text">:</span> <span className="text-code-number">{details.open?.toLocaleString() || 'N/A'}</span><span className="text-ide-text">,</span>
