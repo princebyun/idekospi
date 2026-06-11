@@ -55,32 +55,32 @@ function App() {
       <div className="flex flex-1 overflow-hidden">
         <ActivityBar activeTab={activeTab} setActiveTab={handleTabClick} />
         
-        <PanelGroup orientation="horizontal" className="flex-1">
+        <PanelGroup orientation="horizontal" className="flex-1" autoSaveId="ide-kospi-layout-h">
           {isSidebarOpen && (
             <>
-              <Panel defaultSize={18} minSize={10} maxSize={30} className="bg-[#252526] flex flex-col border-r border-[#2b2b2b]">
+              <Panel id="sidebar" order={1} defaultSize={18} minSize={10} maxSize={30} className="bg-[#252526] flex flex-col border-r border-[#2b2b2b]">
                 {activeTab === 'chat' ? <ChatPanel /> : <Sidebar activeTab={activeTab} />}
               </Panel>
-              {/* 사이드바 가로 크기 조절 핸들 (Negative Margin Trick) */}
-              <PanelResizeHandle className="w-[11px] -mx-[5px] z-50 flex justify-center bg-transparent cursor-col-resize group outline-none">
-                <div className="w-[1px] h-full bg-[#2b2b2b] group-hover:bg-[#007acc] group-active:bg-[#007acc] transition-colors" />
+              {/* 사이드바 가로 크기 조절 핸들 (표준 방식) */}
+              <PanelResizeHandle id="handle-sidebar" className="w-1.5 bg-transparent hover:bg-[#007acc] active:bg-[#007acc] transition-colors cursor-col-resize flex justify-center z-50 group outline-none">
+                <div className="w-[1px] h-full bg-[#2b2b2b] group-hover:bg-transparent" />
               </PanelResizeHandle>
             </>
           )}
           
-          <Panel className="flex flex-col min-w-[300px]">
-            <PanelGroup orientation="vertical">
-              <Panel defaultSize={isTerminalOpen ? 70 : 100} minSize={20} className="bg-[#1e1e1e] flex flex-col relative z-0">
+          <Panel id="main-editor" order={2} className="flex flex-col min-w-[300px]">
+            <PanelGroup orientation="vertical" autoSaveId="ide-kospi-layout-v">
+              <Panel id="editor-top" order={1} defaultSize={isTerminalOpen ? 70 : 100} minSize={20} className="bg-[#1e1e1e] flex flex-col relative z-0">
                 <Editor />
               </Panel>
               
               {isTerminalOpen && (
                 <>
-                  {/* 터미널 세로 크기 조절 핸들 (Negative Margin Trick) */}
-                  <PanelResizeHandle className="h-[11px] -my-[5px] z-50 flex flex-col justify-center bg-transparent cursor-row-resize group outline-none">
-                    <div className="h-[1px] w-full bg-[#2b2b2b] group-hover:bg-[#007acc] group-active:bg-[#007acc] transition-colors" />
+                  {/* 터미널 세로 크기 조절 핸들 (표준 방식) */}
+                  <PanelResizeHandle id="handle-terminal" className="h-1.5 bg-transparent hover:bg-[#007acc] active:bg-[#007acc] transition-colors cursor-row-resize flex flex-col justify-center z-50 group outline-none">
+                    <div className="h-[1px] w-full bg-[#2b2b2b] group-hover:bg-transparent" />
                   </PanelResizeHandle>
-                  <Panel defaultSize={30} minSize={15} className="bg-[#1e1e1e] flex flex-col z-0">
+                  <Panel id="terminal-bottom" order={2} defaultSize={30} minSize={15} className="bg-[#1e1e1e] flex flex-col z-0">
                     <Terminal />
                   </Panel>
                 </>
