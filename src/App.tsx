@@ -23,9 +23,19 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isTerminalOpen, setIsTerminalOpen] = useState(true);
   const [isQuickOpenOpen, setIsQuickOpenOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     startMarketStream();
+    
+    const checkFullscreen = () => {
+      // 윈도우 창 높이와 실제 모니터 해상도 높이가 동일한지 확인 (오차 1px 허용)
+      const isFull = Math.abs(window.innerHeight - window.screen.height) <= 1;
+      setIsFullscreen(isFull);
+    };
+
+    checkFullscreen();
+    window.addEventListener('resize', checkFullscreen);
     
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl + P (Mac: Cmd + P)
@@ -59,7 +69,10 @@ function App() {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('resize', checkFullscreen);
+    };
   }, [setIsSidebarOpen, setIsTerminalOpen, setIsRightPanelOpen]);
 
   const handleTabClick = (tab: string) => {
@@ -77,9 +90,17 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-[#1e1e1e] text-[#d4d4d4] overflow-hidden selection:bg-[#264f78]">
+    <div className="flex flex-col h-screen w-screen bg-[#1e1e1e] text-[#d4d4d4] overflow-hidden selection:bg-[#264f78] relative">
       <TopMenuBar />
       <QuickOpen isOpen={isQuickOpenOpen} onClose={() => setIsQuickOpenOpen(false)} />
+      
+      {/* F11 전체화면 유도 배너 */}
+      {!isFullscreen && (
+        <div className="fixed bottom-10 right-10 z-50 bg-[#d7ba7d] text-[#1e1e1e] px-4 py-3 rounded-md font-bold text-[13px] shadow-[0_4px_12px_rgba(0,0,0,0.5)] flex items-center space-x-2 animate-bounce border border-[#a8905e]">
+          <span className="text-[16px]">⚠️</span>
+          <span>완벽한 위장 모드를 위해 키보드의 <kbd className="bg-[#1e1e1e] text-[#d7ba7d] px-1.5 py-0.5 rounded mx-1 font-mono text-[11px] shadow-sm">F11</kbd> 키를 눌러주세요!</span>
+        </div>
+      )}
       
       <div className="flex flex-1 overflow-hidden">
         {/* Activity Bar (Fixed width 48px / w-12) */}
