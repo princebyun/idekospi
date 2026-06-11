@@ -65,19 +65,12 @@ export function ChatPanel() {
     <div className="w-full h-full bg-[#1e1e1e] flex flex-col text-[#cccccc] font-sans">
       <div className="flex items-center justify-between px-4 py-2 border-b border-[#2b2b2b] flex-shrink-0 select-none">
         <div className="flex items-center text-[12px] font-semibold text-[#cccccc]">
-          CHAT
+          DISCUSSION CHAT
         </div>
         <div className="flex items-center space-x-2">
-          <input 
-            type="text" 
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            title="닉네임 (AI 모델명으로 위장됨)"
-            className="bg-transparent border-b border-transparent hover:border-[#3c3c3c] focus:border-[#007acc] focus:outline-none text-right w-20 text-[10px] text-[#858585] transition-colors"
-          />
           <button 
             onClick={() => setIsRightPanelOpen(false)}
-            className="p-1 hover:bg-[#2d2d2d] rounded-md transition-colors"
+            className="p-1 hover:bg-[#2d2d2d] rounded-md transition-colors text-[#858585] hover:text-[#cccccc]"
           >
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.707L8 8.707z"></path></svg>
           </button>
@@ -140,6 +133,20 @@ export function ChatPanel() {
 
       <div className="p-4 bg-[#1e1e1e]">
         <form onSubmit={sendMessage} className="relative group">
+          <div className="mb-2 flex items-center space-x-2 px-1">
+            <User size={12} className="text-[#858585]" />
+            <input 
+              type="text" 
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+              placeholder="Your nickname"
+              title="채팅방에서 사용할 닉네임"
+              className="bg-transparent border-b border-[#3c3c3c] hover:border-[#555555] focus:border-[#007acc] focus:outline-none text-[11px] text-[#cccccc] w-24 pb-0.5 transition-colors placeholder-[#555555]"
+            />
+            <span className="text-[10px] text-[#555555]">
+              (This name will be visible to others)
+            </span>
+          </div>
           <textarea
             id="chat-input"
             value={input}
@@ -150,7 +157,7 @@ export function ChatPanel() {
                 sendMessage(e);
               }
             }}
-            placeholder="Ask anything (e.g. how is AAPL today?)"
+            placeholder="Discuss the market or ask anything..."
             className="w-full bg-[#1e1e1e] border border-[#3c3c3c] rounded-lg focus:border-[#007acc] focus:ring-1 focus:ring-[#007acc] focus:outline-none py-3 pl-3 pr-10 text-[13px] resize-none custom-scrollbar transition-all shadow-sm"
             rows={2}
             spellCheck={false}
@@ -168,7 +175,7 @@ export function ChatPanel() {
             <TerminalSquare size={12} />
             <span>Use <kbd className="bg-[#2d2d2d] px-1 rounded border border-[#3c3c3c]">Ctrl+L</kbd> to toggle chat</span>
           </div>
-          <span>AI Chat Mode</span>
+          <span>Public Discussion</span>
         </div>
       </div>
     </div>
