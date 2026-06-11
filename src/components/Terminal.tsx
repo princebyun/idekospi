@@ -5,8 +5,8 @@ import { DOMESTIC_LIST, GLOBAL_LIST, CRYPTO_LIST } from '../services/marketData'
 
 export function Terminal() {
   const [history, setHistory] = useState<{ type: 'input' | 'output' | 'error', text: string }[]>([
-    { type: 'output', text: 'Welcome to IDE-KOSPI Terminal.' },
-    { type: 'output', text: 'Type "help" to see available commands.' }
+    { type: 'output', text: 'IDE-KOSPI 터미널에 오신 것을 환영합니다.' },
+    { type: 'output', text: '사용 가능한 명령어를 보려면 "help"를 입력하세요.' }
   ]);
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
