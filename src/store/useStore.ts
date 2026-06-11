@@ -36,6 +36,10 @@ interface IdeState {
   closeTab: (tabId: string) => void;
   setActiveTabId: (tabId: string) => void;
   updatePrice: (code: string, price: number, changeRate: number, marketState?: string) => void;
+  sidebarWidth: number;
+  terminalHeight: number;
+  setSidebarWidth: (width: number) => void;
+  setTerminalHeight: (height: number) => void;
 }
 
 export const useStore = create<IdeState>()(
@@ -77,11 +81,21 @@ export const useStore = create<IdeState>()(
       setActiveTabId: (tabId) => set({ activeTabId: tabId }),
       updatePrice: (code, price, changeRate, marketState) => set((state) => ({
         prices: { ...state.prices, [code]: { price, changeRate, marketState } }
-      }))
+      })),
+      sidebarWidth: 250,
+      terminalHeight: 300,
+      setSidebarWidth: (width) => set({ sidebarWidth: width }),
+      setTerminalHeight: (height) => set({ terminalHeight: height }),
     }),
     {
       name: 'ide-kospi-storage-v3',
-      partialize: (state) => ({ portfolio: state.portfolio, tabs: state.tabs, activeTabId: state.activeTabId }),
+      partialize: (state) => ({ 
+        portfolio: state.portfolio, 
+        tabs: state.tabs, 
+        activeTabId: state.activeTabId,
+        sidebarWidth: state.sidebarWidth,
+        terminalHeight: state.terminalHeight
+      }),
     }
   )
 );

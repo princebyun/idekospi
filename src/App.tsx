@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels';
 import { ActivityBar } from './components/ActivityBar';
 import { Sidebar } from './components/Sidebar';
 import { Editor } from './components/Editor';
@@ -8,11 +7,18 @@ import { StatusBar } from './components/StatusBar';
 import { QuickOpen } from './components/QuickOpen';
 import { startMarketStream } from './services/marketData';
 import { ChatPanel } from './components/ChatPanel';
+import { ResizeHandle } from './components/ResizeHandle';
+import { useStore } from './store/useStore';
 
 function App() {
+  const { 
+    isTerminalOpen, setIsTerminalOpen, 
+    isSidebarOpen, setIsSidebarOpen,
+    sidebarWidth, setSidebarWidth,
+    terminalHeight, setTerminalHeight
+  } = useStore();
+  
   const [activeTab, setActiveTab] = useState('explorer');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isTerminalOpen, setIsTerminalOpen] = useState(true);
   const [isQuickOpenOpen, setIsQuickOpenOpen] = useState(false);
 
   useEffect(() => {
@@ -27,18 +33,18 @@ function App() {
       // Ctrl + B (Mac: Cmd + B)
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
         e.preventDefault();
-        setIsSidebarOpen(prev => !prev);
+        setIsSidebarOpen(!useStore.getState().isSidebarOpen);
       }
       // Ctrl + \ (Mac: Cmd + \)
       if ((e.ctrlKey || e.metaKey) && e.key === '\\') {
         e.preventDefault();
-        setIsTerminalOpen(prev => !prev);
+        setIsTerminalOpen(!useStore.getState().isTerminalOpen);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [setIsSidebarOpen, setIsTerminalOpen]);
 
   const handleTabClick = (tab: string) => {
     if (activeTab === tab && isSidebarOpen) {
@@ -52,42 +58,54 @@ function App() {
   return (
     <div className="flex flex-col h-screen w-screen bg-[#1e1e1e] text-[#d4d4d4] overflow-hidden selection:bg-[#264f78]">
       <QuickOpen isOpen={isQuickOpenOpen} onClose={() => setIsQuickOpenOpen(false)} />
+      
       <div className="flex flex-1 overflow-hidden">
+        {/* Activity Bar (Fixed width 48px / w-12) */}
         <ActivityBar activeTab={activeTab} setActiveTab={handleTabClick} />
         
-        <PanelGroup orientation="horizontal" className="flex-1" autoSaveId="ide-kospi-layout-h">
-          {isSidebarOpen && (
+        {/* Sidebar Area */}
+        {isSidebarOpen && (
+          <>
+            <div 
+              style={{ width: `${sidebarWidth}px` }} 
+              className="bg-[#252526] flex flex-col border-r border-[#2b2b2b] shrink-0"
+            >
+              {activeTab === 'chat' ? <ChatPanel /> : <Sidebar activeTab={activeTab} />}
+            </div>
+            <ResizeHandle 
+              orientation="vertical" 
+              onResize={setSidebarWidth} 
+              minSize={150} 
+              maxSize={800} 
+            />
+          </>
+        )}
+        
+        {/* Main Editor & Terminal Area */}
+        <div className="flex-1 flex flex-col min-w-0">
+          
+          <div className="flex-1 flex flex-col relative z-0 min-h-[100px]">
+            <Editor />
+          </div>
+          
+          {isTerminalOpen && (
             <>
-              <Panel id="sidebar" order={1} defaultSize={18} minSize={10} maxSize={30} className="bg-[#252526] flex flex-col border-r border-[#2b2b2b]">
-                {activeTab === 'chat' ? <ChatPanel /> : <Sidebar activeTab={activeTab} />}
-              </Panel>
-              {/* 사이드바 가로 크기 조절 핸들 (표준 방식) */}
-              <PanelResizeHandle id="handle-sidebar" className="w-1.5 bg-transparent hover:bg-[#007acc] active:bg-[#007acc] transition-colors cursor-col-resize flex justify-center z-50 group outline-none">
-                <div className="w-[1px] h-full bg-[#2b2b2b] group-hover:bg-transparent" />
-              </PanelResizeHandle>
+              <ResizeHandle 
+                orientation="horizontal" 
+                onResize={setTerminalHeight} 
+                minSize={100} 
+                maxSize={800} 
+              />
+              <div 
+                style={{ height: `${terminalHeight}px` }} 
+                className="bg-[#1e1e1e] flex flex-col z-0 shrink-0"
+              >
+                <Terminal />
+              </div>
             </>
           )}
           
-          <Panel id="main-editor" order={2} className="flex flex-col min-w-[300px]">
-            <PanelGroup orientation="vertical" autoSaveId="ide-kospi-layout-v">
-              <Panel id="editor-top" order={1} defaultSize={isTerminalOpen ? 70 : 100} minSize={20} className="bg-[#1e1e1e] flex flex-col relative z-0">
-                <Editor />
-              </Panel>
-              
-              {isTerminalOpen && (
-                <>
-                  {/* 터미널 세로 크기 조절 핸들 (표준 방식) */}
-                  <PanelResizeHandle id="handle-terminal" className="h-1.5 bg-transparent hover:bg-[#007acc] active:bg-[#007acc] transition-colors cursor-row-resize flex flex-col justify-center z-50 group outline-none">
-                    <div className="h-[1px] w-full bg-[#2b2b2b] group-hover:bg-transparent" />
-                  </PanelResizeHandle>
-                  <Panel id="terminal-bottom" order={2} defaultSize={30} minSize={15} className="bg-[#1e1e1e] flex flex-col z-0">
-                    <Terminal />
-                  </Panel>
-                </>
-              )}
-            </PanelGroup>
-          </Panel>
-        </PanelGroup>
+        </div>
       </div>
       
       <StatusBar />
