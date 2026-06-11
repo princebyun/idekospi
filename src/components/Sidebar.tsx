@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import type { Tab } from '../store/useStore';
 
 export function Sidebar({ activeTab }: { activeTab: string }) {
-  const { openTab, activeTabId, portfolio } = useStore();
+  const { openTab, activeTabId, portfolio, theme, setTheme } = useStore();
   const [gitLogs, setGitLogs] = useState<string[]>([]);
 
   useEffect(() => {
@@ -231,8 +231,8 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
           <div className="mb-6">
             <div className="mb-2 text-[11px] text-ide-text-muted uppercase">Theme</div>
             <select 
-              value={useStore.getState().theme}
-              onChange={(e) => useStore.getState().setTheme(e.target.value as 'vscode-dark' | 'intellij' | 'light')}
+              value={theme}
+              onChange={(e) => setTheme(e.target.value as 'vscode-dark' | 'intellij' | 'light')}
               className="w-full bg-ide-border border border-ide-border rounded p-1 text-[12px] outline-none cursor-pointer"
             >
               <option value="vscode-dark">VSCode Dark</option>
