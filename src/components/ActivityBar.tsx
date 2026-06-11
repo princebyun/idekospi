@@ -17,9 +17,6 @@ export function ActivityBar({ activeTab, setActiveTab }: ActivityBarProps) {
       <div className={iconClass('search')} onClick={() => setActiveTab('search')} title="Search (Quick Open)">
         <Search size={24} strokeWidth={1.5} />
       </div>
-      <div className={iconClass('git')} onClick={() => setActiveTab('git')} title="Source Control">
-        <GitBranch size={24} strokeWidth={1.5} />
-      </div>
       <div className={iconClass('chat')} onClick={() => setActiveTab('chat')} title="Discussion (Output)">
         <MessageSquare size={24} strokeWidth={1.5} />
       </div>
