@@ -1,8 +1,27 @@
+import { useEffect, useState } from 'react';
 import { useStore } from '../store/useStore';
 import type { Tab } from '../store/useStore';
 
 export function Sidebar({ activeTab }: { activeTab: string }) {
   const { openTab, activeTabId, portfolio } = useStore();
+  const [gitLogs, setGitLogs] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchGitLogs = async () => {
+      try {
+        const backendUrl = `http://${window.location.hostname}:3001`;
+        const res = await fetch(`${backendUrl}/api/git/log`);
+        if (res.ok) {
+          const data = await res.json();
+          setGitLogs(data.logs || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch git logs:', err);
+      }
+    };
+    
+    fetchGitLogs();
+  }, []);
 
   const handleOpenTab = (id: string, title: string, icon: string, color: string, type: string, code?: string) => {
     openTab({ id, title, icon, color, type, code });
@@ -139,21 +158,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
             <div className="p-2 space-y-1 relative">
               <div className="absolute left-[15px] top-4 bottom-0 w-[1px] bg-[#007acc]"></div>
               
-              {[
-                "feat: 한국 주식 단일 종목 코드 뷰에 개인/외국인/기관 당일 순매수 동향(수급) 연동 추가",
-                "fix: 단일 종목 코드 뷰(SingleCodeView)의 객체 키를 한국어(현재가, 시가총액 등)로 변경 및 단위 포맷 수정",
-                "feat: 단일 종목(한국 주식) 렌더링 시 기간별 상세 정보(1일, 1주, 1달 등)를 포함한 심화 코드 뷰 제공",
-                "feat: 한국 주식(KRX)은 차트 대신 단일 종목 코드 뷰(.ts)로 위장하여 열리도록 기능 개선",
-                "fix: 상태바 데이터 지연 안내 문구를 한국어로 명시적 변경",
-                "feat: 상태 표시줄 주요 지수 롤링 표시 및 15분 지연 경고 문구 추가",
-                "feat: 토론방 닉네임 입력란을 하단 채팅 입력창 상단으로 이동하여 UI/UX 고도화",
-                "fix: 앱 리팩토링 중 누락된 로컬 상태 변수(isSidebarOpen 등) 복구 및 단축키 안정화",
-                "feat: 토론방 우측 패널(Cursor AI 스타일) 분리 및 Public Discussion 컨셉 도입",
-                "fix: PanelResizeHandle 드래그 인식 영역 CSS 개선 및 확장",
-                "feat: UI/UX 디테일 및 액티비티 바 완성 (디자인 시스템 고도화)",
-                "feat: 트레이딩뷰 차트 탭 연동 및 실시간 종목 시세 차트 적용",
-                "fix: 한국 주식(국장) 야후 파이낸스 프리마켓 데이터 오류 보정"
-              ].map((msg, idx) => (
+              {gitLogs.length > 0 ? gitLogs.map((msg, idx) => (
                 <div key={idx} className="flex items-center group cursor-pointer hover:bg-[#37373d] py-0.5 rounded px-1 relative z-10">
                   <div className={`w-[9px] h-[9px] rounded-full border-2 ${idx === 0 ? 'border-[#569cd6] bg-[#1e1e1e]' : 'border-[#007acc] bg-[#007acc]'} flex-shrink-0 z-10 ml-[2px] mr-2`} />
                   <div className="truncate text-[11.5px] text-[#cccccc] flex-1 mr-2" title={msg}>{msg}</div>
@@ -163,7 +168,9 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
                     </div>
                   )}
                 </div>
-              ))}
+              )) : (
+                <div className="text-[11px] text-[#858585] pl-6 py-2">Loading git history...</div>
+              )}
             </div>
           </div>
         </div>
