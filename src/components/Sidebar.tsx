@@ -61,6 +61,14 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
               <span className="mr-1 text-[10px]">▼</span> src
             </div>
             
+            {/* ReleaseNotes.java */}
+            <div 
+              className={`pl-7 py-0.5 hover:bg-[#37373d] cursor-pointer text-[#cccccc] select-none flex items-center ${activeTabId === 'releasenotes' ? 'bg-[#37373d] text-white' : ''}`}
+              onClick={() => handleOpenTab('releasenotes', 'ReleaseNotes.java', 'J', '#b07219', 'release_notes')}
+            >
+              <span className="text-[#b07219] w-4 mr-1 text-xs font-bold text-center">J</span>ReleaseNotes.java
+            </div>
+            
             {/* markets Folder */}
             <div className="py-0.5 px-1 pl-7 hover:bg-[#37373d] cursor-pointer text-[#cccccc] flex items-center select-none">
               <span className="mr-1 text-[10px]">▼</span> markets

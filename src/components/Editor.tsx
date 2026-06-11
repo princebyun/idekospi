@@ -3,6 +3,7 @@ import { useStore } from '../store/useStore';
 import { DOMESTIC_LIST, GLOBAL_LIST, CRYPTO_LIST } from '../services/marketData';
 import { TradingViewWidget } from './TradingViewWidget';
 import { SingleCodeView } from './SingleCodeView';
+import { ReleaseNotesView } from './ReleaseNotesView';
 
 export function Editor() {
   const { portfolio, tabs, activeTabId, prices, closeTab, setActiveTabId } = useStore();
@@ -157,6 +158,10 @@ export function Editor() {
           <div className="w-full h-full p-1 bg-[#1e1e1e]">
             <TradingViewWidget symbol={activeTab.code} />
           </div>
+        )}
+
+        {activeTab?.type === 'release_notes' && (
+          <ReleaseNotesView />
         )}
 
         {!activeTab && (
