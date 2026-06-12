@@ -200,8 +200,8 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
           </div>
           
           {/* Git Graph Area */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
-            <div className="sticky top-0 bg-ide-sidebar p-2 flex items-center justify-between text-[11px] border-b border-ide-border shrink-0 z-10">
+          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col relative">
+            <div className="sticky top-0 bg-ide-sidebar p-2 flex items-center justify-between text-[11px] border-b border-ide-border shrink-0 z-20">
               <div className="flex items-center text-ide-text">
                 <span className="mr-1">▼</span> 그래프
               </div>
