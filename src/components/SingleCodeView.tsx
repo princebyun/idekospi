@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { getMarketTag } from '../utils/marketUtils';
+import { API_BASE_URL } from '../config/api';
 
 interface StockDetails {
   symbol: string;
@@ -35,8 +37,7 @@ export function SingleCodeView({ code, title }: { code: string, title: string })
     const fetchDetails = async () => {
       setLoading(true);
       try {
-        const backendUrl = `http://${window.location.hostname}:3001`;
-        const res = await fetch(`${backendUrl}/api/stock/details?symbol=${code}`);
+        const res = await fetch(`${API_BASE_URL}/api/stock/details?symbol=${code}`);
         if (res.ok) {
           const data = await res.json();
           setDetails(data);
@@ -100,7 +101,7 @@ export function SingleCodeView({ code, title }: { code: string, title: string })
             </div>
             <div className="pl-12 py-0.5">
               <span className="text-code-variable">등락률</span><span className="text-ide-text">:</span> <span className={details.changeRate > 0 ? 'text-[#ff9d9d]' : details.changeRate < 0 ? 'text-[#8cb4ff]' : 'text-code-string'}>
-                '{details.marketState === 'PRE' ? '[PRE] ' : (details.marketState === 'POST' || details.marketState === 'CLOSED' ? '[AFT] ' : '')}{details.changeRate > 0 ? '+' : ''}{details.changeRate.toFixed(2)}%'
+                '{getMarketTag(details.marketState)}{details.changeRate > 0 ? '+' : ''}{details.changeRate.toFixed(2)}%'
               </span><span className="text-ide-text">,</span>
             </div>
             <div className="pl-12 py-0.5">

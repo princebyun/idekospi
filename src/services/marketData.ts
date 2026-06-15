@@ -1,4 +1,5 @@
 import { useStore } from '../store/useStore';
+import { API_BASE_URL } from '../config/api';
 
 let upbitWs: WebSocket | null = null;
 let mockInterval: any = null;
@@ -85,8 +86,7 @@ export const startMarketStream = () => {
         ...portfolioCodes
       ])].join(',');
 
-      const backendUrl = `http://${window.location.hostname}:3001`;
-      const response = await fetch(`${backendUrl}/api/stocks?symbols=${allStocks}`);
+      const response = await fetch(`${API_BASE_URL}/api/stocks?symbols=${allStocks}`);
       if (!response.ok) return;
       const data = await response.json();
       data.forEach((stock: any) => {

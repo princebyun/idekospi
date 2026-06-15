@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, User, TerminalSquare } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { API_BASE_URL } from '../config/api';
 
 interface ChatMessage {
   id: string;
@@ -15,50 +16,65 @@ export function ChatPanel() {
   const [author, setAuthor] = useState(() => localStorage.getItem('chat_author') || `월급루팡개발자_${Math.floor(Math.random() * 10000)}`);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { setIsRightPanelOpen } = useStore();
+  const ws = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     localStorage.setItem('chat_author', author);
   }, [author]);
 
-  const fetchMessages = async () => {
-    try {
-      const backendUrl = `http://${window.location.hostname}:3001`;
-      const res = await fetch(`${backendUrl}/api/chat`);
-      if (res.ok) {
-        const data = await res.json();
-        setMessages(data);
-      }
-    } catch (e) {
-      console.error('Failed to fetch chat', e);
-    }
-  };
-
   useEffect(() => {
-    fetchMessages();
-    const interval = setInterval(fetchMessages, 2000); // 2초마다 갱신
-    return () => clearInterval(interval);
+    // 1. HTTP로 초기 메시지 히스토리 가져오기
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/chat`);
+        if (res.ok) {
+          const data = await res.json();
+          setMessages(data);
+        }
+      } catch (e) {
+        console.error('Failed to fetch chat history', e);
+      }
+    };
+    fetchHistory();
+
+    // 2. WebSocket 연결
+    const wsUrl = API_BASE_URL.replace(/^http/, 'ws');
+    ws.current = new WebSocket(wsUrl);
+    
+    ws.current.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'NEW_MESSAGE') {
+          setMessages(prev => {
+            const next = [...prev, data.message];
+            if (next.length > 100) next.shift();
+            return next;
+          });
+        }
+      } catch (e) {
+        console.error('Failed to parse WS message', e);
+      }
+    };
+
+    return () => {
+      if (ws.current) ws.current.close();
+    };
   }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendMessage = async (e: React.FormEvent) => {
+  const sendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !ws.current || ws.current.readyState !== WebSocket.OPEN) return;
 
-    try {
-      const backendUrl = `http://${window.location.hostname}:3001`;
-      await fetch(`${backendUrl}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: input, author }),
-      });
-      setInput('');
-      fetchMessages(); // 즉시 갱신
-    } catch (e) {
-      console.error('Failed to send message', e);
-    }
+    ws.current.send(JSON.stringify({
+      type: 'SEND_MESSAGE',
+      payload: { text: input, author }
+    }));
+    
+    setInput('');
   };
 
   return (

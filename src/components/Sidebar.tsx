@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../store/useStore';
+import { API_BASE_URL } from '../config/api';
 
 export function Sidebar({ activeTab }: { activeTab: string }) {
   const { openTab, activeTabId, portfolio, theme, setTheme } = useStore();
@@ -8,8 +9,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
   useEffect(() => {
     const fetchGitLogs = async () => {
       try {
-        const backendUrl = `http://${window.location.hostname}:3001`;
-        const res = await fetch(`${backendUrl}/api/git/log`);
+        const res = await fetch(`${API_BASE_URL}/api/git/log`);
         if (res.ok) {
           const data = await res.json();
           setGitLogs(data.logs || []);

@@ -5,6 +5,8 @@ export interface StockItem {
   id: string;
   name: string;
   code: string;
+  buyPrice?: number;
+  amount?: number;
 }
 
 export interface Tab {

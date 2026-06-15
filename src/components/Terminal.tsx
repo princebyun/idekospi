@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Terminal as TerminalIcon } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { DOMESTIC_LIST, GLOBAL_LIST, CRYPTO_LIST } from '../services/marketData';
+import { API_BASE_URL } from '../config/api';
 
 export function Terminal() {
   const [history, setHistory] = useState<{ type: 'input' | 'output' | 'error' | 'system', text: string }[]>([]);
@@ -79,9 +80,10 @@ export function Terminal() {
     if (command === 'help') {
       return [
         '[사용 가능한 명령어]',
-        '  add <종목명>  : 관심 종목에 추가 (예: add 삼성전자)',
-        '  rm <종목명>   : 관심 종목에서 제거 (예: rm 삼성전자)',
-        '  clear         : 터미널 화면 지우기',
+        '  add <종목명> [단가] [수량] : 관심 종목 추가 (예: add 삼성전자 65000 10)',
+        '  rm <종목명>                : 관심 종목에서 제거 (예: rm 삼성전자)',
+        '  portfolio                  : 포트폴리오 수익률 대시보드 조회',
+        '  clear                      : 터미널 화면 지우기',
         '',
         '[유용한 단축키]',
         '  Ctrl + P      : 종목 빠른 검색 및 추가 (Quick Open)',
@@ -95,19 +97,80 @@ export function Terminal() {
       setHistory([]);
       return [];
     }
+    
+    if (command === 'portfolio' || command === 'pf') {
+      const prices = useStore.getState().prices;
+      if (portfolio.length === 0) return ['포트폴리오가 비어있습니다.'];
+      
+      const lines = [
+        '======================================================',
+        '                  PORTFOLIO DASHBOARD                 ',
+        '======================================================'
+      ];
+      
+      let totalInvestment = 0;
+      let totalCurrentValue = 0;
+
+      portfolio.forEach(p => {
+        const currentData = prices[p.code];
+        const currentPrice = currentData ? currentData.price : 0;
+        
+        let row = `${p.name} (${p.code})`;
+        if (p.buyPrice && p.amount) {
+          const investment = p.buyPrice * p.amount;
+          const currentValue = currentPrice * p.amount;
+          const profit = currentValue - investment;
+          const profitRate = (profit / investment) * 100;
+          
+          totalInvestment += investment;
+          totalCurrentValue += currentValue;
+          
+          row += ` | 매수: ${p.buyPrice.toLocaleString()} x ${p.amount}`;
+          row += ` | 현재가: ${currentPrice.toLocaleString()}`;
+          row += ` | 손익: ${profitRate > 0 ? '+' : ''}${profitRate.toFixed(2)}%`;
+        } else {
+          row += ` | 현재가: ${currentPrice.toLocaleString()} (매수단가 미입력)`;
+        }
+        lines.push(row);
+      });
+      
+      if (totalInvestment > 0) {
+        const totalProfit = totalCurrentValue - totalInvestment;
+        const totalProfitRate = (totalInvestment === 0) ? 0 : (totalProfit / totalInvestment) * 100;
+        lines.push('------------------------------------------------------');
+        lines.push(`총 매수금액: ${totalInvestment.toLocaleString()}`);
+        lines.push(`총 평가금액: ${totalCurrentValue.toLocaleString()}`);
+        lines.push(`총 수익률: ${totalProfitRate > 0 ? '+' : ''}${totalProfitRate.toFixed(2)}%`);
+      }
+      
+      lines.push('======================================================');
+      return lines;
+    }
 
     if (command === 'buy' || command === 'add') {
-      if (args.length < 2) return ['Error: Usage: add <name>'];
-      const name = args.slice(1).join(' ');
+      if (args.length < 2) return ['Error: Usage: add <name> [buyPrice] [amount]'];
+      
+      let parsedName = args.slice(1).join(' ');
+      let buyPrice: number | undefined;
+      let amount: number | undefined;
+      
+      if (args.length >= 4) {
+        const possibleAmount = parseFloat(args[args.length - 1].replace(/,/g, ''));
+        const possiblePrice = parseFloat(args[args.length - 2].replace(/,/g, ''));
+        if (!isNaN(possibleAmount) && !isNaN(possiblePrice)) {
+          amount = possibleAmount;
+          buyPrice = possiblePrice;
+          parsedName = args.slice(1, args.length - 2).join(' ');
+        }
+      }
 
-      let code = MAPPING[name] || MAPPING[name.toUpperCase()];
-      let finalName = name;
+      let code = MAPPING[parsedName] || MAPPING[parsedName.toUpperCase()];
+      let finalName = parsedName;
 
       if (!code) {
         // 로컬에 없으면 API 검색
         try {
-          const backendUrl = `http://${window.location.hostname}:3001`;
-          const res = await fetch(`${backendUrl}/api/search?q=${encodeURIComponent(name)}`);
+          const res = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(parsedName)}`);
           if (res.ok) {
             const data = await res.json();
             if (data && data.length > 0) {
@@ -122,14 +185,14 @@ export function Terminal() {
       }
 
       if (!code) {
-        return [`Error: "${name}" 검색 결과가 없습니다. (전체 시장 검색 실패)`];
+        return [`Error: "${parsedName}" 검색 결과가 없습니다. (전체 시장 검색 실패)`];
       }
 
       if (portfolio.some(s => s.code === code)) {
         return [`Error: "${finalName}" (${code}) 은(는) 이미 내 관심 종목(포트폴리오)에 존재합니다.`];
       }
 
-      addStock({ name: finalName, code });
+      addStock({ name: finalName, code, buyPrice, amount });
       return [`Successfully added ${finalName} (${code}) to portfolio.`];
     }
 

@@ -1,38 +1,82 @@
 import { Router } from 'express';
 import express from 'express';
+import { WebSocketServer, WebSocket } from 'ws';
 
-const router = Router();
+export const chatRouter = Router();
 
 // 채팅 메시지 메모리 저장소 (최대 100개 유지)
-interface ChatMessage {
+export interface ChatMessage {
   id: string;
   text: string;
   timestamp: number;
   author: string;
 }
-let chatMessages: ChatMessage[] = [];
+export let chatMessages: ChatMessage[] = [];
 
-router.get('/api/chat', (req, res) => {
+let clients: WebSocket[] = [];
+
+chatRouter.get('/api/chat', (req, res) => {
   res.json(chatMessages);
 });
 
-router.post('/api/chat', express.json(), (req, res) => {
+chatRouter.post('/api/chat', express.json(), (req, res) => {
   const { text, author } = req.body;
   if (!text) return res.status(400).json({ error: 'Text is required' });
   
   const newMessage: ChatMessage = {
     id: Math.random().toString(36).substr(2, 9),
-    text: text.substring(0, 500), // 길이 제한
+    text: text.substring(0, 500),
     timestamp: Date.now(),
     author: author || 'Anonymous',
   };
   
   chatMessages.push(newMessage);
-  if (chatMessages.length > 100) {
-    chatMessages.shift(); // 오래된 메시지 삭제
-  }
+  if (chatMessages.length > 100) chatMessages.shift();
+  
+  // 브로드캐스트
+  clients.forEach(c => {
+    if (c.readyState === WebSocket.OPEN) {
+      c.send(JSON.stringify({ type: 'NEW_MESSAGE', message: newMessage }));
+    }
+  });
   
   res.json(newMessage);
 });
 
-export default router;
+export function setupChatWebSocket(wss: WebSocketServer) {
+  wss.on('connection', (ws) => {
+    clients.push(ws);
+    
+    ws.on('message', (data) => {
+      try {
+        const parsed = JSON.parse(data.toString());
+        if (parsed.type === 'SEND_MESSAGE') {
+          const { text, author } = parsed.payload;
+          if (!text) return;
+          
+          const newMessage: ChatMessage = {
+            id: Math.random().toString(36).substr(2, 9),
+            text: text.substring(0, 500),
+            timestamp: Date.now(),
+            author: author || 'Anonymous',
+          };
+          
+          chatMessages.push(newMessage);
+          if (chatMessages.length > 100) chatMessages.shift();
+          
+          clients.forEach(c => {
+            if (c.readyState === WebSocket.OPEN) {
+              c.send(JSON.stringify({ type: 'NEW_MESSAGE', message: newMessage }));
+            }
+          });
+        }
+      } catch (e) {
+        console.error('Failed to parse WS message', e);
+      }
+    });
+    
+    ws.on('close', () => {
+      clients = clients.filter(c => c !== ws);
+    });
+  });
+}

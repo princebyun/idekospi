@@ -3,8 +3,24 @@ import { getKoreanMarketState, getUSMarketState } from '../utils/marketState';
 
 export const yahooFinance = new YahooFinance();
 
+const cache = new Map<string, { data: any; expiry: number }>();
+
+function getCached(key: string) {
+  const entry = cache.get(key);
+  if (entry && Date.now() < entry.expiry) return entry.data;
+  return null;
+}
+
+function setCache(key: string, data: any, ttlMs = 5000) {
+  cache.set(key, { data, expiry: Date.now() + ttlMs });
+}
+
 // Helper: Fetch from Yahoo
 export async function fetchYahooStock(symbol: string) {
+  const cacheKey = `yahoo_${symbol}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
   const quote = await yahooFinance.quote(symbol);
   let displayPrice = quote.regularMarketPrice || 0;
   let displayChange = quote.regularMarketChangePercent || 0;
@@ -18,7 +34,7 @@ export async function fetchYahooStock(symbol: string) {
     displayChange = quote.postMarketChangePercent || 0;
   }
 
-  return {
+  const result = {
     symbol,
     code: symbol.replace('.KS', '').replace('.KQ', ''),
     price: displayPrice,
@@ -26,10 +42,17 @@ export async function fetchYahooStock(symbol: string) {
     marketState: getUSMarketState(marketState),
     quote // 원본 quote 객체 유지 (상세 API에서 사용)
   };
+
+  setCache(cacheKey, result);
+  return result;
 }
 
 // Helper: Fetch from Naver (with Yahoo Fallback)
 export async function fetchNaverStockBasic(symbol: string) {
+  const cacheKey = `naver_${symbol}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
   const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
   if (!isKorean) return fetchYahooStock(symbol);
 
@@ -49,7 +72,7 @@ export async function fetchNaverStockBasic(symbol: string) {
     // 시간 기반으로 정확한 장 상태 판별
     const marketState = getKoreanMarketState();
 
-    return {
+    const result = {
       symbol,
       code: codeOnly,
       price,
@@ -57,6 +80,9 @@ export async function fetchNaverStockBasic(symbol: string) {
       marketState,
       naverData: data // 원본 데이터 (상세 API에서 사용)
     };
+
+    setCache(cacheKey, result);
+    return result;
   } catch (err) {
     console.warn(`[Fallback] Naver API failed for ${symbol}, falling back to Yahoo:`, err);
     return fetchYahooStock(symbol); // 실패 시 야후로 폴백

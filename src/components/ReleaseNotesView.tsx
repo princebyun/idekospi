@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 interface Release {
   hash: string;
@@ -12,8 +13,7 @@ export function ReleaseNotesView() {
   useEffect(() => {
     const fetchReleases = async () => {
       try {
-        const backendUrl = `http://${window.location.hostname}:3001`;
-        const res = await fetch(`${backendUrl}/api/git/releases`);
+        const res = await fetch(`${API_BASE_URL}/api/git/releases`);
         if (res.ok) {
           const data = await res.json();
           setReleases(data.releases || []);

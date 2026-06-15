@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { DOMESTIC_LIST, GLOBAL_LIST, CRYPTO_LIST } from '../services/marketData';
+import { API_BASE_URL } from '../config/api';
 
 interface QuickOpenProps {
   isOpen: boolean;
@@ -32,8 +33,7 @@ export function QuickOpen({ isOpen, onClose }: QuickOpenProps) {
       );
       
       try {
-        const backendUrl = `http://${window.location.hostname}:3001`;
-        const res = await fetch(`${backendUrl}/api/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`);
         
         let combined = [...localMatches];
         

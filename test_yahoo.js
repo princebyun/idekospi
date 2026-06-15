@@ -1,1 +1,0 @@
-import YahooFinance from 'yahoo-finance2'; async function test() { const q = await YahooFinance.quote('AAPL'); console.log(q.marketState, q.preMarketPrice, q.regularMarketPrice, q.postMarketPrice); } test();

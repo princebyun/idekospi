@@ -36,9 +36,9 @@ export function StatusBar() {
     <div className="h-[22px] bg-ide-primary text-white text-[11px] flex items-center justify-between px-2 select-none flex-shrink-0 cursor-default">
       <div className="flex items-center space-x-3">
         {/* 경고 아이콘 */}
-        <div className="flex items-center space-x-1 hover:bg-[#1f8ad2] px-2 py-0.5 rounded transition-colors cursor-help" title="Crypto is real-time">
+        <div className="flex items-center space-x-1 hover:bg-[#1f8ad2] px-2 py-0.5 rounded transition-colors cursor-help" title="Market Data Status">
           <AlertTriangle size={13} className="text-[#ffcc00]" />
-          <span>현재 IDEKOSPI에 나오는 주식정보는 15분 지연된 서버에서 가져옵니다.</span>
+          <span>국장: 실시간 | 미장: 정규장/프리/애프터마켓 실시간 | 데이마켓: 미지원</span>
         </div>
         
         {/* 지수 롤링 표시 */}
