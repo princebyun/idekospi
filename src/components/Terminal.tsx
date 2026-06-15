@@ -82,6 +82,7 @@ export function Terminal() {
         '[사용 가능한 명령어]',
         '  add <종목명> [단가] [수량] : 관심 종목 추가 (예: add 삼성전자 65000 10)',
         '  rm <종목명>                : 관심 종목에서 제거 (예: rm 삼성전자)',
+        '  alert <종목명> <UP|DOWN> <가격> : 목표가 알림 설정 (예: alert AAPL UP 300)',
         '  portfolio                  : 포트폴리오 수익률 대시보드 조회',
         '  clear                      : 터미널 화면 지우기',
         '',
@@ -96,6 +97,45 @@ export function Terminal() {
     if (command === 'clear') {
       setHistory([]);
       return [];
+    }
+
+    if (command === 'alert') {
+      if (args.length < 4) return ['Error: Usage: alert <name> <UP|DOWN> <price>'];
+      const targetPrice = parseFloat(args[args.length - 1].replace(/,/g, ''));
+      const direction = args[args.length - 2].toUpperCase();
+      const parsedName = args.slice(1, args.length - 2).join(' ');
+
+      if (isNaN(targetPrice)) return ['Error: Invalid target price.'];
+      if (direction !== 'UP' && direction !== 'DOWN') return ['Error: Direction must be UP or DOWN.'];
+
+      let code = MAPPING[parsedName] || MAPPING[parsedName.toUpperCase()];
+      let finalName = parsedName;
+
+      if (!code) {
+        // 로컬에 없으면 API 검색
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(parsedName)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) {
+              code = data[0].code;
+              finalName = data[0].name;
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      if (!code) return [`Error: "${parsedName}" 검색 결과가 없습니다.`];
+
+      // 알림 권한 요청
+      if ('Notification' in window && Notification.permission !== 'granted') {
+        await Notification.requestPermission();
+      }
+
+      useStore.getState().addAlert({ code, name: finalName, targetPrice, direction });
+      return [`[ALERT] ${finalName} 가격이 ${targetPrice.toLocaleString()}원 ${direction === 'UP' ? '이상이' : '이하가'} 되면 알림을 보냅니다.`];
     }
     
     if (command === 'portfolio' || command === 'pf') {

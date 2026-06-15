@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { MiniChart } from './MiniChart';
 import { useStore } from '../store/useStore';
 import { DOMESTIC_LIST, GLOBAL_LIST, CRYPTO_LIST } from '../services/marketData';
 import { TradingViewWidget } from './TradingViewWidget';
@@ -35,12 +36,17 @@ export function Editor() {
           const changeStr = marketTag + ((isProfit ? '+' : '') + info.changeRate.toFixed(2) + '%');
           const statusText = getMarketStatusText(title, item.code, info.marketState);
           
+          // Color mapping based on Tailwind hexes used
+          const chartColor = isProfit ? '#ff9d9d' : isLoss ? '#8cb4ff' : '#ce9178';
+          
           return (
             <div key={item.code} className="transition-opacity duration-300 pl-8 pt-2 pb-3 hover:bg-[#2a2d2e] select-text">
               <span className="text-code-keyword">function</span> <span className="text-code-function">{item.name.replace(/ /g, '_')}</span><span className="text-ide-text">() {'{'} </span><br/>
               <div className="pl-8 py-1">
                 <span className="text-code-variable">price</span><span className="text-ide-text">:</span> <span className={isString ? 'text-code-string' : 'text-code-number'}>{priceStr}</span><span className="text-ide-text">,</span><br/>
-                <span className="text-code-variable">change</span><span className="text-ide-text">:</span> <span className={changeColor}>'{changeStr}'</span><span className="text-ide-text">,</span><br/>
+                <span className="text-code-variable">change</span><span className="text-ide-text">:</span> <span className={changeColor}>'{changeStr}'</span>
+                <MiniChart symbol={item.code} color={chartColor} />
+                <span className="text-ide-text">,</span><br/>
                 <span className="text-code-variable">status</span><span className="text-ide-text">:</span> <span className="text-code-string">{statusText}</span><br/><br/>
                 <span className="text-code-keyword2">return</span><span className="text-ide-text">;</span>
               </div>

@@ -26,8 +26,17 @@ export interface MarketPrices {
   }
 }
 
+export interface PriceAlert {
+  id: string;
+  code: string;
+  name: string;
+  targetPrice: number;
+  direction: 'UP' | 'DOWN';
+}
+
 interface IdeState {
   portfolio: StockItem[];
+  alerts: PriceAlert[];
   tabs: Tab[];
   activeTabId: string;
   prices: MarketPrices;
@@ -35,6 +44,8 @@ interface IdeState {
   addStock: (stock: Omit<StockItem, 'id'>) => void;
   updateStock: (id: string, updates: Partial<StockItem>) => void;
   removeStock: (id: string) => void;
+  addAlert: (alert: Omit<PriceAlert, 'id'>) => void;
+  removeAlert: (id: string) => void;
   openTab: (tab: Tab) => void;
   closeTab: (tabId: string) => void;
   setActiveTabId: (tabId: string) => void;
@@ -61,6 +72,7 @@ export const useStore = create<IdeState>()(
         { id: '1', name: '삼성전자', code: '005930.KS' },
         { id: '2', name: 'BTC', code: 'KRW-BTC' },
       ],
+      alerts: [],
       tabs: [
         { id: 'markets', title: 'Markets.ts', icon: 'TS', color: '#007acc', type: 'markets_all' },
       ],
@@ -74,6 +86,12 @@ export const useStore = create<IdeState>()(
       })),
       removeStock: (id) => set((state) => ({
         portfolio: state.portfolio.filter((s) => s.id !== id)
+      })),
+      addAlert: (alert) => set((state) => ({
+        alerts: [...state.alerts, { ...alert, id: Date.now().toString() }]
+      })),
+      removeAlert: (id) => set((state) => ({
+        alerts: state.alerts.filter((a) => a.id !== id)
       })),
       openTab: (tab) => set((state) => {
         if (!state.tabs.find((t) => t.id === tab.id)) {
@@ -91,9 +109,38 @@ export const useStore = create<IdeState>()(
         };
       }),
       setActiveTabId: (tabId) => set({ activeTabId: tabId }),
-      updatePrice: (code, price, changeRate, marketState) => set((state) => ({
-        prices: { ...state.prices, [code]: { price, changeRate, marketState } }
-      })),
+      updatePrice: (code, price, changeRate, marketState) => set((state) => {
+        // 가격 변동 시 알림 체크
+        const newAlerts = [...state.alerts];
+        let alertsChanged = false;
+        
+        for (let i = newAlerts.length - 1; i >= 0; i--) {
+          const alert = newAlerts[i];
+          if (alert.code === code) {
+            let triggered = false;
+            if (alert.direction === 'UP' && price >= alert.targetPrice) triggered = true;
+            if (alert.direction === 'DOWN' && price <= alert.targetPrice) triggered = true;
+            
+            if (triggered) {
+              if (typeof window !== 'undefined' && Notification.permission === 'granted') {
+                new Notification('IDE-KOSPI 가격 알림', {
+                  body: `${alert.name}이(가) 목표가 ${alert.targetPrice.toLocaleString()}원에 도달했습니다! (현재가: ${price.toLocaleString()})`,
+                  icon: '/favicon.ico' // optional
+                });
+              } else if (typeof window !== 'undefined') {
+                window.alert('IDE-KOSPI 가격 알림\n' + `${alert.name} 목표가 도달! (현재가: ${price.toLocaleString()})`);
+              }
+              newAlerts.splice(i, 1);
+              alertsChanged = true;
+            }
+          }
+        }
+
+        return {
+          prices: { ...state.prices, [code]: { price, changeRate, marketState } },
+          ...(alertsChanged ? { alerts: newAlerts } : {})
+        };
+      }),
       sidebarWidth: 250,
       terminalHeight: 300,
       isRightPanelOpen: true, // 채팅창 기본 오픈

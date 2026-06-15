@@ -174,4 +174,30 @@ router.get('/api/search', async (req, res) => {
   }
 });
 
+router.get('/api/chart', async (req, res) => {
+  const { symbol } = req.query;
+  if (!symbol || typeof symbol !== 'string') return res.status(400).json({ error: 'Symbol required' });
+
+  try {
+    const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
+    const querySymbol = isKorean ? symbol : symbol.toUpperCase();
+    
+    // 최근 7일 데이터 (sparkline 용)
+    const result = await yahooFinance.chart(querySymbol, {
+      period1: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7일 전
+      interval: '1d'
+    });
+    
+    if (result && result.quotes && result.quotes.length > 0) {
+      const prices = result.quotes.map((q: any) => q.close).filter((p: any) => p !== null);
+      res.json({ prices });
+    } else {
+      res.json({ prices: [] });
+    }
+  } catch (e) {
+    console.error('Chart fetch error:', e);
+    res.status(500).json({ error: 'Chart fetch failed' });
+  }
+});
+
 export default router;

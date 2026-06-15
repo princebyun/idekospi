@@ -142,25 +142,32 @@ function App() {
         </div>
       )}
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
         {/* Activity Bar (Fixed width 48px / w-12) */}
         <ActivityBar activeTab={activeTab} setActiveTab={handleTabClick} />
         
         {/* Sidebar Area */}
           {isSidebarOpen && (
             <>
+              {/* 모바일 딤(Dim) 배경 */}
               <div 
-                style={{ width: `${sidebarWidth}px` }} 
-                className="bg-ide-sidebar flex flex-col border-r border-ide-border shrink-0"
+                className="fixed inset-0 bg-black/50 z-30 md:hidden" 
+                onClick={() => setIsSidebarOpen(false)} 
+              />
+              <div 
+                style={{ width: `${sidebarWidth}px`, maxWidth: '80vw' }} 
+                className="bg-ide-sidebar flex flex-col border-r border-ide-border shrink-0 absolute md:relative h-full z-40 md:z-auto"
               >
                 {isPanicMode ? <FakeSidebar /> : <Sidebar activeTab={activeTab} />}
               </div>
-              <ResizeHandle 
-                orientation="vertical" 
-                onResize={setSidebarWidth} 
-                minSize={150} 
-                maxSize={800} 
-              />
+              <div className="hidden md:block">
+                <ResizeHandle 
+                  orientation="vertical" 
+                  onResize={setSidebarWidth} 
+                  minSize={150} 
+                  maxSize={800} 
+                />
+              </div>
             </>
           )}
         
@@ -180,7 +187,7 @@ function App() {
                 maxSize={800} 
               />
               <div 
-                style={{ height: `${terminalHeight}px` }} 
+                style={{ height: `${terminalHeight}px`, maxHeight: '60vh' }} 
                 className="bg-ide-bg flex flex-col z-0 shrink-0"
               >
                 {isPanicMode ? <FakeTerminal /> : <Terminal />}
@@ -193,15 +200,17 @@ function App() {
         {/* Right Panel (Chat) - 패닉 모드 시 채팅창 완전히 숨김 */}
         {isRightPanelOpen && !isPanicMode && (
           <>
-            <ResizeHandle 
-              orientation="right-vertical" 
-              onResize={setRightPanelWidth} 
-              minSize={250} 
-              maxSize={800} 
-            />
+            <div className="hidden md:block">
+              <ResizeHandle 
+                orientation="right-vertical" 
+                onResize={setRightPanelWidth} 
+                minSize={250} 
+                maxSize={800} 
+              />
+            </div>
             <div 
-              style={{ width: `${rightPanelWidth}px` }} 
-              className="bg-ide-bg flex flex-col border-l border-ide-border shrink-0 z-10"
+              style={{ width: `${rightPanelWidth}px`, maxWidth: '100vw' }} 
+              className="bg-ide-bg flex flex-col border-l border-ide-border shrink-0 z-40 absolute right-0 h-full md:relative md:z-10"
             >
               <ChatPanel />
             </div>
