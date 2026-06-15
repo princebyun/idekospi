@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MessageSquare, GitPullRequest, ArrowLeft, Send } from 'lucide-react';
+import { useStore } from '../store/useStore';
 
 export function IssuesView() {
-  const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
+  const { selectedIssueId, setSelectedIssueId } = useStore();
   const [isCreating, setIsCreating] = useState(false);
   
   // Mock data for PRs/Issues
@@ -30,9 +31,15 @@ export function IssuesView() {
   const [newIssueTitle, setNewIssueTitle] = useState('');
   const [newIssueTag, setNewIssueTag] = useState('');
 
+  // store에서 selectedIssueId가 변경될 때마다 코멘트를 동기화
+  useEffect(() => {
+    if (selectedIssueId) {
+      setCurrentComments(mockComments[selectedIssueId] || []);
+    }
+  }, [selectedIssueId]);
+
   const handleIssueClick = (id: string) => {
     setSelectedIssueId(id);
-    setCurrentComments(mockComments[id] || []);
   };
 
   const handleAddComment = (e: React.FormEvent) => {

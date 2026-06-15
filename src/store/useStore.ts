@@ -69,6 +69,8 @@ interface IdeState {
   setTimeframe: (tf: '1D' | '15m' | '30m') => void;
   bottomPanelTab: 'terminal' | 'output';
   setBottomPanelTab: (tab: 'terminal' | 'output') => void;
+  selectedIssueId: string | null;
+  setSelectedIssueId: (id: string | null) => void;
 }
 
 export const useStore = create<IdeState>()(
@@ -166,6 +168,8 @@ export const useStore = create<IdeState>()(
       setTimeframe: (tf) => set({ timeframe: tf }),
       bottomPanelTab: 'terminal',
       setBottomPanelTab: (tab) => set({ bottomPanelTab: tab }),
+      selectedIssueId: null,
+      setSelectedIssueId: (id) => set({ selectedIssueId: id }),
     }),
     {
       name: 'ide-kospi-storage-v6', // 캐시 무효화 및 새로운 기본값 적용

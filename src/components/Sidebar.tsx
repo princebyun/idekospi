@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { API_BASE_URL } from '../config/api';
 
 export function Sidebar({ activeTab }: { activeTab: string }) {
-  const { openTab, activeTabId, portfolio, theme, setTheme } = useStore();
+  const { openTab, activeTabId, portfolio, theme, setTheme, setSelectedIssueId } = useStore();
   const [gitLogs, setGitLogs] = useState<string[]>([]);
 
   useEffect(() => {
@@ -161,11 +161,23 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
             </button>
             <div className="space-y-2 mt-4">
               <div className="text-[11px] font-bold text-ide-text-muted mb-2">RECENT PULL REQUESTS</div>
-              <div className="flex items-center text-[12px] hover:bg-ide-hover cursor-pointer p-1 rounded" onClick={() => handleOpenTab('issues_view', 'PullRequests.md', 'M', '#519657', 'issues_view')}>
+              <div 
+                className="flex items-center text-[12px] hover:bg-ide-hover cursor-pointer p-1 rounded transition-colors" 
+                onClick={() => {
+                  setSelectedIssueId('1');
+                  handleOpenTab('issues_view', 'PullRequests.md', 'M', '#519657', 'issues_view');
+                }}
+              >
                 <span className="text-[#519657] mr-2">#1</span>
                 <span className="truncate">엔비디아 어닝 대응</span>
               </div>
-              <div className="flex items-center text-[12px] hover:bg-ide-hover cursor-pointer p-1 rounded" onClick={() => handleOpenTab('issues_view', 'PullRequests.md', 'M', '#519657', 'issues_view')}>
+              <div 
+                className="flex items-center text-[12px] hover:bg-ide-hover cursor-pointer p-1 rounded transition-colors" 
+                onClick={() => {
+                  setSelectedIssueId('2');
+                  handleOpenTab('issues_view', 'PullRequests.md', 'M', '#519657', 'issues_view');
+                }}
+              >
                 <span className="text-[#8cb4ff] mr-2">#2</span>
                 <span className="truncate">코스피 버그 수정</span>
               </div>
