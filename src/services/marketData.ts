@@ -25,6 +25,7 @@ export const GLOBAL_LIST = [
   { code: 'NVDA', name: '엔비디아' },
   { code: 'TSLA', name: '테슬라' },
   { code: 'AAPL', name: '애플' },
+  { code: 'BTC-USD', name: 'BTC(Global)' },
   { code: 'CL=F', name: 'WTI 원유' },
   { code: 'ZN=F', name: '미국채 10년' },
 ];

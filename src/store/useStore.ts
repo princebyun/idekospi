@@ -61,6 +61,14 @@ interface IdeState {
   setTheme: (theme: 'vscode-dark' | 'intellij' | 'light') => void;
   isPanicMode: boolean;
   togglePanicMode: () => void;
+  
+  // Phase 1 Features
+  isMenuBarVisible: boolean;
+  toggleMenuBar: () => void;
+  timeframe: '1D' | '15m' | '30m';
+  setTimeframe: (tf: '1D' | '15m' | '30m') => void;
+  bottomPanelTab: 'terminal' | 'output';
+  setBottomPanelTab: (tab: 'terminal' | 'output') => void;
 }
 
 export const useStore = create<IdeState>()(
@@ -151,9 +159,16 @@ export const useStore = create<IdeState>()(
       setRightPanelWidth: (width) => set({ rightPanelWidth: width }),
       setTheme: (theme) => set({ theme }),
       togglePanicMode: () => set((state) => ({ isPanicMode: !state.isPanicMode })),
+      
+      isMenuBarVisible: true,
+      toggleMenuBar: () => set((state) => ({ isMenuBarVisible: !state.isMenuBarVisible })),
+      timeframe: '1D',
+      setTimeframe: (tf) => set({ timeframe: tf }),
+      bottomPanelTab: 'terminal',
+      setBottomPanelTab: (tab) => set({ bottomPanelTab: tab }),
     }),
     {
-      name: 'ide-kospi-storage-v5', // 캐시 무효화 및 새로운 기본값 적용
+      name: 'ide-kospi-storage-v6', // 캐시 무효화 및 새로운 기본값 적용
       partialize: (state) => ({ 
         theme: state.theme,
         portfolio: state.portfolio, 
@@ -162,7 +177,9 @@ export const useStore = create<IdeState>()(
         sidebarWidth: state.sidebarWidth,
         terminalHeight: state.terminalHeight,
         isRightPanelOpen: state.isRightPanelOpen,
-        rightPanelWidth: state.rightPanelWidth
+        rightPanelWidth: state.rightPanelWidth,
+        isMenuBarVisible: state.isMenuBarVisible,
+        timeframe: state.timeframe
       }),
     }
   )

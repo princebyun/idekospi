@@ -4,6 +4,7 @@ import http from 'http';
 import { WebSocketServer } from 'ws';
 import stockRoutes from './routes/stocks';
 import gitRoutes from './routes/git';
+import newsRoutes from './routes/news';
 import { chatRouter, setupChatWebSocket } from './routes/chat';
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(cors());
 // 라우트 등록
 app.use(stockRoutes);
 app.use(gitRoutes);
+app.use(newsRoutes);
 app.use(chatRouter);
 
 const server = http.createServer(app);

@@ -5,10 +5,11 @@ import { DOMESTIC_LIST, GLOBAL_LIST, CRYPTO_LIST } from '../services/marketData'
 import { TradingViewWidget } from './TradingViewWidget';
 import { SingleCodeView } from './SingleCodeView';
 import { ReleaseNotesView } from './ReleaseNotesView';
+import { IssuesView } from './IssuesView';
 import { getMarketStatusText, getMarketTag, formatPriceString } from '../utils/marketUtils';
 
 export function Editor() {
-  const { portfolio, tabs, activeTabId, prices, closeTab, setActiveTabId } = useStore();
+  const { portfolio, tabs, activeTabId, prices, closeTab, setActiveTabId, timeframe, setTimeframe } = useStore();
   const activeTab = tabs.find((t) => t.id === activeTabId);
 
   const renderMarketMethod = (methodName: string, title: string, list: { code: string; name: string }[]) => {
@@ -33,8 +34,20 @@ export function Editor() {
           const { priceStr, isString } = formatPriceString(info.price, { isDomestic, isCrypto, isIndex, exchangeRate });
 
           const marketTag = getMarketTag(info.marketState);
-          const changeStr = marketTag + ((isProfit ? '+' : '') + info.changeRate.toFixed(2) + '%');
+          let changeStr = marketTag + ((isProfit ? '+' : '') + info.changeRate.toFixed(2) + '%');
           const statusText = getMarketStatusText(title, item.code, info.marketState);
+          
+          // 김치프리미엄 계산 (코인)
+          let kimchiPremiumStr = '';
+          if (title.includes('코인') && item.code === 'KRW-BTC') {
+            const btcKrw = prices['KRW-BTC']?.price;
+            const btcUsd = prices['BTC-USD']?.price;
+            const exchangeRate = prices['KRW=X']?.price || 1400;
+            if (btcKrw && btcUsd) {
+              const kp = ((btcKrw / exchangeRate) / btcUsd - 1) * 100;
+              kimchiPremiumStr = ` // 김치프리미엄: ${kp > 0 ? '+' : ''}${kp.toFixed(2)}%`;
+            }
+          }
           
           // Color mapping based on Tailwind hexes used
           const chartColor = isProfit ? '#ff9d9d' : isLoss ? '#8cb4ff' : '#ce9178';
@@ -46,7 +59,7 @@ export function Editor() {
                 <span className="text-code-variable">price</span><span className="text-ide-text">:</span> <span className={isString ? 'text-code-string' : 'text-code-number'}>{priceStr}</span><span className="text-ide-text">,</span><br/>
                 <span className="text-code-variable">change</span><span className="text-ide-text">:</span> <span className={changeColor}>'{changeStr}'</span>
                 <MiniChart symbol={item.code} color={chartColor} />
-                <span className="text-ide-text">,</span><br/>
+                <span className="text-ide-text">,</span><span className="text-code-comment">{kimchiPremiumStr}</span><br/>
                 <span className="text-code-variable">status</span><span className="text-ide-text">:</span> <span className="text-code-string">{statusText}</span><br/><br/>
                 <span className="text-code-keyword2">return</span><span className="text-ide-text">;</span>
               </div>
@@ -108,12 +121,31 @@ export function Editor() {
       </div>
 
       {/* Breadcrumbs */}
-      <div className="h-[22px] bg-ide-bg flex items-center px-4 text-[13px] text-ide-text-muted select-none shadow-sm">
-        <span>src</span>
-        <span className="mx-1">›</span>
-        <span>{activeTab?.type.startsWith('market') ? 'markets' : 'portfolio'}</span>
-        <span className="mx-1">›</span>
-        <span>{activeTab?.title}</span>
+      <div className="h-[22px] bg-ide-bg flex items-center justify-between px-4 text-[13px] text-ide-text-muted select-none shadow-sm">
+        <div className="flex items-center">
+          <span>src</span>
+          <span className="mx-1">›</span>
+          <span>{activeTab?.type.startsWith('market') ? 'markets' : 'portfolio'}</span>
+          <span className="mx-1">›</span>
+          <span>{activeTab?.title}</span>
+        </div>
+        {/* Timeframe Toggle */}
+        <div className="flex items-center space-x-1 text-[11px] bg-[#1e1e1e] rounded px-1 py-0.5 border border-ide-border">
+          <button 
+            onClick={() => setTimeframe('1D')} 
+            className={`px-1.5 rounded-sm ${timeframe === '1D' ? 'bg-[#37373d] text-white' : 'hover:bg-[#2d2d2d]'}`}
+          >1D</button>
+          <button 
+            onClick={() => setTimeframe('15m')} 
+            className={`px-1.5 rounded-sm ${timeframe === '15m' ? 'bg-[#37373d] text-white' : 'hover:bg-[#2d2d2d]'}`}
+            title="15분 단위 데이터 (추후 지원 예정)"
+          >15m</button>
+          <button 
+            onClick={() => setTimeframe('30m')} 
+            className={`px-1.5 rounded-sm ${timeframe === '30m' ? 'bg-[#37373d] text-white' : 'hover:bg-[#2d2d2d]'}`}
+            title="30분 단위 데이터 (추후 지원 예정)"
+          >30m</button>
+        </div>
       </div>
 
       {/* Editor Content */}
@@ -136,6 +168,10 @@ export function Editor() {
 
         {activeTab?.type === 'release_notes' && (
           <ReleaseNotesView />
+        )}
+
+        {activeTab?.type === 'issues_view' && (
+          <IssuesView />
         )}
 
         {!activeTab && (

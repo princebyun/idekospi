@@ -31,7 +31,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
       {/* Main Content Area (Top 45%) */}
       <div className="flex-[45] flex flex-col min-h-0">
         <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-ide-text flex-shrink-0">
-          {activeTab === 'explorer' ? '탐색기' : activeTab === 'search' ? 'Search' : 'Settings'}
+          {activeTab === 'explorer' ? '탐색기' : activeTab === 'search' ? 'Search' : activeTab === 'issues' ? 'Pull Requests' : 'Settings'}
         </div>
         
         {activeTab === 'explorer' && (
@@ -144,6 +144,32 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
             >
               Open Global Search
             </button>
+          </div>
+        )}
+
+        {activeTab === 'issues' && (
+          <div className="flex-1 overflow-y-auto p-4 text-ide-text">
+            <div className="mb-2 text-[11px] text-ide-text-muted uppercase">Pull Requests</div>
+            <div className="text-[12px] mb-4 leading-relaxed">
+              종목토론방을 Pull Request 뷰로 확인하세요. 종목에 대한 최신 이슈와 토론이 등록되어 있습니다.
+            </div>
+            <button 
+              onClick={() => handleOpenTab('issues_view', 'PullRequests.md', 'M', '#519657', 'issues_view')}
+              className="w-full bg-ide-primary hover:bg-[#005f9e] text-white py-1.5 rounded text-[12px] transition-colors mb-4"
+            >
+              종목토론방 열기
+            </button>
+            <div className="space-y-2 mt-4">
+              <div className="text-[11px] font-bold text-ide-text-muted mb-2">RECENT PULL REQUESTS</div>
+              <div className="flex items-center text-[12px] hover:bg-ide-hover cursor-pointer p-1 rounded" onClick={() => handleOpenTab('issues_view', 'PullRequests.md', 'M', '#519657', 'issues_view')}>
+                <span className="text-[#519657] mr-2">#1</span>
+                <span className="truncate">엔비디아 어닝 대응</span>
+              </div>
+              <div className="flex items-center text-[12px] hover:bg-ide-hover cursor-pointer p-1 rounded" onClick={() => handleOpenTab('issues_view', 'PullRequests.md', 'M', '#519657', 'issues_view')}>
+                <span className="text-[#8cb4ff] mr-2">#2</span>
+                <span className="truncate">코스피 버그 수정</span>
+              </div>
+            </div>
           </div>
         )}
 

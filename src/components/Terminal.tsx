@@ -7,9 +7,10 @@ import { API_BASE_URL } from '../config/api';
 export function Terminal() {
   const [history, setHistory] = useState<{ type: 'input' | 'output' | 'error' | 'system', text: string }[]>([]);
   const [input, setInput] = useState('');
+  const [news, setNews] = useState<any[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const { addStock, removeStock, portfolio } = useStore();
+  const { addStock, removeStock, portfolio, bottomPanelTab, setBottomPanelTab } = useStore();
 
   const MAPPING: Record<string, string> = {
     '비트코인': 'KRW-BTC',
@@ -71,6 +72,28 @@ export function Terminal() {
     }, 4500); // 4.5초마다 하나씩 로그 찍음
 
     return () => clearInterval(intervalId);
+  }, []);
+
+  // 뉴스 피드 가져오기
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/news`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.items) {
+            setNews(data.items);
+          } else if (Array.isArray(data)) {
+            setNews(data);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch news', err);
+      }
+    };
+    fetchNews();
+    const newsIntervalId = setInterval(fetchNews, 60000); // 1분마다 뉴스 갱신
+    return () => clearInterval(newsIntervalId);
   }, []);
 
   const handleCommand = async (cmd: string): Promise<string[]> => {
@@ -282,40 +305,71 @@ export function Terminal() {
 
   return (
     <div className="h-full flex flex-col bg-ide-bg font-mono text-[13px] border-t border-ide-border">
-      <div className="flex items-center px-4 h-8 text-[#e7e7e7] uppercase tracking-wider text-xs font-semibold select-none bg-ide-sidebar">
-        <TerminalIcon size={14} className="mr-2" />
-        Terminal
+      <div className="flex items-center h-[35px] text-[#e7e7e7] text-xs select-none bg-ide-sidebar border-b border-[#2d2d2d]">
+        <div 
+          className={`flex items-center h-full px-4 cursor-pointer border-b-2 transition-colors ${bottomPanelTab === 'terminal' ? 'border-[#4fc1ff] text-[#4fc1ff]' : 'border-transparent text-ide-text hover:text-white'}`}
+          onClick={() => setBottomPanelTab('terminal')}
+        >
+          <TerminalIcon size={14} className="mr-2" />
+          TERMINAL
+        </div>
+        <div 
+          className={`flex items-center h-full px-4 cursor-pointer border-b-2 transition-colors ${bottomPanelTab === 'output' ? 'border-[#4fc1ff] text-[#4fc1ff]' : 'border-transparent text-ide-text hover:text-white'}`}
+          onClick={() => setBottomPanelTab('output')}
+        >
+          OUTPUT
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col">
-        {/* 상단 고정 도움말 (Sticky Header) - 패딩과 배경색을 확실히 지정하여 스크롤 오버랩 방지 */}
-        <div className="sticky top-0 bg-ide-bg z-10 px-4 py-3 border-b border-ide-border shrink-0 shadow-sm">
-          <div className="text-ide-text-muted font-bold mb-1">IDE-KOSPI 터미널에 오신 것을 환영합니다.</div>
-          <div className="text-ide-text-muted">IDE-KOSPI의 사용법을 보려면 터미널에 help를 입력해보세요.</div>
-        </div>
-
-        <div className="p-4 flex-1">
-          {history.map((line, i) => (
-            <div key={i} className={`mb-1 ${line.type === 'error' ? 'text-[#f48771]' : line.type === 'input' ? 'text-ide-text' : line.type === 'system' ? 'text-code-comment' : 'text-ide-text-muted'}`}>
-              {line.type === 'input' && <span className="text-[#519657] mr-2">➜</span>}
-              {line.text}
+        {bottomPanelTab === 'terminal' ? (
+          <>
+            <div className="sticky top-0 bg-ide-bg z-10 px-4 py-3 border-b border-ide-border shrink-0 shadow-sm">
+              <div className="text-ide-text-muted font-bold mb-1">IDE-KOSPI 터미널에 오신 것을 환영합니다.</div>
+              <div className="text-ide-text-muted">IDE-KOSPI의 사용법을 보려면 터미널에 help를 입력해보세요.</div>
             </div>
-          ))}
 
-          <form onSubmit={onSubmit} className="flex items-center mt-2">
-            <span className="text-[#519657] mr-2">➜</span>
-            <span className="text-[#4fc1ff] mr-2">~</span>
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="flex-1 bg-transparent outline-none text-ide-text"
-              autoFocus
-              spellCheck={false}
-            />
-          </form>
-          <div ref={bottomRef} />
-        </div>
+            <div className="p-4 flex-1">
+              {history.map((line, i) => (
+                <div key={i} className={`mb-1 ${line.type === 'error' ? 'text-[#f48771]' : line.type === 'input' ? 'text-ide-text' : line.type === 'system' ? 'text-code-comment' : 'text-ide-text-muted'}`}>
+                  {line.type === 'input' && <span className="text-[#519657] mr-2">➜</span>}
+                  {line.text}
+                </div>
+              ))}
+
+              <form onSubmit={onSubmit} className="flex items-center mt-2">
+                <span className="text-[#519657] mr-2">➜</span>
+                <span className="text-[#4fc1ff] mr-2">~</span>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  className="flex-1 bg-transparent outline-none text-ide-text"
+                  autoFocus
+                  spellCheck={false}
+                />
+              </form>
+              <div ref={bottomRef} />
+            </div>
+          </>
+        ) : (
+          <div className="p-4 flex-1 font-mono text-[13px] leading-relaxed">
+            <div className="text-[#4fc1ff] mb-4">Starting IDE-KOSPI Output Stream... [OK]</div>
+            {news.map((item, idx) => (
+              <div key={idx} className="mb-2 hover:bg-[#2a2d2e] px-2 py-1 rounded flex">
+                <span className="text-[#569cd6] w-20 shrink-0">[INFO]</span>
+                <span className="text-ide-text-muted w-24 shrink-0">{item.datetime ? item.datetime.substring(4, 12) : ''}</span>
+                <a href={`https://m.stock.naver.com/investment/news/article/${item.officeId}/${item.articleId}`} target="_blank" rel="noreferrer" className="text-[#ce9178] hover:underline flex-1 truncate">
+                  {item.title}
+                </a>
+                <span className="text-ide-text-muted ml-2 shrink-0 w-24 text-right">{item.officeName}</span>
+              </div>
+            ))}
+            {news.length === 0 && (
+              <div className="text-ide-text-muted animate-pulse">Fetching news stream...</div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
