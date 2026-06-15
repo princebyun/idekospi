@@ -50,8 +50,8 @@ async function fetchNaverStockBasic(symbol: string) {
     const price = parseFloat(priceStr.replace(/,/g, ''));
     const changeRate = parseFloat(data.fluctuationsRatio || '0');
     
-    // 한국장 시간(09:00~15:30) 기준 대략적인 상태 확인, 또는 기본값
-    const marketState = 'REGULAR'; 
+    // 네이버 API의 marketStatus 기반 상태 매핑 ('CLOSE' -> 'CLOSED', 그 외 'REGULAR')
+    const marketState = data.marketStatus === 'CLOSE' ? 'CLOSED' : 'REGULAR';
 
     return {
       symbol,
