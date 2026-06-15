@@ -36,9 +36,8 @@ function getUSMarketState(yahooState: string): string {
   if (day >= 1 && day <= 5) {
     const hour = kst.getHours();
     if (hour >= 9 && hour < 17) {
-      if (yahooState === 'CLOSED' || yahooState === 'POST' || yahooState === 'POSTPOST') {
-        return 'DAY';
-      }
+      // 한국 낮 시간(09:00~17:00)에는 야후 상태와 무관하게 무조건 데이마켓으로 오버라이드
+      return 'DAY';
     }
   }
   return yahooState;

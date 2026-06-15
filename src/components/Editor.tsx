@@ -65,7 +65,7 @@ export function Editor() {
             isString = true;
           }
 
-          const marketTag = info.marketState === 'PRE' ? '[PRE] ' : (info.marketState === 'POST' || info.marketState === 'CLOSED' ? '[AFT] ' : (info.marketState === 'DAY' ? '[DAY] ' : ''));
+          const marketTag = (info.marketState === 'PRE' || info.marketState === 'PREPRE') ? '[PRE] ' : (info.marketState === 'POST' || info.marketState === 'POSTPOST' || info.marketState === 'CLOSED' ? '[AFT] ' : (info.marketState === 'DAY' ? '[DAY] ' : ''));
           const changeStr = marketTag + ((isProfit ? '+' : '') + info.changeRate.toFixed(2) + '%');
           const statusText = getMarketStatus(title, item.code, info.marketState);
           
