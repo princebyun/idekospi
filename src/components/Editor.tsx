@@ -4,30 +4,11 @@ import { DOMESTIC_LIST, GLOBAL_LIST, CRYPTO_LIST } from '../services/marketData'
 import { TradingViewWidget } from './TradingViewWidget';
 import { SingleCodeView } from './SingleCodeView';
 import { ReleaseNotesView } from './ReleaseNotesView';
+import { getMarketStatusText, getMarketTag, formatPriceString } from '../utils/marketUtils';
 
 export function Editor() {
   const { portfolio, tabs, activeTabId, prices, closeTab, setActiveTabId } = useStore();
   const activeTab = tabs.find((t) => t.id === activeTabId);
-
-  const getMarketStatus = (title: string, code: string, apiMarketState?: string) => {
-    if (title.includes('코인') || code.startsWith('KRW-')) {
-      return "'24시간 거래 중입니다.'";
-    }
-
-    if (apiMarketState) {
-      if (apiMarketState === 'PRE' || apiMarketState === 'PREPRE') return "'현재 프리마켓 진행 중입니다.'";
-      if (apiMarketState === 'REGULAR') return "'현재 정규장이 열려있습니다.'";
-      if (apiMarketState === 'POST' || apiMarketState === 'POSTPOST') return "'현재 애프터마켓 진행 중입니다.'";
-      if (apiMarketState === 'DAY') return "'데이마켓 (무료 API 공식 실시간 시세 미지원)'";
-      if (apiMarketState === 'CLOSED') return "'시장이 마감되었습니다.'";
-    }
-
-    // fallback
-    const isDomestic = title.includes('국장') || DOMESTIC_LIST.some(i => i.code === code) || code.endsWith('.KS') || code.endsWith('.KQ');
-    if (isDomestic) return "'장 상태 모니터링 중...'";
-
-    return "'장 상태 모니터링 중...'";
-  };
 
   const renderMarketMethod = (methodName: string, title: string, list: { code: string; name: string }[]) => {
     return (
@@ -48,26 +29,11 @@ export function Editor() {
           const isCrypto = title.includes('코인') || item.code.startsWith('KRW-');
           const isIndex = item.code.startsWith('^') || item.code.includes('=X');
           
-          let priceStr = '';
-          let isString = false;
-          
-          if (isIndex) {
-            priceStr = info.price.toLocaleString(undefined, { maximumFractionDigits: 2 });
-          } else if (isDomestic || isCrypto) {
-            const krwStr = `₩${info.price.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-            const usdPrice = info.price / exchangeRate;
-            priceStr = `'${krwStr} ($${usdPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })})'`;
-            isString = true;
-          } else {
-            const usdStr = `$${info.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-            const krwPrice = info.price * exchangeRate;
-            priceStr = `'${usdStr} (₩${krwPrice.toLocaleString(undefined, { maximumFractionDigits: 0 })})'`;
-            isString = true;
-          }
+          const { priceStr, isString } = formatPriceString(info.price, { isDomestic, isCrypto, isIndex, exchangeRate });
 
-          const marketTag = (info.marketState === 'PRE' || info.marketState === 'PREPRE') ? '[PRE] ' : (info.marketState === 'POST' || info.marketState === 'POSTPOST' || info.marketState === 'CLOSED' ? '[AFT] ' : (info.marketState === 'DAY' ? '[DAY] ' : ''));
+          const marketTag = getMarketTag(info.marketState);
           const changeStr = marketTag + ((isProfit ? '+' : '') + info.changeRate.toFixed(2) + '%');
-          const statusText = getMarketStatus(title, item.code, info.marketState);
+          const statusText = getMarketStatusText(title, item.code, info.marketState);
           
           return (
             <div key={item.code} className="transition-opacity duration-300 pl-8 pt-2 pb-3 hover:bg-[#2a2d2e] select-text">
