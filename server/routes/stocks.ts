@@ -180,7 +180,12 @@ router.get('/api/chart', async (req, res) => {
 
   try {
     const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
-    const querySymbol = isKorean ? symbol : symbol.toUpperCase();
+    let querySymbol = isKorean ? symbol : symbol.toUpperCase();
+    
+    // Upbit 심볼(KRW-BTC)을 Yahoo 심볼(BTC-KRW)로 변환
+    if (querySymbol.startsWith('KRW-')) {
+      querySymbol = querySymbol.replace('KRW-', '') + '-KRW';
+    }
     
     // 최근 7일 데이터 (sparkline 용)
     const result = await yahooFinance.chart(querySymbol, {
