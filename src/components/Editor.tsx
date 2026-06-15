@@ -18,7 +18,7 @@ export function Editor() {
       if (apiMarketState === 'PRE' || apiMarketState === 'PREPRE') return "'현재 프리마켓 진행 중입니다.'";
       if (apiMarketState === 'REGULAR') return "'현재 정규장이 열려있습니다.'";
       if (apiMarketState === 'POST' || apiMarketState === 'POSTPOST') return "'현재 애프터마켓 진행 중입니다.'";
-      if (apiMarketState === 'DAY') return "'현재 데이마켓 진행 중입니다.'";
+      if (apiMarketState === 'DAY') return "'데이마켓 (무료 API 공식 실시간 시세 미지원)'";
       if (apiMarketState === 'CLOSED') return "'시장이 마감되었습니다.'";
     }
 
