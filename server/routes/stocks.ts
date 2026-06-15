@@ -182,9 +182,10 @@ router.get('/api/chart', async (req, res) => {
     const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
     let querySymbol = isKorean ? symbol : symbol.toUpperCase();
     
-    // Upbit 심볼(KRW-BTC)을 Yahoo 심볼(BTC-KRW)로 변환
+    // Upbit 심볼(KRW-BTC)을 Yahoo 심볼(BTC-USD)로 변환
+    // (참고: -KRW로 변환하면 SUI 등 일부 코인이 야후 파이낸스에 없어 에러가 발생함. 스파크라인은 추세만 보므로 USD로 통일)
     if (querySymbol.startsWith('KRW-')) {
-      querySymbol = querySymbol.replace('KRW-', '') + '-KRW';
+      querySymbol = querySymbol.replace('KRW-', '') + '-USD';
     }
     
     // 최근 7일 데이터 (sparkline 용)
@@ -199,8 +200,12 @@ router.get('/api/chart', async (req, res) => {
     } else {
       res.json({ prices: [] });
     }
-  } catch (e) {
-    console.error('Chart fetch error:', e);
+  } catch (e: any) {
+    if (e.message && e.message.includes('delisted')) {
+      // 야후 파이낸스에 없는 코인/종목(예: SUI-KRW)은 조용히 빈 배열 반환
+      return res.json({ prices: [] });
+    }
+    console.error(`Chart fetch error for ${symbol}:`, e.message);
     res.status(500).json({ error: 'Chart fetch failed' });
   }
 });
