@@ -357,12 +357,12 @@ export function Terminal() {
             <div className="text-[#4fc1ff] mb-4">Starting IDE-KOSPI Output Stream... [OK]</div>
             {news.map((item, idx) => (
               <div key={idx} className="mb-2 hover:bg-[#2a2d2e] px-2 py-1 rounded flex">
-                <span className="text-[#569cd6] w-20 shrink-0">[INFO]</span>
-                <span className="text-ide-text-muted w-24 shrink-0">{item.datetime ? item.datetime.substring(4, 12) : ''}</span>
-                <a href={`https://m.stock.naver.com/investment/news/article/${item.officeId}/${item.articleId}`} target="_blank" rel="noreferrer" className="text-[#ce9178] hover:underline flex-1 truncate">
-                  {item.title}
+                <span className="text-[#569cd6] w-16 shrink-0">[INFO]</span>
+                <span className="text-ide-text-muted w-24 shrink-0">{item.dt ? `${item.dt.substring(4, 6)}-${item.dt.substring(6, 8)} ${item.dt.substring(8, 10)}:${item.dt.substring(10, 12)}` : ''}</span>
+                <a href={`https://m.stock.naver.com/investment/news/article/${item.oid}/${item.aid}`} target="_blank" rel="noreferrer" className="text-[#ce9178] hover:underline flex-1 truncate">
+                  {item.tit}
                 </a>
-                <span className="text-ide-text-muted ml-2 shrink-0 w-24 text-right">{item.officeName}</span>
+                <span className="text-ide-text-muted ml-2 shrink-0 w-24 text-right truncate">{item.ohnm}</span>
               </div>
             ))}
             {news.length === 0 && (
