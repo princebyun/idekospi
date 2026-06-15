@@ -7,6 +7,66 @@ import util from 'util';
 const execPromise = util.promisify(exec);
 const yahooFinance = new YahooFinance();
 
+// Helper: Fetch from Yahoo
+async function fetchYahooStock(symbol: string) {
+  const quote = await yahooFinance.quote(symbol);
+  let displayPrice = quote.regularMarketPrice || 0;
+  let displayChange = quote.regularMarketChangePercent || 0;
+  const marketState = quote.marketState || 'REGULAR';
+  
+  if (marketState === 'PRE' && quote.preMarketPrice) {
+    displayPrice = quote.preMarketPrice;
+    displayChange = quote.preMarketChangePercent || 0;
+  } else if ((marketState === 'POST' || marketState === 'CLOSED') && quote.postMarketPrice) {
+    displayPrice = quote.postMarketPrice;
+    displayChange = quote.postMarketChangePercent || 0;
+  }
+
+  return {
+    symbol,
+    code: symbol.replace('.KS', '').replace('.KQ', ''),
+    price: displayPrice,
+    changeRate: displayChange,
+    marketState,
+    quote // 원본 quote 객체 유지 (상세 API에서 사용)
+  };
+}
+
+// Helper: Fetch from Naver (with Yahoo Fallback)
+async function fetchNaverStockBasic(symbol: string) {
+  const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
+  if (!isKorean) return fetchYahooStock(symbol);
+
+  const codeOnly = symbol.replace('.KS', '').replace('.KQ', '');
+  
+  try {
+    const res = await fetch(`https://m.stock.naver.com/api/stock/${codeOnly}/basic`);
+    if (!res.ok) throw new Error('Naver API response not ok');
+    
+    const data = await res.json();
+    
+    // 네이버 데이터 파싱
+    const priceStr = data.closePrice || '0';
+    const price = parseFloat(priceStr.replace(/,/g, ''));
+    const changeRate = parseFloat(data.fluctuationsRatio || '0');
+    
+    // 한국장 시간(09:00~15:30) 기준 대략적인 상태 확인, 또는 기본값
+    const marketState = 'REGULAR'; 
+
+    return {
+      symbol,
+      code: codeOnly,
+      price,
+      changeRate,
+      marketState,
+      naverData: data // 원본 데이터 (상세 API에서 사용)
+    };
+  } catch (err) {
+    console.warn(`[Fallback] Naver API failed for ${symbol}, falling back to Yahoo:`, err);
+    return fetchYahooStock(symbol); // 실패 시 야후로 폴백
+  }
+}
+
 const app = express();
 app.use(cors());
 
@@ -48,30 +108,18 @@ app.get('/api/stocks', async (req, res) => {
     
     const promises = symbols.map(async (symbol) => {
       try {
-        const quote = await yahooFinance.quote(symbol);
+        const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
+        const data = isKorean ? await fetchNaverStockBasic(symbol) : await fetchYahooStock(symbol);
         
-        let displayPrice = quote.regularMarketPrice;
-        let displayChange = quote.regularMarketChangePercent;
-        const marketState = quote.marketState || 'REGULAR';
-        
-        if (marketState === 'PRE' && quote.preMarketPrice) {
-          displayPrice = quote.preMarketPrice;
-          displayChange = quote.preMarketChangePercent;
-        } else if ((marketState === 'POST' || marketState === 'CLOSED') && quote.postMarketPrice) {
-          displayPrice = quote.postMarketPrice;
-          displayChange = quote.postMarketChangePercent;
-        }
-
         return {
-          symbol,
-          code: symbol.replace('.KS', ''),
-          price: displayPrice,
-          changeRate: displayChange,
-          marketState: marketState
+          symbol: data.symbol,
+          code: data.code,
+          price: data.price,
+          changeRate: data.changeRate,
+          marketState: data.marketState
         };
       } catch (err) {
-        console.error(`Failed to fetch ${symbol}:`);
-        console.error(err);
+        console.error(`Failed to fetch ${symbol}:`, err);
         return null;
       }
     });
@@ -89,9 +137,15 @@ app.get('/api/stock/details', async (req, res) => {
     const symbol = req.query.symbol as string;
     if (!symbol) return res.status(400).json({ error: 'Symbol required' });
 
-    const quote = await yahooFinance.quote(symbol);
+    const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
     
-    // 기간별 수익률 계산을 위한 히스토리 (최대 5년)
+    // 1. 현재 가격 데이터 가져오기 (Naver 또는 Yahoo)
+    const currentData = isKorean ? await fetchNaverStockBasic(symbol) : await fetchYahooStock(symbol);
+    const currentPrice = currentData.price;
+    const displayChange = currentData.changeRate;
+    const marketState = currentData.marketState;
+
+    // 2. 야후 파이낸스에서 과거 데이터(History) 가져오기 (수익률 계산용)
     const now = new Date();
     const period1 = new Date();
     period1.setFullYear(now.getFullYear() - 5);
@@ -102,8 +156,6 @@ app.get('/api/stock/details', async (req, res) => {
     } catch (e) {
       console.error('Failed to fetch history for', symbol);
     }
-
-    const currentPrice = quote.regularMarketPrice || 0;
     
     const getReturnRate = (daysAgo: number) => {
       if (history.length === 0 || currentPrice === 0) return 0;
@@ -125,11 +177,10 @@ app.get('/api/stock/details', async (req, res) => {
       return ((currentPrice - closest.close) / closest.close) * 100;
     };
 
-    // 네이버 금융 API 연동을 통한 수급(투자자 동향) 가져오기
+    // 3. 네이버 수급 데이터 가져오기 (한국 주식만)
     let investorTrend = null;
-    const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
     if (isKorean) {
-      const codeOnly = symbol.replace('.KS', '').replace('.KQ', '');
+      const codeOnly = currentData.code;
       try {
         const naverRes = await fetch(`https://m.stock.naver.com/api/stock/${codeOnly}/integration`);
         if (naverRes.ok) {
@@ -148,32 +199,41 @@ app.get('/api/stock/details', async (req, res) => {
       }
     }
 
-    let displayPrice = quote.regularMarketPrice || 0;
-    let displayChange = quote.regularMarketChangePercent || 0;
-    const marketState = quote.marketState || 'REGULAR';
+    // 4. 상세 메타데이터 조합
+    let open = 0, high = 0, low = 0, volume = 0, marketCap = 0, fiftyTwoWeekHigh = 0, fiftyTwoWeekLow = 0;
     
-    if (marketState === 'PRE' && quote.preMarketPrice) {
-      displayPrice = quote.preMarketPrice;
-      displayChange = quote.preMarketChangePercent || 0;
-    } else if ((marketState === 'POST' || marketState === 'CLOSED') && quote.postMarketPrice) {
-      displayPrice = quote.postMarketPrice;
-      displayChange = quote.postMarketChangePercent || 0;
+    if (isKorean && currentData.naverData) {
+      const nd = currentData.naverData;
+      open = parseFloat((nd.openPrice || '0').replace(/,/g, ''));
+      high = parseFloat((nd.highPrice || '0').replace(/,/g, ''));
+      low = parseFloat((nd.lowPrice || '0').replace(/,/g, ''));
+      volume = nd.accumulatedTradingVolume || 0;
+      marketCap = nd.marketSum ? nd.marketSum * 100000000 : 0; // 억원 단위 변환
+    } else if (currentData.quote) {
+      const q = currentData.quote;
+      open = q.regularMarketOpen || 0;
+      high = q.regularMarketDayHigh || 0;
+      low = q.regularMarketDayLow || 0;
+      volume = q.regularMarketVolume || 0;
+      marketCap = q.marketCap || 0;
+      fiftyTwoWeekHigh = q.fiftyTwoWeekHigh || 0;
+      fiftyTwoWeekLow = q.fiftyTwoWeekLow || 0;
     }
 
     res.json({
       symbol,
-      price: displayPrice,
+      price: currentPrice,
       changeRate: displayChange,
       marketState: marketState,
-      open: quote.regularMarketOpen,
-      high: quote.regularMarketDayHigh,
-      low: quote.regularMarketDayLow,
-      volume: quote.regularMarketVolume,
-      marketCap: quote.marketCap,
-      fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh,
-      fiftyTwoWeekLow: quote.fiftyTwoWeekLow,
+      open,
+      high,
+      low,
+      volume,
+      marketCap,
+      fiftyTwoWeekHigh,
+      fiftyTwoWeekLow,
       returns: {
-        '1D': quote.regularMarketChangePercent || 0,
+        '1D': displayChange,
         '1W': getReturnRate(7),
         '1M': getReturnRate(30),
         '3M': getReturnRate(90),
