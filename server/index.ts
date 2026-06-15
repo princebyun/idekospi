@@ -7,6 +7,43 @@ import util from 'util';
 const execPromise = util.promisify(exec);
 const yahooFinance = new YahooFinance();
 
+// Helper: Get KST Time based Market State for KR
+function getKoreanMarketState(): string {
+  const now = new Date();
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const kst = new Date(utc + (9 * 3600000));
+  
+  const day = kst.getDay();
+  if (day === 0 || day === 6) return 'CLOSED';
+  
+  const hour = kst.getHours();
+  const minute = kst.getMinutes();
+  const time = hour * 100 + minute;
+  
+  if (time >= 830 && time < 900) return 'PRE';
+  if (time >= 900 && time <= 1530) return 'REGULAR';
+  if (time > 1530 && time <= 1800) return 'POST';
+  return 'CLOSED';
+}
+
+// Helper: Override US Market State for Day Market
+function getUSMarketState(yahooState: string): string {
+  const now = new Date();
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const kst = new Date(utc + (9 * 3600000));
+  
+  const day = kst.getDay();
+  if (day >= 1 && day <= 5) {
+    const hour = kst.getHours();
+    if (hour >= 9 && hour < 17) {
+      if (yahooState === 'CLOSED' || yahooState === 'POST' || yahooState === 'POSTPOST') {
+        return 'DAY';
+      }
+    }
+  }
+  return yahooState;
+}
+
 // Helper: Fetch from Yahoo
 async function fetchYahooStock(symbol: string) {
   const quote = await yahooFinance.quote(symbol);
@@ -27,7 +64,7 @@ async function fetchYahooStock(symbol: string) {
     code: symbol.replace('.KS', '').replace('.KQ', ''),
     price: displayPrice,
     changeRate: displayChange,
-    marketState,
+    marketState: getUSMarketState(marketState),
     quote // 원본 quote 객체 유지 (상세 API에서 사용)
   };
 }
@@ -50,8 +87,8 @@ async function fetchNaverStockBasic(symbol: string) {
     const price = parseFloat(priceStr.replace(/,/g, ''));
     const changeRate = parseFloat(data.fluctuationsRatio || '0');
     
-    // 네이버 API의 marketStatus 기반 상태 매핑 ('CLOSE' -> 'CLOSED', 그 외 'REGULAR')
-    const marketState = data.marketStatus === 'CLOSE' ? 'CLOSED' : 'REGULAR';
+    // 시간 기반으로 정확한 장 상태 판별
+    const marketState = getKoreanMarketState();
 
     return {
       symbol,

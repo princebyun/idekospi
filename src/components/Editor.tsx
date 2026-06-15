@@ -18,6 +18,7 @@ export function Editor() {
       if (apiMarketState === 'PRE' || apiMarketState === 'PREPRE') return "'현재 프리마켓 진행 중입니다.'";
       if (apiMarketState === 'REGULAR') return "'현재 정규장이 열려있습니다.'";
       if (apiMarketState === 'POST' || apiMarketState === 'POSTPOST') return "'현재 애프터마켓 진행 중입니다.'";
+      if (apiMarketState === 'DAY') return "'현재 데이마켓 진행 중입니다.'";
       if (apiMarketState === 'CLOSED') return "'시장이 마감되었습니다.'";
     }
 
@@ -64,7 +65,7 @@ export function Editor() {
             isString = true;
           }
 
-          const marketTag = info.marketState === 'PRE' ? '[PRE] ' : (info.marketState === 'POST' || info.marketState === 'CLOSED' ? '[AFT] ' : '');
+          const marketTag = info.marketState === 'PRE' ? '[PRE] ' : (info.marketState === 'POST' || info.marketState === 'CLOSED' ? '[AFT] ' : (info.marketState === 'DAY' ? '[DAY] ' : ''));
           const changeStr = marketTag + ((isProfit ? '+' : '') + info.changeRate.toFixed(2) + '%');
           const statusText = getMarketStatus(title, item.code, info.marketState);
           
