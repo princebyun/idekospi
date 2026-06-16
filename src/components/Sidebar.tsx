@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { API_BASE_URL } from '../config/api';
 
 export function Sidebar({ activeTab }: { activeTab: string }) {
-  const { openTab, activeTabId, portfolio, theme, setTheme, setSelectedIssueId } = useStore();
+  const { openTab, activeTabId, portfolio, theme, setTheme, setSelectedIssueId, addStock } = useStore();
   const [gitLogs, setGitLogs] = useState<string[]>([]);
 
   useEffect(() => {
@@ -27,9 +27,17 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
   };
 
   const handleAddStock = (code: string, name: string) => {
-    const event = new KeyboardEvent('keydown', { key: 't', ctrlKey: true });
-    window.dispatchEvent(event);
-    alert(`[${name}] 패키지가 설치되었습니다. 터미널에서 'add ${code}'를 입력해서 수동 추가할 수도 있습니다.`);
+    // 포트폴리오에 이미 있는지 확인
+    if (portfolio.some(p => p.code === code)) {
+      alert(`[${name}] 패키지가 이미 설치되어 있습니다.`);
+      return;
+    }
+    
+    // store의 addStock을 호출하여 포트폴리오에 자동 추가
+    addStock({ code, name });
+    
+    // 안내 메시지
+    alert(`[${name}] 패키지가 포트폴리오에 성공적으로 설치되었습니다!\n\n좌측 상단 '탐색기(Explorer)' 탭의 파일 목록에서 확인하실 수 있습니다.`);
   };
 
   return (
