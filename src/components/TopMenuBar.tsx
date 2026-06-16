@@ -51,17 +51,7 @@ export function TopMenuBar() {
         openTab({ id: 'release_notes', title: 'ReleaseNotes.java', icon: 'M', color: '#e3c153', type: 'release_notes' });
         break;
       case 'terminal_help':
-        alert(`[ 터미널 명령어 도움말 ]
-
-add [종목코드/명] : 포트폴리오에 종목 추가 (예: add 삼성전자)
-remove [종목코드/명] : 포트폴리오에서 제거 (예: remove AAPL)
-portfolio : 현재 포트폴리오 목록 보기
-buy [종목명/코드] [수량] : 모의투자 매수 (예: buy TSLA 10)
-sell [종목명/코드] [수량] : 모의투자 매도 (예: sell 005930 5)
-balance : 모의투자 계좌 잔고 확인
-theme [dark/light/intellij] : 에디터 테마 변경
-clear : 터미널 화면 지우기
-help : 도움말 출력`);
+        openTab({ id: 'terminal_help', title: 'TerminalCommands.md', icon: 'M', color: '#69b4d8', type: 'terminal_help' });
         break;
       case 'about':
         alert('IDE-KOSPI v1.2.0\n개발자 주식 위장 터미널\n\nGitHub: https://github.com/princebyun/idekospi');

@@ -5,6 +5,7 @@ import { DOMESTIC_LIST, GLOBAL_LIST, CRYPTO_LIST } from '../services/marketData'
 import { TradingViewWidget } from './TradingViewWidget';
 import { SingleCodeView } from './SingleCodeView';
 import { ReleaseNotesView } from './ReleaseNotesView';
+import { TerminalHelpView } from './TerminalHelpView';
 import { IssuesView } from './IssuesView';
 import { getMarketStatusText, getMarketTag, formatPriceString } from '../utils/marketUtils';
 
@@ -168,6 +169,10 @@ export function Editor() {
 
         {activeTab?.type === 'release_notes' && (
           <ReleaseNotesView />
+        )}
+
+        {activeTab?.type === 'terminal_help' && (
+          <TerminalHelpView />
         )}
 
         {activeTab?.type === 'issues_view' && (
