@@ -8,6 +8,7 @@ export const DOMESTIC_LIST = [
   { code: '005380.KS', name: '현대차' },
   { code: '^KS11', name: '코스피' },
   { code: '^KQ11', name: '코스닥' },
+  { code: 'FUT', name: '코스피200선물' },
   { code: 'KRW=X', name: '원/달러' },
 ];
 
@@ -15,6 +16,9 @@ export const GLOBAL_LIST = [
   { code: '^IXIC', name: '나스닥' },
   { code: '^GSPC', name: 'S&P500' },
   { code: '^DJI', name: '다우' },
+  { code: 'NQ=F', name: '나스닥선물' },
+  { code: 'ES=F', name: 'S&P500선물' },
+  { code: 'YM=F', name: '다우선물' },
   { code: 'QQQ', name: 'QQQ' },
   { code: 'QQQM', name: 'QQQM' },
   { code: 'SPY', name: 'SPY' },

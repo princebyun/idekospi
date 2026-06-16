@@ -1,7 +1,9 @@
 import YahooFinance from 'yahoo-finance2';
 import { getKoreanMarketState, getUSMarketState } from '../utils/marketState';
 
-export const yahooFinance = new YahooFinance();
+export const yahooFinance = new YahooFinance({
+  suppressNotices: ['yahooSurvey']
+});
 
 const cache = new Map<string, { data: any; expiry: number }>();
 
@@ -53,13 +55,16 @@ export async function fetchNaverStockBasic(symbol: string) {
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
-  const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
+  const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ') || symbol === 'FUT';
   if (!isKorean) return fetchYahooStock(symbol);
 
   const codeOnly = symbol.replace('.KS', '').replace('.KQ', '');
+  const apiUrl = symbol === 'FUT' 
+    ? `https://m.stock.naver.com/api/index/${codeOnly}/basic`
+    : `https://m.stock.naver.com/api/stock/${codeOnly}/basic`;
   
   try {
-    const res = await fetch(`https://m.stock.naver.com/api/stock/${codeOnly}/basic`);
+    const res = await fetch(apiUrl);
     if (!res.ok) throw new Error('Naver API response not ok');
     
     const data = await res.json();

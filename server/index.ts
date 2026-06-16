@@ -24,8 +24,8 @@ setupChatWebSocket(wss);
 import { fetchYahooStock, fetchNaverStockBasic } from './services/stockFetcher';
 import { broadcastMessage } from './routes/chat';
 
-const DOMESTIC_LIST = ['005930.KS', '000660.KS', '005380.KS', '^KS11', '^KQ11', 'KRW=X'];
-const GLOBAL_LIST = ['^IXIC', '^GSPC', '^DJI', 'QQQ', 'QQQM', 'SPY', 'TQQQ', 'SOXL', 'NVDA', 'TSLA', 'AAPL', 'BTC-USD', 'CL=F', 'ZN=F'];
+const DOMESTIC_LIST = ['005930.KS', '000660.KS', '005380.KS', '^KS11', '^KQ11', 'FUT', 'KRW=X'];
+const GLOBAL_LIST = ['^IXIC', '^GSPC', '^DJI', 'NQ=F', 'ES=F', 'YM=F', 'QQQ', 'QQQM', 'SPY', 'TQQQ', 'SOXL', 'NVDA', 'TSLA', 'AAPL', 'BTC-USD', 'CL=F', 'ZN=F'];
 
 interface PriceSnapshot {
   timestamp: number;
@@ -76,7 +76,7 @@ const startCentralPolling = () => {
       const allStocks = [...DOMESTIC_LIST, ...GLOBAL_LIST];
       const promises = allStocks.map(async (symbol) => {
         try {
-          const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
+          const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ') || symbol === 'FUT';
           const data = isKorean ? await fetchNaverStockBasic(symbol) : await fetchYahooStock(symbol);
           
           const { changeRate15m, changeRate30m } = updateHistoryAndCalculateRates(symbol, data.price, data.changeRate);
