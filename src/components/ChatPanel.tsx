@@ -15,7 +15,7 @@ export function ChatPanel() {
   const [input, setInput] = useState('');
   const [author, setAuthor] = useState(() => localStorage.getItem('chat_author') || `월급루팡개발자_${Math.floor(Math.random() * 10000)}`);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const { setIsRightPanelOpen } = useStore();
+  const { setIsRightPanelOpen, setOnlineUsers } = useStore();
   const ws = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -50,6 +50,8 @@ export function ChatPanel() {
             if (next.length > 100) next.shift();
             return next;
           });
+        } else if (data.type === 'ONLINE_USERS') {
+          setOnlineUsers(data.count);
         }
       } catch (e) {
         console.error('Failed to parse WS message', e);

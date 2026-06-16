@@ -15,6 +15,17 @@ export let chatMessages: ChatMessage[] = [];
 
 let clients: WebSocket[] = [];
 
+const BANNED_WORDS = ['바보', '멍청이', '씨발', '개새끼', '병신', '지랄', '존나'];
+
+function filterProfanity(text: string): string {
+  let filtered = text;
+  BANNED_WORDS.forEach(word => {
+    const regex = new RegExp(word, 'gi');
+    filtered = filtered.replace(regex, '*'.repeat(word.length));
+  });
+  return filtered;
+}
+
 chatRouter.get('/api/chat', (req, res) => {
   res.json(chatMessages);
 });
@@ -25,7 +36,7 @@ chatRouter.post('/api/chat', express.json(), (req, res) => {
   
   const newMessage: ChatMessage = {
     id: Math.random().toString(36).substr(2, 9),
-    text: text.substring(0, 500),
+    text: filterProfanity(text.substring(0, 500)),
     timestamp: Date.now(),
     author: author || 'Anonymous',
   };
@@ -44,8 +55,18 @@ chatRouter.post('/api/chat', express.json(), (req, res) => {
 });
 
 export function setupChatWebSocket(wss: WebSocketServer) {
+  const broadcastOnlineUsers = () => {
+    const count = clients.length;
+    clients.forEach(c => {
+      if (c.readyState === WebSocket.OPEN) {
+        c.send(JSON.stringify({ type: 'ONLINE_USERS', count }));
+      }
+    });
+  };
+
   wss.on('connection', (ws) => {
     clients.push(ws);
+    broadcastOnlineUsers();
     
     ws.on('message', (data) => {
       try {
@@ -56,7 +77,7 @@ export function setupChatWebSocket(wss: WebSocketServer) {
           
           const newMessage: ChatMessage = {
             id: Math.random().toString(36).substr(2, 9),
-            text: text.substring(0, 500),
+            text: filterProfanity(text.substring(0, 500)),
             timestamp: Date.now(),
             author: author || 'Anonymous',
           };
@@ -77,6 +98,7 @@ export function setupChatWebSocket(wss: WebSocketServer) {
     
     ws.on('close', () => {
       clients = clients.filter(c => c !== ws);
+      broadcastOnlineUsers();
     });
   });
 }

@@ -31,6 +31,25 @@ function App() {
   useEffect(() => {
     startMarketStream();
     
+    // 모바일 등에서 화면 꺼짐 방지 (Wake Lock API)
+    let wakeLock: any = null;
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator) {
+          // @ts-ignore
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err: any) {
+        console.warn(`Wake Lock error: ${err.name}, ${err.message}`);
+      }
+    };
+    requestWakeLock();
+    document.addEventListener('visibilitychange', () => {
+      if (wakeLock !== null && document.visibilityState === 'visible') {
+        requestWakeLock();
+      }
+    });
+
     const checkFullscreen = () => {
       // 윈도우 창 높이와 실제 모니터 해상도 높이가 동일한지 확인 (오차 1px 허용)
       const isFull = Math.abs(window.innerHeight - window.screen.height) <= 1;

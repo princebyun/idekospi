@@ -84,6 +84,9 @@ interface IdeState {
   holdings: Holding[];
   buyStock: (code: string, name: string, price: number, amount: number) => { success: boolean, message: string };
   sellStock: (code: string, price: number, amount: number) => { success: boolean, message: string };
+  
+  onlineUsers: number;
+  setOnlineUsers: (count: number) => void;
 }
 
 export const useStore = create<IdeState>()(
@@ -233,7 +236,9 @@ export const useStore = create<IdeState>()(
           return { balance: state.balance + totalRevenue, holdings: newHoldings };
         });
         return result;
-      }
+      },
+      onlineUsers: 1,
+      setOnlineUsers: (count) => set({ onlineUsers: count }),
     }),
     {
       name: 'ide-kospi-storage-v7', // 캐시 무효화 및 새로운 기본값 적용
