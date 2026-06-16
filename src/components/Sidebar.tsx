@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { API_BASE_URL } from '../config/api';
 
 export function Sidebar({ activeTab }: { activeTab: string }) {
-  const { openTab, activeTabId, portfolio, theme, setTheme, setSelectedIssueId, addStock, reorderPortfolio } = useStore();
+  const { openTab, activeTabId, portfolio, theme, setTheme, setSelectedIssueId, addStock, reorderPortfolio, removeStock } = useStore();
   const [gitLogs, setGitLogs] = useState<string[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
@@ -22,6 +22,10 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
     if (draggedIndex !== null && draggedIndex !== dropIndex) {
       reorderPortfolio(draggedIndex, dropIndex);
     }
+    setDraggedIndex(null);
+  };
+
+  const handleDragEnd = () => {
     setDraggedIndex(null);
   };
 
@@ -121,7 +125,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
             {/* Portfolio Items */}
             {portfolio.map((item, index) => {
-              const isKrx = item.code.endsWith('.KS') || item.code.endsWith('.KQ') || item.code.startsWith('KRX:');
+              const isKrx = item.code.endsWith('.KS') || item.code.endsWith('.KQ') || item.code.startsWith('KRX:') || item.code === 'FUT';
               
               if (isKrx) {
                 return (
@@ -131,10 +135,19 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
                     onDragStart={(e) => handleDragStart(e, index)}
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, index)}
-                    className={`pl-11 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center ${activeTabId === `code_${item.code}` ? 'bg-[#37373d] text-white' : ''} ${draggedIndex === index ? 'opacity-50' : ''}`}
+                    onDragEnd={handleDragEnd}
+                    className={`group pl-11 pr-2 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center justify-between ${activeTabId === `code_${item.code}` ? 'bg-[#37373d] text-white' : ''} ${draggedIndex === index ? 'opacity-50' : ''}`}
                     onClick={() => handleOpenTab(`code_${item.code}`, `${item.name}.ts`, 'TS', '#007acc', 'code_single', item.code)}
                   >
-                    <span className="text-ide-primary w-4 mr-1 text-xs font-bold text-center">TS</span>{item.name}.ts
+                    <div className="flex items-center truncate">
+                      <span className="text-ide-primary w-4 mr-1 text-xs font-bold text-center flex-shrink-0">TS</span>
+                      <span className="truncate">{item.name}.ts</span>
+                    </div>
+                    <button 
+                      className="opacity-0 group-hover:opacity-100 hover:text-white text-ide-text-muted px-1"
+                      onClick={(e) => { e.stopPropagation(); removeStock(item.id); }}
+                      title="Remove from Portfolio"
+                    >×</button>
                   </div>
                 );
               }
@@ -146,10 +159,19 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
                   onDragStart={(e) => handleDragStart(e, index)}
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, index)}
-                  className={`pl-11 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center ${activeTabId === `chart_${item.code}` ? 'bg-[#37373d] text-white' : ''} ${draggedIndex === index ? 'opacity-50' : ''}`}
+                  onDragEnd={handleDragEnd}
+                  className={`group pl-11 pr-2 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center justify-between ${activeTabId === `chart_${item.code}` ? 'bg-[#37373d] text-white' : ''} ${draggedIndex === index ? 'opacity-50' : ''}`}
                   onClick={() => handleOpenTab(`chart_${item.code}`, `${item.name}.chart`, '📊', '#ce9178', 'chart', item.code)}
                 >
-                  <span className="w-4 mr-1 text-[11px] text-center">📊</span>{item.name}.chart
+                  <div className="flex items-center truncate">
+                    <span className="w-4 mr-1 text-[11px] text-center flex-shrink-0">📊</span>
+                    <span className="truncate">{item.name}.chart</span>
+                  </div>
+                  <button 
+                    className="opacity-0 group-hover:opacity-100 hover:text-white text-ide-text-muted px-1"
+                    onClick={(e) => { e.stopPropagation(); removeStock(item.id); }}
+                    title="Remove from Portfolio"
+                  >×</button>
                 </div>
               );
             })}
@@ -283,12 +305,13 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
               <div className="mb-2 text-[11px] text-ide-text-muted uppercase">Theme</div>
               <select 
                 value={theme}
-                onChange={(e) => setTheme(e.target.value as 'vscode-dark' | 'intellij' | 'light')}
+                onChange={(e) => setTheme(e.target.value as 'vscode-dark' | 'intellij' | 'light' | 'outlook')}
                 className="w-full bg-ide-border border border-ide-border rounded p-1 text-[12px] outline-none cursor-pointer"
               >
                 <option value="vscode-dark">VSCode Dark</option>
                 <option value="intellij">IntelliJ Darcula</option>
                 <option value="light">Light Theme</option>
+                  <option value="outlook">Outlook Mail Mode</option>
               </select>
             </div>
 

@@ -11,6 +11,7 @@ import { ResizeHandle } from './components/ResizeHandle';
 import { useStore } from './store/useStore';
 import { TopMenuBar } from './components/TopMenuBar';
 import { FakeEditor, FakeSidebar, FakeTerminal, FakeStatusBar } from './components/FakeViews';
+import { OutlookMode } from './components/OutlookMode';
 
 function App() {
   const { 
@@ -141,8 +142,10 @@ function App() {
     }
   };
 
+  if (theme === 'outlook') return <OutlookMode />;
+
   return (
-    <div className={`flex flex-col h-screen w-screen bg-ide-bg text-ide-text overflow-hidden selection:bg-[#264f78] relative theme-${theme}`}>
+      <div className={`flex flex-col h-screen w-screen bg-ide-bg text-ide-text overflow-hidden selection:bg-[#264f78] relative theme-${theme}`}>
       <TopMenuBar />
       <QuickOpen isOpen={isQuickOpenOpen} onClose={() => setIsQuickOpenOpen(false)} />
       

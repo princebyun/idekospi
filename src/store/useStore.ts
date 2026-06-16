@@ -49,7 +49,7 @@ interface IdeState {
   tabs: Tab[];
   activeTabId: string;
   prices: MarketPrices;
-  theme: 'vscode-dark' | 'intellij' | 'light';
+  theme: 'vscode-dark' | 'intellij' | 'light' | 'outlook';
   addStock: (stock: Omit<StockItem, 'id'>) => void;
   reorderPortfolio: (fromIndex: number, toIndex: number) => void;
   updateStock: (id: string, updates: Partial<StockItem>) => void;
@@ -68,7 +68,7 @@ interface IdeState {
   setTerminalHeight: (height: number) => void;
   setIsRightPanelOpen: (isOpen: boolean) => void;
   setRightPanelWidth: (width: number) => void;
-  setTheme: (theme: 'vscode-dark' | 'intellij' | 'light') => void;
+  setTheme: (theme: 'vscode-dark' | 'intellij' | 'light' | 'outlook') => void;
   isPanicMode: boolean;
   togglePanicMode: () => void;
   

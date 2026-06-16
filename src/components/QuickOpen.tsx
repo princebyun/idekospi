@@ -14,7 +14,7 @@ export function QuickOpen({ isOpen, onClose }: QuickOpenProps) {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { addStock, portfolio } = useStore();
+  const { addStock, removeStock, portfolio } = useStore();
 
   const predefinedItems = [...DOMESTIC_LIST, ...GLOBAL_LIST, ...CRYPTO_LIST];
 
@@ -82,8 +82,10 @@ export function QuickOpen({ isOpen, onClose }: QuickOpenProps) {
   const handleSelect = (item: typeof allItems[0]) => {
     if (!item.inPortfolio) {
       addStock({ name: item.name, code: item.code });
+    } else {
+      const portItem = portfolio.find(p => p.code === item.code);
+      if (portItem) removeStock(portItem.id);
     }
-    onClose();
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -131,7 +133,7 @@ export function QuickOpen({ isOpen, onClose }: QuickOpenProps) {
             allItems.map((item, idx) => (
               <div
                 key={item.code}
-                className={`px-4 py-1.5 flex items-center justify-between cursor-pointer text-[13px]
+                className={`px-4 py-1.5 flex items-center justify-between cursor-pointer text-[13px] group
                   ${idx === selectedIndex ? 'bg-[#04395e] text-white' : 'text-ide-text hover:bg-[#2a2d2e]'}`}
                 onClick={() => handleSelect(item)}
                 onMouseEnter={() => setSelectedIndex(idx)}
@@ -142,7 +144,14 @@ export function QuickOpen({ isOpen, onClose }: QuickOpenProps) {
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className="text-ide-text-muted">{item.code}</span>
-                  {item.inPortfolio && <span className="text-code-comment text-[11px]">In Portfolio</span>}
+                  {item.inPortfolio ? (
+                      <span className="text-code-comment text-[11px] group-hover:hidden">Added</span>
+                    ) : null}
+                    {item.inPortfolio ? (
+                      <span className="text-[#ff9d9d] text-[11px] hidden group-hover:inline">Remove</span>
+                    ) : (
+                      <span className="text-ide-primary text-[11px] hidden group-hover:inline">Add</span>
+                    )}
                 </div>
               </div>
             ))
