@@ -2,7 +2,7 @@ import YahooFinance from 'yahoo-finance2';
 import { getKoreanMarketState, getUSMarketState } from '../utils/marketState';
 
 export const yahooFinance = new YahooFinance({
-  suppressNotices: ['yahooSurvey']
+  suppressNotices: ['yahooSurvey', 'ripHistorical']
 });
 
 const cache = new Map<string, { data: any; expiry: number }>();

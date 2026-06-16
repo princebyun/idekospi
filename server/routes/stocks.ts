@@ -155,10 +155,15 @@ router.get('/api/search', async (req, res) => {
     const query = req.query.q as string;
     if (!query) return res.json([]);
     
-    const result = await yahooFinance.search(query, {
-      newsCount: 0,
-      quotesCount: 15
-    });
+    let result;
+    try {
+      result = await yahooFinance.search(query, {
+        newsCount: 0,
+        quotesCount: 15
+      });
+    } catch (e) {
+      return res.json([]);
+    }
     
     const formatted = result.quotes.map((q: any) => ({
       code: q.symbol,
