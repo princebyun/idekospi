@@ -102,3 +102,12 @@ export function setupChatWebSocket(wss: WebSocketServer) {
     });
   });
 }
+
+export const broadcastMessage = (message: any) => {
+  clients.forEach(c => {
+    if (c.readyState === WebSocket.OPEN) {
+      c.send(JSON.stringify(message));
+    }
+  });
+};
+

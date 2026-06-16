@@ -52,6 +52,10 @@ export function ChatPanel() {
           });
         } else if (data.type === 'ONLINE_USERS') {
           setOnlineUsers(data.count);
+        } else if (data.type === 'STOCK_UPDATE') {
+          data.data.forEach((stock: any) => {
+            useStore.getState().updatePrice(stock.symbol, stock.price, stock.changeRate, stock.marketState);
+          });
         }
       } catch (e) {
         console.error('Failed to parse WS message', e);

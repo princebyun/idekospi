@@ -1,8 +1,6 @@
 import { useStore } from '../store/useStore';
-import { API_BASE_URL } from '../config/api';
 
 let upbitWs: WebSocket | null = null;
-let mockInterval: any = null;
 
 export const DOMESTIC_LIST = [
   { code: '005930.KS', name: '삼성전자' },
@@ -45,7 +43,6 @@ export const CRYPTO_LIST = [
 
 export const startMarketStream = () => {
   if (upbitWs) upbitWs.close();
-  if (mockInterval) clearInterval(mockInterval);
   
   // 1. Upbit 웹소켓 연결 (암호화폐)
   upbitWs = new WebSocket('wss://api.upbit.com/websocket/v1');
@@ -69,35 +66,23 @@ export const startMarketStream = () => {
           data.trade_price, 
           data.signed_change_rate * 100
         );
+
+        // 김프 계산 (KRW-BTC가 업데이트 될 때)
+        if (data.code === 'KRW-BTC') {
+          const prices = useStore.getState().prices;
+          const btcUsd = prices['BTC-USD']?.price;
+          const exchangeRate = prices['KRW=X']?.price;
+          
+          if (btcUsd && exchangeRate) {
+            const upbitPrice = data.trade_price;
+            const globalPriceKRW = btcUsd * exchangeRate;
+            const premium = ((upbitPrice - globalPriceKRW) / globalPriceKRW) * 100;
+            useStore.getState().setKimchiPremium(premium);
+          }
+        }
       }
     } catch (e) {
       console.error('Failed to parse websocket message', e);
     }
   };
-
-  // 2. 백엔드 프록시 서버를 통한 실제 주식/지수 시세 (5초 주기 폴링)
-  const fetchStockData = async () => {
-    try {
-      const portfolio = useStore.getState().portfolio;
-      const portfolioCodes = portfolio.filter(p => !p.code.startsWith('KRW-')).map(p => p.code);
-      
-      const allStocks = [...new Set([
-        ...DOMESTIC_LIST.map(s => s.code), 
-        ...GLOBAL_LIST.map(s => s.code),
-        ...portfolioCodes
-      ])].join(',');
-
-      const response = await fetch(`${API_BASE_URL}/api/stocks?symbols=${allStocks}`);
-      if (!response.ok) return;
-      const data = await response.json();
-      data.forEach((stock: any) => {
-        useStore.getState().updatePrice(stock.symbol, stock.price, stock.changeRate, stock.marketState);
-      });
-    } catch (e) {
-      console.error('Failed to fetch real stock data:', e);
-    }
-  };
-  
-  fetchStockData();
-  mockInterval = setInterval(fetchStockData, 5000);
 };

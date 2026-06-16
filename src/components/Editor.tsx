@@ -69,6 +69,16 @@ export function Editor() {
             </div>
           );
         })}
+        {title.includes('코인') && (
+          <div className="pl-8 pt-2 pb-3 hover:bg-[#2a2d2e] select-text">
+            <span className="text-code-keyword">function</span> <span className="text-code-function">kimchi_premium</span><span className="text-ide-text">() {'{'} </span><br/>
+            <div className="pl-8 py-1">
+              <span className="text-code-variable">value</span><span className="text-ide-text">:</span> <span className="text-code-string">"{useStore.getState().kimchiPremium.toFixed(2)}%"</span><span className="text-ide-text">,</span><span className="text-code-comment ml-2">// 김치프리미엄</span><br/>
+              <span className="text-code-keyword2">return</span><span className="text-ide-text">;</span>
+            </div>
+            <span className="text-ide-text">{'}'}</span><br/>
+          </div>
+        )}
         <span className="text-ide-text pl-4">{'}'}</span>
       </div>
     );
@@ -99,6 +109,20 @@ export function Editor() {
 
   return (
     <div className="flex flex-col h-full bg-ide-bg">
+      {/* Timeframe Toggle (Mock Structure) */}
+      <div className="flex px-4 py-2 bg-ide-sidebar border-b border-[#2d2d2d] space-x-4 items-center">
+        <span className="text-ide-text-muted text-[13px]">Change Rate:</span>
+        <select 
+          className="bg-[#3c3c3c] text-ide-text border border-[#555] rounded px-2 py-0.5 text-xs focus:outline-none"
+          value={timeframe}
+          onChange={(e) => setTimeframe(e.target.value as any)}
+        >
+          <option value="1D">1D (일간)</option>
+          <option value="15m">15m</option>
+          <option value="30m">30m</option>
+        </select>
+      </div>
+
       {/* Tabs */}
       <div className="flex bg-ide-sidebar overflow-x-auto custom-scrollbar select-none">
         {tabs.map((tab) => (

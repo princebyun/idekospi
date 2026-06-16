@@ -87,6 +87,9 @@ interface IdeState {
   
   onlineUsers: number;
   setOnlineUsers: (count: number) => void;
+  
+  kimchiPremium: number;
+  setKimchiPremium: (value: number) => void;
 }
 
 export const useStore = create<IdeState>()(
@@ -104,6 +107,7 @@ export const useStore = create<IdeState>()(
       ],
       activeTabId: 'markets',
       prices: {},
+      kimchiPremium: 0,
       addStock: (stock) => set((state) => ({ 
         portfolio: [...state.portfolio, { ...stock, id: Date.now().toString() }] 
       })),
@@ -239,6 +243,7 @@ export const useStore = create<IdeState>()(
       },
       onlineUsers: 1,
       setOnlineUsers: (count) => set({ onlineUsers: count }),
+      setKimchiPremium: (value) => set({ kimchiPremium: value }),
     }),
     {
       name: 'ide-kospi-storage-v7', // 캐시 무효화 및 새로운 기본값 적용
