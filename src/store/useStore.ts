@@ -22,6 +22,8 @@ export interface MarketPrices {
   [code: string]: {
     price: number;
     changeRate: number;
+    changeRate15m?: number;
+    changeRate30m?: number;
     marketState?: string;
   }
 }
@@ -49,6 +51,7 @@ interface IdeState {
   prices: MarketPrices;
   theme: 'vscode-dark' | 'intellij' | 'light';
   addStock: (stock: Omit<StockItem, 'id'>) => void;
+  reorderPortfolio: (fromIndex: number, toIndex: number) => void;
   updateStock: (id: string, updates: Partial<StockItem>) => void;
   removeStock: (id: string) => void;
   addAlert: (alert: Omit<PriceAlert, 'id'>) => void;
@@ -56,7 +59,7 @@ interface IdeState {
   openTab: (tab: Tab) => void;
   closeTab: (tabId: string) => void;
   setActiveTabId: (tabId: string) => void;
-  updatePrice: (code: string, price: number, changeRate: number, marketState?: string) => void;
+  updatePrice: (code: string, price: number, changeRate: number, marketState?: string, changeRate15m?: number, changeRate30m?: number) => void;
   sidebarWidth: number;
   terminalHeight: number;
   isRightPanelOpen: boolean;
@@ -111,6 +114,12 @@ export const useStore = create<IdeState>()(
       addStock: (stock) => set((state) => ({ 
         portfolio: [...state.portfolio, { ...stock, id: Date.now().toString() }] 
       })),
+      reorderPortfolio: (fromIndex, toIndex) => set((state) => {
+        const newPortfolio = [...state.portfolio];
+        const [movedItem] = newPortfolio.splice(fromIndex, 1);
+        newPortfolio.splice(toIndex, 0, movedItem);
+        return { portfolio: newPortfolio };
+      }),
       updateStock: (id, updates) => set((state) => ({
         portfolio: state.portfolio.map((s) => s.id === id ? { ...s, ...updates } : s)
       })),
@@ -139,8 +148,8 @@ export const useStore = create<IdeState>()(
         };
       }),
       setActiveTabId: (tabId) => set({ activeTabId: tabId }),
-      updatePrice: (code, price, changeRate, marketState) => set((state) => {
-        // 가격 변동 시 알림 체크
+      updatePrice: (code, price, changeRate, marketState, changeRate15m, changeRate30m) => set((state) => {
+        // 기존 가격 캐시를 사용하여 Alert 체크 및 MarketPrices 업데이트
         const newAlerts = [...state.alerts];
         let alertsChanged = false;
         
@@ -167,7 +176,10 @@ export const useStore = create<IdeState>()(
         }
 
         return {
-          prices: { ...state.prices, [code]: { price, changeRate, marketState } },
+          prices: { 
+            ...state.prices, 
+            [code]: { price, changeRate, marketState, changeRate15m, changeRate30m } 
+          },
           ...(alertsChanged ? { alerts: newAlerts } : {})
         };
       }),

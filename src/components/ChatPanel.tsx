@@ -54,7 +54,14 @@ export function ChatPanel() {
           setOnlineUsers(data.count);
         } else if (data.type === 'STOCK_UPDATE') {
           data.data.forEach((stock: any) => {
-            useStore.getState().updatePrice(stock.symbol, stock.price, stock.changeRate, stock.marketState);
+            useStore.getState().updatePrice(
+              stock.symbol, 
+              stock.price, 
+              stock.changeRate, 
+              stock.marketState, 
+              stock.changeRate15m, 
+              stock.changeRate30m
+            );
           });
         }
       } catch (e) {

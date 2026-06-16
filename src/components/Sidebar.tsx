@@ -3,8 +3,27 @@ import { useStore } from '../store/useStore';
 import { API_BASE_URL } from '../config/api';
 
 export function Sidebar({ activeTab }: { activeTab: string }) {
-  const { openTab, activeTabId, portfolio, theme, setTheme, setSelectedIssueId, addStock } = useStore();
+  const { openTab, activeTabId, portfolio, theme, setTheme, setSelectedIssueId, addStock, reorderPortfolio } = useStore();
   const [gitLogs, setGitLogs] = useState<string[]>([]);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex !== null && draggedIndex !== dropIndex) {
+      reorderPortfolio(draggedIndex, dropIndex);
+    }
+    setDraggedIndex(null);
+  };
 
   useEffect(() => {
     const fetchGitLogs = async () => {
@@ -101,14 +120,18 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
             </div>
 
             {/* Portfolio Items */}
-            {portfolio.map((item) => {
+            {portfolio.map((item, index) => {
               const isKrx = item.code.endsWith('.KS') || item.code.endsWith('.KQ') || item.code.startsWith('KRX:');
               
               if (isKrx) {
                 return (
                   <div 
                     key={item.id}
-                    className={`pl-11 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center ${activeTabId === `code_${item.code}` ? 'bg-[#37373d] text-white' : ''}`}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, index)}
+                    className={`pl-11 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center ${activeTabId === `code_${item.code}` ? 'bg-[#37373d] text-white' : ''} ${draggedIndex === index ? 'opacity-50' : ''}`}
                     onClick={() => handleOpenTab(`code_${item.code}`, `${item.name}.ts`, 'TS', '#007acc', 'code_single', item.code)}
                   >
                     <span className="text-ide-primary w-4 mr-1 text-xs font-bold text-center">TS</span>{item.name}.ts
@@ -119,10 +142,14 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
               return (
                 <div 
                   key={item.id}
-                  className={`pl-11 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center ${activeTabId === `chart_${item.code}` ? 'bg-[#37373d] text-white' : ''}`}
-                  onClick={() => handleOpenTab(`chart_${item.code}`, `${item.name}.chart`, '📈', '#ce9178', 'chart', item.code)}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, index)}
+                  className={`pl-11 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center ${activeTabId === `chart_${item.code}` ? 'bg-[#37373d] text-white' : ''} ${draggedIndex === index ? 'opacity-50' : ''}`}
+                  onClick={() => handleOpenTab(`chart_${item.code}`, `${item.name}.chart`, '📊', '#ce9178', 'chart', item.code)}
                 >
-                  <span className="w-4 mr-1 text-[11px] text-center">📈</span>{item.name}.chart
+                  <span className="w-4 mr-1 text-[11px] text-center">📊</span>{item.name}.chart
                 </div>
               );
             })}

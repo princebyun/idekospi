@@ -21,8 +21,16 @@ export function Editor() {
         <span className="text-code-keyword pl-4">public async</span> <span className="text-code-function">{methodName}</span><span className="text-ide-text">() {'{'}</span><br/>
         {list.map(item => {
           const info = prices[item.code] || { price: 0, changeRate: 0 };
-          const isProfit = info.changeRate > 0;
-          const isLoss = info.changeRate < 0;
+          
+          let displayChangeRate = info.changeRate;
+          if (timeframe === '15m' && info.changeRate15m !== undefined) {
+            displayChangeRate = info.changeRate15m;
+          } else if (timeframe === '30m' && info.changeRate30m !== undefined) {
+            displayChangeRate = info.changeRate30m;
+          }
+
+          const isProfit = displayChangeRate > 0;
+          const isLoss = displayChangeRate < 0;
           let changeColor = 'text-code-string';
           if (isProfit) changeColor = 'text-[#ff9d9d]';
           if (isLoss) changeColor = 'text-[#8cb4ff]';
@@ -36,7 +44,7 @@ export function Editor() {
           const { priceStr, isString } = formatPriceString(info.price, { isDomestic, isCrypto, isIndex, exchangeRate });
 
           const marketTag = getMarketTag(info.marketState);
-          let changeStr = marketTag + ((isProfit ? '+' : '') + info.changeRate.toFixed(2) + '%');
+          let changeStr = marketTag + ((isProfit ? '+' : '') + displayChangeRate.toFixed(2) + '%');
           const statusText = getMarketStatusText(title, item.code, info.marketState);
           
           // 김치프리미엄 계산 (코인)
