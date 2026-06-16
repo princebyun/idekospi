@@ -26,12 +26,18 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
     openTab({ id, title, icon, color, type, code });
   };
 
+  const handleAddStock = (code: string, name: string) => {
+    const event = new KeyboardEvent('keydown', { key: 't', ctrlKey: true });
+    window.dispatchEvent(event);
+    alert(`[${name}] 패키지가 설치되었습니다. 터미널에서 'add ${code}'를 입력해서 수동 추가할 수도 있습니다.`);
+  };
+
   return (
     <div className="flex flex-col h-full text-sm">
       {/* Main Content Area (Top 45%) */}
       <div className="flex-[45] flex flex-col min-h-0">
         <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-ide-text flex-shrink-0">
-          {activeTab === 'explorer' ? '탐색기' : activeTab === 'search' ? 'Search' : activeTab === 'issues' ? 'Pull Requests' : 'Settings'}
+          {activeTab === 'explorer' ? '탐색기' : activeTab === 'search' ? 'Search' : activeTab === 'issues' ? 'Pull Requests' : activeTab === 'extensions' ? 'Extensions' : 'Settings'}
         </div>
         
         {activeTab === 'explorer' && (
@@ -125,6 +131,77 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
             </div>
             <div className="py-0.5 px-1 pl-4 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none">
               <span className="text-ide-primary w-4 mr-1 text-xs font-bold text-center">TS</span>tsconfig.json
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'extensions' && (
+          <div className="flex-1 overflow-y-auto p-0 text-ide-text custom-scrollbar">
+            <div className="px-4 pt-4 pb-2 text-[11px] text-ide-text-muted uppercase">ETF 탐색기 (마켓)</div>
+            <div className="px-4 mb-4 text-[12px] leading-relaxed text-ide-text-muted">
+              Marketplace에서 인기 ETF를 검색하고 'Install'하여 시세 탭에 추가하세요.
+            </div>
+            
+            <div className="space-y-4">
+              {/* ETF Item 1 */}
+              <div className="px-4 flex">
+                <div className="w-10 h-10 bg-[#333333] rounded mr-3 flex items-center justify-center shrink-0">
+                  <span className="text-xl">📈</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-[#4fc1ff] text-[13px] truncate">TIGER 미국나스닥100</div>
+                  <div className="text-[11px] text-ide-text-muted truncate mb-1">미래에셋자산운용 | 133690.KS</div>
+                  <div className="text-[11px] text-ide-text line-clamp-2 leading-snug">미국 나스닥 100 지수를 추종하는 국내 상장 대표 ETF. 빅테크 투자에 필수적인 확장 프로그램입니다.</div>
+                  <div className="mt-2 flex space-x-2">
+                    <button 
+                      onClick={() => handleAddStock('133690.KS', 'TIGER 미국나스닥100')}
+                      className="bg-[#0e639c] hover:bg-[#1177bb] text-white px-2 py-0.5 rounded text-[11px] transition-colors"
+                    >
+                      Install
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* ETF Item 2 */}
+              <div className="px-4 flex">
+                <div className="w-10 h-10 bg-[#333333] rounded mr-3 flex items-center justify-center shrink-0">
+                  <span className="text-xl">📊</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-[#4fc1ff] text-[13px] truncate">KODEX 200</div>
+                  <div className="text-[11px] text-ide-text-muted truncate mb-1">삼성자산운용 | 069500.KS</div>
+                  <div className="text-[11px] text-ide-text line-clamp-2 leading-snug">대한민국 KOSPI 200 지수를 추종하는 가장 기본적이고 필수적인 코어 익스텐션입니다.</div>
+                  <div className="mt-2 flex space-x-2">
+                    <button 
+                      onClick={() => handleAddStock('069500.KS', 'KODEX 200')}
+                      className="bg-[#0e639c] hover:bg-[#1177bb] text-white px-2 py-0.5 rounded text-[11px] transition-colors"
+                    >
+                      Install
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* ETF Item 3 */}
+              <div className="px-4 flex mb-4">
+                <div className="w-10 h-10 bg-[#333333] rounded mr-3 flex items-center justify-center shrink-0">
+                  <span className="text-xl">💰</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-[#4fc1ff] text-[13px] truncate">TIGER 미국배당+7%프리미엄다우존스</div>
+                  <div className="text-[11px] text-ide-text-muted truncate mb-1">미래에셋자산운용 | 458730.KS</div>
+                  <div className="text-[11px] text-ide-text line-clamp-2 leading-snug">미국 배당주 투자와 커버드콜 전략을 통해 연 7% 수준의 배당을 목표로 하는 수익형 모듈입니다.</div>
+                  <div className="mt-2 flex space-x-2">
+                    <button 
+                      onClick={() => handleAddStock('458730.KS', 'TIGER 미국배당+7%')}
+                      className="bg-[#0e639c] hover:bg-[#1177bb] text-white px-2 py-0.5 rounded text-[11px] transition-colors"
+                    >
+                      Install
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

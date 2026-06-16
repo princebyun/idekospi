@@ -10,7 +10,7 @@ export function Terminal() {
   const [news, setNews] = useState<any[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const { addStock, removeStock, portfolio, bottomPanelTab, setBottomPanelTab } = useStore();
+  const { addStock, removeStock, portfolio, bottomPanelTab, setBottomPanelTab, balance, holdings, buyStock, sellStock, prices } = useStore();
 
   const MAPPING: Record<string, string> = {
     '비트코인': 'KRW-BTC',
@@ -120,6 +120,95 @@ export function Terminal() {
     if (command === 'clear') {
       setHistory([]);
       return [];
+    }
+
+    if (command === 'portfolio') {
+      return [
+        '현재 포트폴리오:',
+        ...portfolio.map(s => `- ${s.name} (${s.code})`)
+      ];
+    }
+    
+    // --- 모의투자 명령어 (Phase 2) ---
+    if (command === 'balance') {
+      const formattedBalance = Math.floor(balance).toLocaleString();
+      let totalValue = balance;
+      const lines = [
+        '--- 모의투자 계좌 현황 ---',
+        `예수금: ₩${formattedBalance}`
+      ];
+      if (holdings.length > 0) {
+        lines.push('보유 종목:');
+        holdings.forEach(h => {
+          const currentPrice = prices[h.code]?.price || h.avgPrice; // 현재가 없으면 평단가로 계산
+          const isCrypto = h.code.includes('-');
+          const isGlobal = !h.code.endsWith('.KS') && !h.code.endsWith('.KQ') && !isCrypto;
+          const exchangeRate = prices['KRW=X']?.price || 1400;
+          
+          // 원화 환산
+          let currentPriceKRW = currentPrice;
+          if (isGlobal && !isCrypto) {
+            currentPriceKRW = currentPrice * exchangeRate;
+          }
+          
+          const value = currentPriceKRW * h.amount;
+          totalValue += value;
+          const returnRate = ((currentPriceKRW / (h.avgPrice * (isGlobal && !isCrypto ? exchangeRate : 1))) - 1) * 100;
+          
+          lines.push(`- ${h.name} (${h.code}): ${h.amount}주 | 수익률: ${returnRate > 0 ? '+' : ''}${returnRate.toFixed(2)}% | 평가금: ₩${Math.floor(value).toLocaleString()}`);
+        });
+      }
+      lines.push(`총 평가 자산: ₩${Math.floor(totalValue).toLocaleString()}`);
+      return lines;
+    }
+
+    if (command === 'buy' || command === 'sell') {
+      if (args.length < 3) {
+        return [`사용법: ${command} [종목명] [수량] (예: ${command} 삼성전자 10)`];
+      }
+      const keyword = args[1];
+      const amount = parseInt(args[2], 10);
+      
+      if (isNaN(amount) || amount <= 0) {
+        return ['수량은 1 이상의 숫자여야 합니다.'];
+      }
+
+      let code = MAPPING[keyword] || keyword.toUpperCase();
+      let name = keyword;
+      
+      if (!prices[code]) {
+        // MAPPING에 없으면 포트폴리오(portfolio)에서 검색
+        const found = portfolio.find(p => p.name.includes(keyword) || p.name.replace(/\s/g, '').includes(keyword) || p.code === code);
+        if (found) {
+          code = found.code;
+          name = found.name;
+        } else {
+          return [`'${keyword}' 종목의 현재 시세 정보를 찾을 수 없습니다. (시세 탭에 추가되어 있어야 매매 가능)`];
+        }
+      } else {
+        // name은 매핑이나 포트폴리오에서 가져옴
+        const found = portfolio.find(p => p.code === code);
+        if (found) name = found.name;
+      }
+
+      const currentPrice = prices[code].price;
+      if (!currentPrice) return ['현재가 정보를 가져올 수 없습니다.'];
+
+      const isGlobal = !code.endsWith('.KS') && !code.endsWith('.KQ') && !code.includes('-');
+      const exchangeRate = prices['KRW=X']?.price || 1400;
+      let krwPrice = currentPrice;
+      
+      if (isGlobal) {
+         krwPrice = currentPrice * exchangeRate; // 달러 -> 원화 환산
+      }
+
+      if (command === 'buy') {
+        const res = buyStock(code, name, krwPrice, amount);
+        return [res.message];
+      } else {
+        const res = sellStock(code, krwPrice, amount);
+        return [res.message];
+      }
     }
 
     if (command === 'alert') {

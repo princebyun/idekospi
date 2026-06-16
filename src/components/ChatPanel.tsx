@@ -77,6 +77,27 @@ export function ChatPanel() {
     setInput('');
   };
 
+  // 종목 멘션 하이라이팅 유틸 함수
+  const renderMessageContent = (text: string) => {
+    // @종목명 매칭 정규식
+    const regex = /@([가-힣a-zA-Z0-9]+)/g;
+    const parts = text.split(regex);
+    
+    if (parts.length === 1) return text;
+    
+    return parts.map((part, i) => {
+      // split(regex) 결과는 [일반텍스트, 매칭된그룹, 일반텍스트, 매칭된그룹...] 형태
+      if (i % 2 === 1) {
+        return (
+          <span key={i} className="bg-[#2d2d2d] text-[#4fc1ff] px-1 rounded cursor-pointer hover:underline transition-colors font-semibold" title={`${part} 관련 정보 보기`}>
+            @{part}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
+
   return (
     <div className="w-full h-full bg-ide-bg flex flex-col text-ide-text font-sans">
       <div className="flex items-center justify-between px-4 py-2 border-b border-ide-border flex-shrink-0 select-none">
@@ -130,15 +151,10 @@ export function ChatPanel() {
                   </div>
                 )}
 
-                {/* 메시지 본문 */}
-                <div 
-                  className={`text-[13px] leading-relaxed break-words px-3 py-2 ${
-                    isMe 
-                      ? 'bg-[#2b2d31] text-ide-text rounded-2xl rounded-tr-sm max-w-[85%] border border-ide-border' 
-                      : 'bg-transparent text-ide-text w-full'
-                  }`}
-                >
-                  {msg.text}
+                <div className={`mt-1 text-[13px] px-3 py-2 rounded-md ${isMe ? 'bg-[#3b3b3b] text-ide-text border border-[#4d4d4d]' : 'bg-[#1e1e1e] border border-ide-border'}`}>
+                  <span className={`leading-relaxed break-words ${msg.author === 'System' ? 'text-code-comment italic' : 'text-ide-text'}`}>
+                    {renderMessageContent(msg.text)}
+                  </span>
                 </div>
               </div>
             );

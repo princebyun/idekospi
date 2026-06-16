@@ -1,4 +1,4 @@
-import { Files, Search, Settings, MessageSquare, GitPullRequest } from 'lucide-react';
+import { Files, Search, Settings, MessageSquare, GitPullRequest, Blocks } from 'lucide-react';
 
 interface ActivityBarProps {
   activeTab: string;
@@ -19,6 +19,9 @@ export function ActivityBar({ activeTab, setActiveTab }: ActivityBarProps) {
       </div>
       <div className={iconClass('issues')} onClick={() => setActiveTab('issues')} title="Pull Requests (종목토론방)">
         <GitPullRequest size={24} strokeWidth={1.5} />
+      </div>
+      <div className={iconClass('extensions')} onClick={() => setActiveTab('extensions')} title="Extensions (ETF 탐색기)">
+        <Blocks size={24} strokeWidth={1.5} />
       </div>
       <div className={iconClass('chat')} onClick={() => setActiveTab('chat')} title="Discussion (Output)">
         <MessageSquare size={24} strokeWidth={1.5} />
