@@ -53,6 +53,9 @@ export function TopMenuBar() {
       case 'terminal_help':
         openTab({ id: 'terminal_help', title: 'TerminalCommands.md', icon: 'M', color: '#69b4d8', type: 'terminal_help' });
         break;
+      case 'policy':
+        openTab({ id: 'policy', title: 'Policy.md', icon: 'M', color: '#69b4d8', type: 'policy' });
+        break;
       case 'about':
         alert('IDE-KOSPI v1.2.0\n개발자 주식 위장 터미널\n\nGitHub: https://github.com/princebyun/idekospi');
         break;
@@ -83,6 +86,7 @@ export function TopMenuBar() {
       'Help': [
         { label: 'Release Notes', action: 'release_notes' },
         { label: 'Terminal Commands Help', action: 'terminal_help' },
+        { label: 'Privacy & Policy', action: 'policy' },
         { label: '---', action: '', divider: true },
         { label: 'About IDE-KOSPI', action: 'about' }
       ]

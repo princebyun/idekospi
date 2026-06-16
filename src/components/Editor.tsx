@@ -6,6 +6,7 @@ import { TradingViewWidget } from './TradingViewWidget';
 import { SingleCodeView } from './SingleCodeView';
 import { ReleaseNotesView } from './ReleaseNotesView';
 import { TerminalHelpView } from './TerminalHelpView';
+import { PolicyView } from './PolicyView';
 import { IssuesView } from './IssuesView';
 import { getMarketStatusText, getMarketTag, formatPriceString } from '../utils/marketUtils';
 
@@ -173,6 +174,10 @@ export function Editor() {
 
         {activeTab?.type === 'terminal_help' && (
           <TerminalHelpView />
+        )}
+
+        {activeTab?.type === 'policy' && (
+          <PolicyView />
         )}
 
         {activeTab?.type === 'issues_view' && (
