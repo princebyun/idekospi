@@ -1,6 +1,8 @@
 import { useStore } from '../store/useStore';
 
 let upbitWs: WebSocket | null = null;
+let reconnectTimeout: ReturnType<typeof setTimeout>;
+let retryCount = 0;
 
 export const DOMESTIC_LIST = [
   { code: '005930.KS', name: '삼성전자' },
@@ -46,13 +48,17 @@ export const CRYPTO_LIST = [
 ];
 
 export const startMarketStream = () => {
-  if (upbitWs) upbitWs.close();
+  if (upbitWs) {
+    upbitWs.onclose = null;
+    upbitWs.close();
+  }
   
   // 1. Upbit 웹소켓 연결 (암호화폐)
   upbitWs = new WebSocket('wss://api.upbit.com/websocket/v1');
   upbitWs.binaryType = 'blob';
   
   upbitWs.onopen = () => {
+    retryCount = 0;
     const cryptoCodes = CRYPTO_LIST.map(c => c.code);
     upbitWs?.send(JSON.stringify([
       { ticket: "ide-kospi" },
@@ -88,5 +94,16 @@ export const startMarketStream = () => {
     } catch (e) {
       console.error('Failed to parse websocket message', e);
     }
+  };
+
+  upbitWs.onclose = () => {
+    const timeout = Math.min(1000 * Math.pow(2, retryCount), 30000);
+    retryCount++;
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = setTimeout(startMarketStream, timeout);
+  };
+  
+  upbitWs.onerror = () => {
+    upbitWs?.close();
   };
 };

@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { useState, useEffect } from 'react';
 
 export function StatusBar() {
-  const { prices, onlineUsers } = useStore();
+  const { prices, onlineUsers, wsStatus } = useStore();
   const [showTerms, setShowTerms] = useState(false);
   
   const [tickerIndex, setTickerIndex] = useState(0);
@@ -69,6 +69,10 @@ export function StatusBar() {
       </div>
       
       <div className="flex items-center space-x-1">
+        <div className="hover:bg-[#1f8ad2] px-2 py-0.5 rounded flex items-center space-x-1 transition-colors" title="WebSocket 상태">
+          <span className={`w-2 h-2 rounded-full ${wsStatus === 'connected' ? 'bg-[#519657]' : wsStatus === 'connecting' ? 'bg-[#ffca28] animate-pulse' : 'bg-[#cc3e44]'}`}></span>
+          <span className="capitalize">{wsStatus}</span>
+        </div>
         <div className="hover:bg-[#1f8ad2] px-2 py-0.5 rounded flex items-center space-x-1 transition-colors" title="현재 접속 중인 사용자 수">
           <Users size={12} />
           <span>{onlineUsers} Online</span>

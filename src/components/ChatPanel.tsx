@@ -15,8 +15,10 @@ export function ChatPanel() {
   const [input, setInput] = useState('');
   const [author, setAuthor] = useState(() => localStorage.getItem('chat_author') || `월급루팡개발자_${Math.floor(Math.random() * 10000)}`);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const { setIsRightPanelOpen, setOnlineUsers } = useStore();
+  const { setIsRightPanelOpen, setOnlineUsers, setWsStatus } = useStore();
   const ws = useRef<WebSocket | null>(null);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryCountRef = useRef(0);
 
   useEffect(() => {
     localStorage.setItem('chat_author', author);
@@ -38,39 +40,64 @@ export function ChatPanel() {
     fetchHistory();
 
     // 2. WebSocket 연결
-    const wsUrl = API_BASE_URL.replace(/^http/, 'ws');
-    ws.current = new WebSocket(wsUrl);
-    
-    ws.current.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'NEW_MESSAGE') {
-          setMessages(prev => {
-            const next = [...prev, data.message];
-            if (next.length > 100) next.shift();
-            return next;
-          });
-        } else if (data.type === 'ONLINE_USERS') {
-          setOnlineUsers(data.count);
-        } else if (data.type === 'STOCK_UPDATE') {
-          data.data.forEach((stock: any) => {
-            useStore.getState().updatePrice(
-              stock.symbol, 
-              stock.price, 
-              stock.changeRate, 
-              stock.marketState, 
-              stock.changeRate15m, 
-              stock.changeRate30m
-            );
-          });
+    const connectWs = () => {
+      setWsStatus('connecting');
+      const wsUrl = API_BASE_URL.replace(/^http/, 'ws');
+      ws.current = new WebSocket(wsUrl);
+      
+      ws.current.onopen = () => {
+        setWsStatus('connected');
+        retryCountRef.current = 0;
+      };
+      
+      ws.current.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'NEW_MESSAGE') {
+            setMessages(prev => {
+              const next = [...prev, data.message];
+              if (next.length > 100) next.shift();
+              return next;
+            });
+          } else if (data.type === 'ONLINE_USERS') {
+            setOnlineUsers(data.count);
+          } else if (data.type === 'STOCK_UPDATE') {
+            data.data.forEach((stock: any) => {
+              useStore.getState().updatePrice(
+                stock.symbol, 
+                stock.price, 
+                stock.changeRate, 
+                stock.marketState, 
+                stock.changeRate15m, 
+                stock.changeRate30m
+              );
+            });
+          }
+        } catch (e) {
+          console.error('Failed to parse WS message', e);
         }
-      } catch (e) {
-        console.error('Failed to parse WS message', e);
-      }
+      };
+
+      ws.current.onclose = () => {
+        setWsStatus('disconnected');
+        const timeout = Math.min(1000 * Math.pow(2, retryCountRef.current), 30000);
+        retryCountRef.current += 1;
+        reconnectTimeoutRef.current = setTimeout(connectWs, timeout);
+      };
+
+      ws.current.onerror = () => {
+        ws.current?.close();
+      };
     };
 
+    connectWs();
+
     return () => {
-      if (ws.current) ws.current.close();
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+      if (ws.current) {
+        ws.current.onclose = null; // disable auto-reconnect on unmount
+        ws.current.close();
+      }
     };
   }, []);
 
