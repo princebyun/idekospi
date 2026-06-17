@@ -4,7 +4,7 @@ import type { Tab, IdeState } from '../useStore';
 export interface UiSlice {
   tabs: Tab[];
   activeTabId: string;
-  theme: 'vscode-dark' | 'intellij' | 'light' | 'outlook';
+  theme: 'vscode-dark' | 'intellij' | 'light' | 'outlook' | 'monokai' | 'github-dark';
   sidebarWidth: number;
   terminalHeight: number;
   isRightPanelOpen: boolean;
@@ -22,7 +22,7 @@ export interface UiSlice {
   setTerminalHeight: (height: number) => void;
   setIsRightPanelOpen: (isOpen: boolean) => void;
   setRightPanelWidth: (width: number) => void;
-  setTheme: (theme: 'vscode-dark' | 'intellij' | 'light' | 'outlook') => void;
+  setTheme: (theme: 'vscode-dark' | 'intellij' | 'light' | 'outlook' | 'monokai' | 'github-dark') => void;
   togglePanicMode: () => void;
   toggleMenuBar: () => void;
   setBottomPanelTab: (tab: 'terminal' | 'output') => void;
