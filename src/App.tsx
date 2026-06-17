@@ -10,7 +10,10 @@ import { ChatPanel } from './components/ChatPanel';
 import { ResizeHandle } from './components/ResizeHandle';
 import { useStore } from './store/useStore';
 import { TopMenuBar } from './components/TopMenuBar';
-import { FakeEditor, FakeSidebar, FakeTerminal, FakeStatusBar } from './components/FakeViews';
+import { FakeEditor } from './components/panic/FakeEditor';
+import { FakeSidebar } from './components/panic/FakeSidebar';
+import { FakeTerminal } from './components/panic/FakeTerminal';
+import { FakeStatusBar } from './components/panic/FakeStatusBar';
 import { OutlookMode } from './components/OutlookMode';
 
 function App() {
