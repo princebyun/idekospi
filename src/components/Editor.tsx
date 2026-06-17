@@ -8,6 +8,7 @@ import { ReleaseNotesView } from './ReleaseNotesView';
 import { TerminalHelpView } from './TerminalHelpView';
 import { PolicyView } from './PolicyView';
 import { IssuesView } from './IssuesView';
+import { PortfolioDashboard } from './PortfolioDashboard';
 import { getMarketStatusText, getMarketTag, formatPriceString } from '../utils/marketUtils';
 
 export function Editor() {
@@ -184,6 +185,10 @@ export function Editor() {
 
       {/* Editor Content */}
       <div className="flex-1 overflow-auto custom-scrollbar bg-ide-bg relative">
+        {activeTab?.type === 'portfolio_dashboard' && (
+          <PortfolioDashboard />
+        )}
+
         {activeTab?.type === 'markets_all' && (
           <div className="p-4">
             {renderAllMarkets()}

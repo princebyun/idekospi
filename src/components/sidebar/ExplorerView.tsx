@@ -83,6 +83,13 @@ export function ExplorerView() {
         <span className="mr-1 text-[10px]">▼</span> portfolio
       </div>
 
+      <div 
+        className={`pl-11 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center ${activeTabId === 'portfolio_dashboard' ? 'bg-[#37373d] text-white' : ''}`}
+        onClick={() => handleOpenTab('portfolio_dashboard', 'Portfolio.dashboard', 'TS', '#007acc', 'portfolio_dashboard')}
+      >
+        <span className="text-ide-primary w-4 mr-1 text-xs font-bold text-center">TS</span>Portfolio.dashboard
+      </div>
+
       {/* Portfolio Items */}
       {portfolio.map((item, index) => {
         const isKrx = item.code.endsWith('.KS') || item.code.endsWith('.KQ') || item.code.startsWith('KRX:') || item.code === 'FUT';
