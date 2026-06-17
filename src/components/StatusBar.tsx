@@ -3,7 +3,11 @@ import { useStore } from '../store/useStore';
 import { useState, useEffect } from 'react';
 
 export function StatusBar() {
-  const { prices, onlineUsers, wsStatus, alertHistory, toggleAlertHistory } = useStore();
+  const prices = useStore(state => state.prices);
+  const onlineUsers = useStore(state => state.onlineUsers);
+  const wsStatus = useStore(state => state.wsStatus);
+  const alertHistory = useStore(state => state.alertHistory);
+  const toggleAlertHistory = useStore(state => state.toggleAlertHistory);
   const [showTerms, setShowTerms] = useState(false);
   
   const [tickerIndex, setTickerIndex] = useState(0);

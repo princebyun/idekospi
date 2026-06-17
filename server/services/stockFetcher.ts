@@ -1,6 +1,22 @@
 import YahooFinance from 'yahoo-finance2';
 import { getKoreanMarketState, getUSMarketState } from '../utils/marketState';
 
+export interface StockFetchResult {
+  symbol: string;
+  code: string;
+  price: number;
+  changeRate: number;
+  marketState: string;
+  quote?: any;
+  naverData?: any;
+}
+
+interface NaverBasicResponse {
+  closePrice?: string;
+  fluctuationsRatio?: string;
+  [key: string]: any;
+}
+
 export const yahooFinance = new YahooFinance({
   suppressNotices: ['yahooSurvey', 'ripHistorical']
 });
@@ -55,7 +71,7 @@ function setCache(key: string, data: any, ttlMs = 5000) {
 }
 
 // Helper: Fetch from Yahoo
-export async function fetchYahooStock(symbol: string) {
+export async function fetchYahooStock(symbol: string): Promise<StockFetchResult> {
   const cacheKey = `yahoo_${symbol}`;
   const cached = getCached(cacheKey);
   if (cached) return cached;
@@ -87,7 +103,7 @@ export async function fetchYahooStock(symbol: string) {
 }
 
 // Helper: Fetch from Naver (with Yahoo Fallback)
-export async function fetchNaverStockBasic(symbol: string) {
+export async function fetchNaverStockBasic(symbol: string): Promise<StockFetchResult> {
   const cacheKey = `naver_${symbol}`;
   const cached = getCached(cacheKey);
   if (cached) return cached;
@@ -104,7 +120,7 @@ export async function fetchNaverStockBasic(symbol: string) {
     const res = await fetch(apiUrl);
     if (!res.ok) throw new Error('Naver API response not ok');
     
-    const data = await res.json();
+    const data = await res.json() as NaverBasicResponse;
     
     // 네이버 데이터 파싱
     const priceStr = data.closePrice || '0';

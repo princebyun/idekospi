@@ -15,7 +15,9 @@ export function ChatPanel() {
   const [input, setInput] = useState('');
   const [author, setAuthor] = useState(() => localStorage.getItem('chat_author') || `월급루팡개발자_${Math.floor(Math.random() * 10000)}`);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const { setIsRightPanelOpen, setOnlineUsers, setWsStatus } = useStore();
+  const setIsRightPanelOpen = useStore(state => state.setIsRightPanelOpen);
+  const setOnlineUsers = useStore(state => state.setOnlineUsers);
+  const setWsStatus = useStore(state => state.setWsStatus);
   const ws = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const retryCountRef = useRef(0);

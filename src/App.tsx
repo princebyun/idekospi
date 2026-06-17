@@ -18,13 +18,17 @@ import { OutlookMode } from './components/OutlookMode';
 import { AlertHistoryPanel } from './components/AlertHistoryPanel';
 
 function App() {
-  const { 
-    isRightPanelOpen, setIsRightPanelOpen,
-    sidebarWidth, setSidebarWidth,
-    terminalHeight, setTerminalHeight,
-    rightPanelWidth, setRightPanelWidth,
-    theme, isPanicMode, togglePanicMode
-  } = useStore();
+  const isRightPanelOpen = useStore(state => state.isRightPanelOpen);
+  const setIsRightPanelOpen = useStore(state => state.setIsRightPanelOpen);
+  const sidebarWidth = useStore(state => state.sidebarWidth);
+  const setSidebarWidth = useStore(state => state.setSidebarWidth);
+  const terminalHeight = useStore(state => state.terminalHeight);
+  const setTerminalHeight = useStore(state => state.setTerminalHeight);
+  const rightPanelWidth = useStore(state => state.rightPanelWidth);
+  const setRightPanelWidth = useStore(state => state.setRightPanelWidth);
+  const theme = useStore(state => state.theme);
+  const isPanicMode = useStore(state => state.isPanicMode);
+  const togglePanicMode = useStore(state => state.togglePanicMode);
   
   const [activeTab, setActiveTab] = useState('explorer');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);

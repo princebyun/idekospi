@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useStore } from '../../store/useStore';
 import { FolderPlus, Pencil, Trash } from 'lucide-react';
+import { StockItemNode } from './StockItemNode';
 
 export function ExplorerView() {
-  const { openTab, activeTabId, portfolio, groups, removeStock, addGroup, updateStock, removeGroup, renameGroup } = useStore();
+  const { openTab, activeTabId, portfolio, groups, addGroup, updateStock, removeGroup, renameGroup } = useStore();
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
@@ -38,35 +39,7 @@ export function ExplorerView() {
     openTab({ id, title, icon, color, type, code });
   };
 
-  const renderStockItem = (item: any, paddingLeft: string) => {
-    const isKrx = item.code.endsWith('.KS') || item.code.endsWith('.KQ') || item.code.startsWith('KRX:') || item.code === 'FUT';
-    
-    return (
-      <div 
-        key={item.id}
-        draggable
-        onDragStart={(e) => handleDragStart(e, item.id)}
-        onDragEnd={handleDragEnd}
-        className={`group pr-2 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center justify-between ${activeTabId === (isKrx ? `code_${item.code}` : `chart_${item.code}`) ? 'bg-[#37373d] text-white' : ''} ${draggedId === item.id ? 'opacity-50' : ''}`}
-        style={{ paddingLeft }}
-        onClick={() => handleOpenTab(isKrx ? `code_${item.code}` : `chart_${item.code}`, isKrx ? `${item.name}.ts` : `${item.name}.chart`, isKrx ? 'TS' : '📊', isKrx ? '#007acc' : '#ce9178', isKrx ? 'code_single' : 'chart', item.code)}
-      >
-        <div className="flex items-center truncate">
-          {isKrx ? (
-            <span className="text-ide-primary w-4 mr-1 text-xs font-bold text-center flex-shrink-0">TS</span>
-          ) : (
-            <span className="w-4 mr-1 text-[11px] text-center flex-shrink-0">📊</span>
-          )}
-          <span className="truncate">{item.name}{isKrx ? '.ts' : '.chart'}</span>
-        </div>
-        <button 
-          className="opacity-0 group-hover:opacity-100 hover:text-white text-ide-text-muted px-1"
-          onClick={(e) => { e.stopPropagation(); removeStock(item.id); }}
-          title="Remove from Portfolio"
-        >×</button>
-      </div>
-    );
-  };
+
 
   return (
     <div className="flex-1 overflow-y-auto font-mono text-[13px] custom-scrollbar">
@@ -201,12 +174,30 @@ export function ExplorerView() {
               </>
             )}
           </div>
-          {portfolio.filter(item => item.groupId === group.id).map(item => renderStockItem(item, '3.5rem'))}
+          {portfolio.filter(item => item.groupId === group.id).map(item => (
+            <StockItemNode
+              key={item.id}
+              item={item}
+              paddingLeft="3.5rem"
+              isDragged={draggedId === item.id}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            />
+          ))}
         </div>
       ))}
 
       {/* Root Portfolio Items */}
-      {portfolio.filter(item => !item.groupId).map(item => renderStockItem(item, '2.75rem'))}
+      {portfolio.filter(item => !item.groupId).map(item => (
+        <StockItemNode
+          key={item.id}
+          item={item}
+          paddingLeft="2.75rem"
+          isDragged={draggedId === item.id}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        />
+      ))}
       
       {/* config files */}
       <div className="py-0.5 px-1 pl-4 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none mt-2">

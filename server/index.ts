@@ -11,6 +11,14 @@ import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 import { startCentralPolling } from './services/centralPoller';
 import { config } from './config/env';
+import { logger } from './utils/logger';
+
+process.on('uncaughtException', (err) => {
+  logger.error('Uncaught Exception', err);
+});
+process.on('unhandledRejection', (reason) => {
+  logger.error('Unhandled Rejection', reason);
+});
 
 const app = express();
 app.use(cors());
@@ -36,7 +44,7 @@ startCentralPolling();
 
 const PORT = config.port;
 server.listen(PORT, () => {
-  console.log(`Stock proxy server running on http://localhost:${PORT}`);
+  logger.info(`Stock proxy server running on http://localhost:${PORT}`);
   // 강제로 프로세스가 죽지 않도록 방지
   setInterval(() => {}, 1000 * 60 * 60);
 });
