@@ -5,16 +5,53 @@ export const yahooFinance = new YahooFinance({
   suppressNotices: ['yahooSurvey', 'ripHistorical']
 });
 
-const cache = new Map<string, { data: any; expiry: number }>();
+class LRUCache<K, V> {
+  private capacity: number;
+  private cache: Map<K, { value: V; expiry: number }>;
+
+  constructor(capacity: number) {
+    this.capacity = capacity;
+    this.cache = new Map();
+  }
+
+  get(key: K): V | null {
+    if (!this.cache.has(key)) return null;
+
+    const item = this.cache.get(key)!;
+    if (Date.now() > item.expiry) {
+      this.cache.delete(key);
+      return null;
+    }
+
+    // Refresh position
+    this.cache.delete(key);
+    this.cache.set(key, item);
+    return item.value;
+  }
+
+  set(key: K, value: V, ttlMs: number) {
+    if (this.cache.has(key)) {
+      this.cache.delete(key);
+    } else if (this.cache.size >= this.capacity) {
+      // Evict least recently used (first item in Map)
+      const firstKey = this.cache.keys().next().value;
+      if (firstKey !== undefined) {
+        this.cache.delete(firstKey);
+      }
+    }
+
+    this.cache.set(key, { value, expiry: Date.now() + ttlMs });
+  }
+}
+
+const cache = new LRUCache<string, any>(500);
 
 function getCached(key: string) {
-  const entry = cache.get(key);
-  if (entry && Date.now() < entry.expiry) return entry.data;
-  return null;
+  return cache.get(key);
 }
 
 function setCache(key: string, data: any, ttlMs = 5000) {
-  cache.set(key, { data, expiry: Date.now() + ttlMs });
+  cache.set(key, data, ttlMs);
 }
 
 // Helper: Fetch from Yahoo

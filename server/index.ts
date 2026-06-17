@@ -8,11 +8,13 @@ import newsRoutes from './routes/news';
 import { chatRouter, setupChatWebSocket } from './routes/chat';
 import { requestLogger } from './middleware/requestLogger';
 import { errorHandler } from './middleware/errorHandler';
+import { rateLimiter } from './middleware/rateLimiter';
 import { startCentralPolling } from './services/centralPoller';
 
 const app = express();
 app.use(cors());
 app.use(requestLogger);
+app.use(rateLimiter);
 
 // 라우트 등록
 app.use(stockRoutes);
