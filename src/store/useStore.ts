@@ -1,5 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { PortfolioSlice } from './slices/portfolioSlice';
+import { createPortfolioSlice } from './slices/portfolioSlice';
+import type { UiSlice } from './slices/uiSlice';
+import { createUiSlice } from './slices/uiSlice';
+import type { MarketSlice } from './slices/marketSlice';
+import { createMarketSlice } from './slices/marketSlice';
+import type { TradingSlice } from './slices/tradingSlice';
+import { createTradingSlice } from './slices/tradingSlice';
 
 export interface StockItem {
   id: string;
@@ -36,226 +44,22 @@ export interface PriceAlert {
   direction: 'UP' | 'DOWN';
 }
 
-interface Holding {
+export interface Holding {
   code: string;
   name: string;
   avgPrice: number;
   amount: number;
 }
 
-interface IdeState {
-  portfolio: StockItem[];
-  alerts: PriceAlert[];
-  tabs: Tab[];
-  activeTabId: string;
-  prices: MarketPrices;
-  theme: 'vscode-dark' | 'intellij' | 'light' | 'outlook';
-  addStock: (stock: Omit<StockItem, 'id'>) => void;
-  reorderPortfolio: (fromIndex: number, toIndex: number) => void;
-  updateStock: (id: string, updates: Partial<StockItem>) => void;
-  removeStock: (id: string) => void;
-  addAlert: (alert: Omit<PriceAlert, 'id'>) => void;
-  removeAlert: (id: string) => void;
-  openTab: (tab: Tab) => void;
-  closeTab: (tabId: string) => void;
-  setActiveTabId: (tabId: string) => void;
-  updatePrice: (code: string, price: number, changeRate: number, marketState?: string, changeRate15m?: number, changeRate30m?: number) => void;
-  sidebarWidth: number;
-  terminalHeight: number;
-  isRightPanelOpen: boolean;
-  rightPanelWidth: number;
-  setSidebarWidth: (width: number) => void;
-  setTerminalHeight: (height: number) => void;
-  setIsRightPanelOpen: (isOpen: boolean) => void;
-  setRightPanelWidth: (width: number) => void;
-  setTheme: (theme: 'vscode-dark' | 'intellij' | 'light' | 'outlook') => void;
-  isPanicMode: boolean;
-  togglePanicMode: () => void;
-  
-  // Phase 1 Features
-  isMenuBarVisible: boolean;
-  toggleMenuBar: () => void;
-  timeframe: '1D' | '15m' | '30m';
-  setTimeframe: (tf: '1D' | '15m' | '30m') => void;
-  bottomPanelTab: 'terminal' | 'output';
-  setBottomPanelTab: (tab: 'terminal' | 'output') => void;
-  selectedIssueId: string | null;
-  setSelectedIssueId: (id: string | null) => void;
-  
-  // Paper Trading (모의투자)
-  balance: number; // 예수금 (원화)
-  holdings: Holding[];
-  buyStock: (code: string, name: string, price: number, amount: number) => { success: boolean, message: string };
-  sellStock: (code: string, price: number, amount: number) => { success: boolean, message: string };
-  
-  onlineUsers: number;
-  setOnlineUsers: (count: number) => void;
-  
-  kimchiPremium: number;
-  setKimchiPremium: (value: number) => void;
-}
+export type IdeState = PortfolioSlice & UiSlice & MarketSlice & TradingSlice;
 
 export const useStore = create<IdeState>()(
   persist(
-    (set) => ({
-      theme: 'vscode-dark',
-      isPanicMode: false,
-      portfolio: [
-        { id: '1', name: '삼성전자', code: '005930.KS' },
-        { id: '2', name: 'BTC', code: 'KRW-BTC' },
-      ],
-      alerts: [],
-      tabs: [
-        { id: 'markets', title: 'Markets.ts', icon: 'TS', color: '#007acc', type: 'markets_all' },
-      ],
-      activeTabId: 'markets',
-      prices: {},
-      kimchiPremium: 0,
-      addStock: (stock) => set((state) => ({ 
-        portfolio: [...state.portfolio, { ...stock, id: Date.now().toString() }] 
-      })),
-      reorderPortfolio: (fromIndex, toIndex) => set((state) => {
-        const newPortfolio = [...state.portfolio];
-        const [movedItem] = newPortfolio.splice(fromIndex, 1);
-        newPortfolio.splice(toIndex, 0, movedItem);
-        return { portfolio: newPortfolio };
-      }),
-      updateStock: (id, updates) => set((state) => ({
-        portfolio: state.portfolio.map((s) => s.id === id ? { ...s, ...updates } : s)
-      })),
-      removeStock: (id) => set((state) => ({
-        portfolio: state.portfolio.filter((s) => s.id !== id)
-      })),
-      addAlert: (alert) => set((state) => ({
-        alerts: [...state.alerts, { ...alert, id: Date.now().toString() }]
-      })),
-      removeAlert: (id) => set((state) => ({
-        alerts: state.alerts.filter((a) => a.id !== id)
-      })),
-      openTab: (tab) => set((state) => {
-        if (!state.tabs.find((t) => t.id === tab.id)) {
-          return { tabs: [...state.tabs, tab], activeTabId: tab.id };
-        }
-        return { activeTabId: tab.id };
-      }),
-      closeTab: (tabId) => set((state) => {
-        const newTabs = state.tabs.filter((t) => t.id !== tabId);
-        return { 
-          tabs: newTabs,
-          activeTabId: state.activeTabId === tabId 
-            ? (newTabs.length > 0 ? newTabs[newTabs.length - 1].id : '') 
-            : state.activeTabId
-        };
-      }),
-      setActiveTabId: (tabId) => set({ activeTabId: tabId }),
-      updatePrice: (code, price, changeRate, marketState, changeRate15m, changeRate30m) => set((state) => {
-        // 기존 가격 캐시를 사용하여 Alert 체크 및 MarketPrices 업데이트
-        const newAlerts = [...state.alerts];
-        let alertsChanged = false;
-        
-        for (let i = newAlerts.length - 1; i >= 0; i--) {
-          const alert = newAlerts[i];
-          if (alert.code === code) {
-            let triggered = false;
-            if (alert.direction === 'UP' && price >= alert.targetPrice) triggered = true;
-            if (alert.direction === 'DOWN' && price <= alert.targetPrice) triggered = true;
-            
-            if (triggered) {
-              if (typeof window !== 'undefined' && Notification.permission === 'granted') {
-                new Notification('IDE-KOSPI 가격 알림', {
-                  body: `${alert.name}이(가) 목표가 ${alert.targetPrice.toLocaleString()}원에 도달했습니다! (현재가: ${price.toLocaleString()})`,
-                  icon: '/favicon.ico' // optional
-                });
-              } else if (typeof window !== 'undefined') {
-                window.alert('IDE-KOSPI 가격 알림\n' + `${alert.name} 목표가 도달! (현재가: ${price.toLocaleString()})`);
-              }
-              newAlerts.splice(i, 1);
-              alertsChanged = true;
-            }
-          }
-        }
-
-        return {
-          prices: { 
-            ...state.prices, 
-            [code]: { price, changeRate, marketState, changeRate15m, changeRate30m } 
-          },
-          ...(alertsChanged ? { alerts: newAlerts } : {})
-        };
-      }),
-      sidebarWidth: 250,
-      terminalHeight: 300,
-      isRightPanelOpen: true, // 채팅창 기본 오픈
-      rightPanelWidth: 350,
-      setSidebarWidth: (width) => set({ sidebarWidth: width }),
-      setTerminalHeight: (height) => set({ terminalHeight: height }),
-      setIsRightPanelOpen: (isOpen) => set({ isRightPanelOpen: isOpen }),
-      setRightPanelWidth: (width) => set({ rightPanelWidth: width }),
-      setTheme: (theme) => set({ theme }),
-      togglePanicMode: () => set((state) => ({ isPanicMode: !state.isPanicMode })),
-      
-      isMenuBarVisible: true,
-      toggleMenuBar: () => set((state) => ({ isMenuBarVisible: !state.isMenuBarVisible })),
-      timeframe: '1D',
-      setTimeframe: (tf) => set({ timeframe: tf }),
-      bottomPanelTab: 'terminal',
-      setBottomPanelTab: (tab) => set({ bottomPanelTab: tab }),
-      selectedIssueId: null,
-      setSelectedIssueId: (id) => set({ selectedIssueId: id }),
-      
-      // 모의투자 초기 자본금 5천만원
-      balance: 50000000,
-      holdings: [],
-      buyStock: (code, name, price, amount) => {
-        let result = { success: false, message: '' };
-        set((state) => {
-          const totalCost = price * amount;
-          if (state.balance < totalCost) {
-            result = { success: false, message: '잔고가 부족합니다.' };
-            return state;
-          }
-          
-          const existing = state.holdings.find(h => h.code === code);
-          let newHoldings;
-          if (existing) {
-            const newAmount = existing.amount + amount;
-            const newAvgPrice = ((existing.avgPrice * existing.amount) + totalCost) / newAmount;
-            newHoldings = state.holdings.map(h => h.code === code ? { ...h, amount: newAmount, avgPrice: newAvgPrice } : h);
-          } else {
-            newHoldings = [...state.holdings, { code, name, avgPrice: price, amount }];
-          }
-          
-          result = { success: true, message: `${name} ${amount}주를 매수했습니다.` };
-          return { balance: state.balance - totalCost, holdings: newHoldings };
-        });
-        return result;
-      },
-      sellStock: (code, price, amount) => {
-        let result = { success: false, message: '' };
-        set((state) => {
-          const existing = state.holdings.find(h => h.code === code);
-          if (!existing || existing.amount < amount) {
-            result = { success: false, message: '보유 수량이 부족합니다.' };
-            return state;
-          }
-          
-          const totalRevenue = price * amount;
-          const newAmount = existing.amount - amount;
-          let newHoldings;
-          if (newAmount === 0) {
-            newHoldings = state.holdings.filter(h => h.code !== code);
-          } else {
-            newHoldings = state.holdings.map(h => h.code === code ? { ...h, amount: newAmount } : h);
-          }
-          
-          result = { success: true, message: `${existing.name} ${amount}주를 매도했습니다.` };
-          return { balance: state.balance + totalRevenue, holdings: newHoldings };
-        });
-        return result;
-      },
-      onlineUsers: 1,
-      setOnlineUsers: (count) => set({ onlineUsers: count }),
-      setKimchiPremium: (value) => set({ kimchiPremium: value }),
+    (...a) => ({
+      ...createPortfolioSlice(...a),
+      ...createUiSlice(...a),
+      ...createMarketSlice(...a),
+      ...createTradingSlice(...a),
     }),
     {
       name: 'ide-kospi-storage-v7', // 캐시 무효화 및 새로운 기본값 적용
