@@ -10,6 +10,7 @@ import { requestLogger } from './middleware/requestLogger';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 import { startCentralPolling } from './services/centralPoller';
+import { config } from './config/env';
 
 const app = express();
 app.use(cors());
@@ -33,7 +34,7 @@ setupChatWebSocket(wss);
 // 폴링 시작
 startCentralPolling();
 
-const PORT = 3001;
+const PORT = config.port;
 server.listen(PORT, () => {
   console.log(`Stock proxy server running on http://localhost:${PORT}`);
   // 강제로 프로세스가 죽지 않도록 방지
