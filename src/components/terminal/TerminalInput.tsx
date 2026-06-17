@@ -5,6 +5,8 @@ import { useStore } from '../../store/useStore';
 export function TerminalInput() {
   const [history, setHistory] = useState<{ type: 'input' | 'output' | 'error' | 'system', text: string }[]>([]);
   const [input, setInput] = useState('');
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,6 +51,9 @@ export function TerminalInput() {
     const cmd = input.trim();
     const newHistory = [...history, { type: 'input' as const, text: input }];
     setHistory(newHistory);
+    
+    setCommandHistory(prev => [cmd, ...prev]);
+    setHistoryIndex(-1);
     setInput('');
 
     if (cmd.toLowerCase() === 'clear') {
@@ -69,6 +74,27 @@ export function TerminalInput() {
         });
         return next;
       });
+    }
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (commandHistory.length > 0 && historyIndex < commandHistory.length - 1) {
+        const nextIndex = historyIndex + 1;
+        setHistoryIndex(nextIndex);
+        setInput(commandHistory[nextIndex]);
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIndex > 0) {
+        const nextIndex = historyIndex - 1;
+        setHistoryIndex(nextIndex);
+        setInput(commandHistory[nextIndex]);
+      } else if (historyIndex === 0) {
+        setHistoryIndex(-1);
+        setInput('');
+      }
     }
   };
 
@@ -93,7 +119,11 @@ export function TerminalInput() {
           <input
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              setHistoryIndex(-1);
+            }}
+            onKeyDown={onKeyDown}
             className="flex-1 bg-transparent outline-none text-ide-text"
             autoFocus
             spellCheck={false}
