@@ -1,67 +1,12 @@
-import { useEffect, useState } from 'react';
 import { useStore } from '../store/useStore';
-import { API_BASE_URL } from '../config/api';
+import { ExplorerView } from './sidebar/ExplorerView';
+import { SearchView } from './sidebar/SearchView';
+import { ExtensionsView } from './sidebar/ExtensionsView';
+import { SettingsView } from './sidebar/SettingsView';
+import { SourceControlPanel } from './sidebar/SourceControlPanel';
 
 export function Sidebar({ activeTab }: { activeTab: string }) {
-  const { openTab, activeTabId, portfolio, theme, setTheme, setSelectedIssueId, addStock, reorderPortfolio, removeStock } = useStore();
-  const [gitLogs, setGitLogs] = useState<string[]>([]);
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault();
-    if (draggedIndex !== null && draggedIndex !== dropIndex) {
-      reorderPortfolio(draggedIndex, dropIndex);
-    }
-    setDraggedIndex(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-  };
-
-  useEffect(() => {
-    const fetchGitLogs = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/git/log`);
-        if (res.ok) {
-          const data = await res.json();
-          setGitLogs(data.logs || []);
-        }
-      } catch (err) {
-        console.error('Failed to fetch git logs:', err);
-      }
-    };
-    
-    fetchGitLogs();
-  }, []);
-
-  const handleOpenTab = (id: string, title: string, icon: string, color: string, type: string, code?: string) => {
-    openTab({ id, title, icon, color, type, code });
-  };
-
-  const handleAddStock = (code: string, name: string) => {
-    // 포트폴리오에 이미 있는지 확인
-    if (portfolio.some(p => p.code === code)) {
-      alert(`[${name}] 패키지가 이미 설치되어 있습니다.`);
-      return;
-    }
-    
-    // store의 addStock을 호출하여 포트폴리오에 자동 추가
-    addStock({ code, name });
-    
-    // 안내 메시지
-    alert(`[${name}] 패키지가 포트폴리오에 성공적으로 설치되었습니다!\n\n좌측 상단 '탐색기(Explorer)' 탭의 파일 목록에서 확인하실 수 있습니다.`);
-  };
+  const { setSelectedIssueId, openTab } = useStore();
 
   return (
     <div className="flex flex-col h-full text-sm">
@@ -71,215 +16,10 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
           {activeTab === 'explorer' ? '탐색기' : activeTab === 'search' ? 'Search' : activeTab === 'issues' ? 'Pull Requests' : activeTab === 'extensions' ? 'Extensions' : 'Settings'}
         </div>
         
-        {activeTab === 'explorer' && (
-          <div className="flex-1 overflow-y-auto font-mono text-[13px]">
-            {/* Root Folder */}
-            <div className="py-0.5 px-1 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none font-bold">
-              <span className="mr-1 text-[10px]">▼</span> idekospi
-            </div>
-            
-            {/* Fake Folders */}
-            <div className="py-0.5 px-1 pl-4 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none">
-              <span className="mr-1 text-[10px] text-ide-text-muted">▶</span> dist
-            </div>
-            <div className="py-0.5 px-1 pl-4 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none">
-              <span className="mr-1 text-[10px] text-ide-text-muted">▶</span> node_modules
-            </div>
-            <div className="py-0.5 px-1 pl-4 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none">
-              <span className="mr-1 text-[10px] text-ide-text-muted">▶</span> public
-            </div>
-            <div className="py-0.5 px-1 pl-4 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none">
-              <span className="mr-1 text-[10px] text-ide-text-muted">▶</span> server
-            </div>
-            
-            {/* src Folder */}
-            <div className="py-0.5 px-1 pl-4 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none">
-              <span className="mr-1 text-[10px]">▼</span> src
-            </div>
-            
-            {/* ReleaseNotes.java */}
-            <div 
-              className={`pl-7 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center ${activeTabId === 'releasenotes' ? 'bg-[#37373d] text-white' : ''}`}
-              onClick={() => handleOpenTab('releasenotes', 'ReleaseNotes.java', 'J', '#b07219', 'release_notes')}
-            >
-              <span className="text-[#b07219] w-4 mr-1 text-xs font-bold text-center">J</span>ReleaseNotes.java
-            </div>
-            
-            {/* markets Folder */}
-            <div className="py-0.5 px-1 pl-7 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none">
-              <span className="mr-1 text-[10px]">▼</span> markets
-            </div>
-            
-            {/* Markets.ts */}
-            <div 
-              className={`pl-11 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center ${activeTabId === 'markets' ? 'bg-[#37373d] text-white' : ''}`}
-              onClick={() => handleOpenTab('markets', 'Markets.ts', 'TS', '#007acc', 'markets_all')}
-            >
-              <span className="text-ide-primary w-4 mr-1 text-xs font-bold text-center">TS</span>Markets.ts
-            </div>
-
-            {/* portfolio Folder */}
-            <div className="py-0.5 px-1 pl-7 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none mt-1">
-              <span className="mr-1 text-[10px]">▼</span> portfolio
-            </div>
-
-            {/* Portfolio Items */}
-            {portfolio.map((item, index) => {
-              const isKrx = item.code.endsWith('.KS') || item.code.endsWith('.KQ') || item.code.startsWith('KRX:') || item.code === 'FUT';
-              
-              if (isKrx) {
-                return (
-                  <div 
-                    key={item.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, index)}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, index)}
-                    onDragEnd={handleDragEnd}
-                    className={`group pl-11 pr-2 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center justify-between ${activeTabId === `code_${item.code}` ? 'bg-[#37373d] text-white' : ''} ${draggedIndex === index ? 'opacity-50' : ''}`}
-                    onClick={() => handleOpenTab(`code_${item.code}`, `${item.name}.ts`, 'TS', '#007acc', 'code_single', item.code)}
-                  >
-                    <div className="flex items-center truncate">
-                      <span className="text-ide-primary w-4 mr-1 text-xs font-bold text-center flex-shrink-0">TS</span>
-                      <span className="truncate">{item.name}.ts</span>
-                    </div>
-                    <button 
-                      className="opacity-0 group-hover:opacity-100 hover:text-white text-ide-text-muted px-1"
-                      onClick={(e) => { e.stopPropagation(); removeStock(item.id); }}
-                      title="Remove from Portfolio"
-                    >×</button>
-                  </div>
-                );
-              }
-
-              return (
-                <div 
-                  key={item.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, index)}
-                  onDragEnd={handleDragEnd}
-                  className={`group pl-11 pr-2 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center justify-between ${activeTabId === `chart_${item.code}` ? 'bg-[#37373d] text-white' : ''} ${draggedIndex === index ? 'opacity-50' : ''}`}
-                  onClick={() => handleOpenTab(`chart_${item.code}`, `${item.name}.chart`, '📊', '#ce9178', 'chart', item.code)}
-                >
-                  <div className="flex items-center truncate">
-                    <span className="w-4 mr-1 text-[11px] text-center flex-shrink-0">📊</span>
-                    <span className="truncate">{item.name}.chart</span>
-                  </div>
-                  <button 
-                    className="opacity-0 group-hover:opacity-100 hover:text-white text-ide-text-muted px-1"
-                    onClick={(e) => { e.stopPropagation(); removeStock(item.id); }}
-                    title="Remove from Portfolio"
-                  >×</button>
-                </div>
-              );
-            })}
-            
-            {/* config files */}
-            <div className="py-0.5 px-1 pl-4 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none mt-2">
-              <span className="text-[#69b057] w-4 mr-1 text-[11px] text-center font-bold">{}</span>.gitignore
-            </div>
-            <div className="py-0.5 px-1 pl-4 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none">
-              <span className="text-[#f5c040] w-4 mr-1 text-xs text-center font-bold">JS</span>eslint.config.js
-            </div>
-            <div className="py-0.5 px-1 pl-4 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none">
-              <span className="text-[#f5c040] w-4 mr-1 text-xs text-center font-bold">{}</span>package.json
-            </div>
-            <div className="py-0.5 px-1 pl-4 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none">
-              <span className="text-ide-primary w-4 mr-1 text-xs font-bold text-center">TS</span>tsconfig.json
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'extensions' && (
-          <div className="flex-1 overflow-y-auto p-0 text-ide-text custom-scrollbar">
-            <div className="px-4 pt-4 pb-2 text-[11px] text-ide-text-muted uppercase">ETF 탐색기 (마켓)</div>
-            <div className="px-4 mb-4 text-[12px] leading-relaxed text-ide-text-muted">
-              Marketplace에서 인기 ETF를 검색하고 'Install'하여 시세 탭에 추가하세요.
-            </div>
-            
-            <div className="space-y-4">
-              {/* ETF Item 1 */}
-              <div className="px-4 flex">
-                <div className="w-10 h-10 bg-[#333333] rounded mr-3 flex items-center justify-center shrink-0">
-                  <span className="text-xl">📈</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-[#4fc1ff] text-[13px] truncate">TIGER 미국나스닥100</div>
-                  <div className="text-[11px] text-ide-text-muted truncate mb-1">미래에셋자산운용 | 133690.KS</div>
-                  <div className="text-[11px] text-ide-text line-clamp-2 leading-snug">미국 나스닥 100 지수를 추종하는 국내 상장 대표 ETF. 빅테크 투자에 필수적인 확장 프로그램입니다.</div>
-                  <div className="mt-2 flex space-x-2">
-                    <button 
-                      onClick={() => handleAddStock('133690.KS', 'TIGER 미국나스닥100')}
-                      className="bg-[#0e639c] hover:bg-[#1177bb] text-white px-2 py-0.5 rounded text-[11px] transition-colors"
-                    >
-                      Install
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* ETF Item 2 */}
-              <div className="px-4 flex">
-                <div className="w-10 h-10 bg-[#333333] rounded mr-3 flex items-center justify-center shrink-0">
-                  <span className="text-xl">📊</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-[#4fc1ff] text-[13px] truncate">KODEX 200</div>
-                  <div className="text-[11px] text-ide-text-muted truncate mb-1">삼성자산운용 | 069500.KS</div>
-                  <div className="text-[11px] text-ide-text line-clamp-2 leading-snug">대한민국 KOSPI 200 지수를 추종하는 가장 기본적이고 필수적인 코어 익스텐션입니다.</div>
-                  <div className="mt-2 flex space-x-2">
-                    <button 
-                      onClick={() => handleAddStock('069500.KS', 'KODEX 200')}
-                      className="bg-[#0e639c] hover:bg-[#1177bb] text-white px-2 py-0.5 rounded text-[11px] transition-colors"
-                    >
-                      Install
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* ETF Item 3 */}
-              <div className="px-4 flex mb-4">
-                <div className="w-10 h-10 bg-[#333333] rounded mr-3 flex items-center justify-center shrink-0">
-                  <span className="text-xl">💰</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-[#4fc1ff] text-[13px] truncate">TIGER 미국배당+7%프리미엄다우존스</div>
-                  <div className="text-[11px] text-ide-text-muted truncate mb-1">미래에셋자산운용 | 458730.KS</div>
-                  <div className="text-[11px] text-ide-text line-clamp-2 leading-snug">미국 배당주 투자와 커버드콜 전략을 통해 연 7% 수준의 배당을 목표로 하는 수익형 모듈입니다.</div>
-                  <div className="mt-2 flex space-x-2">
-                    <button 
-                      onClick={() => handleAddStock('458730.KS', 'TIGER 미국배당+7%')}
-                      className="bg-[#0e639c] hover:bg-[#1177bb] text-white px-2 py-0.5 rounded text-[11px] transition-colors"
-                    >
-                      Install
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'search' && (
-          <div className="flex-1 overflow-y-auto p-4 text-ide-text">
-            <div className="mb-2 text-[11px] text-ide-text-muted uppercase">Search Market</div>
-            <div className="text-[12px] mb-4 leading-relaxed">
-              빠른 종목 검색은 단축키 <span className="text-ide-primary font-mono">Ctrl + P</span> 를 사용해 주세요. (전 세계 주식/코인 실시간 검색 지원)
-            </div>
-            <button 
-              onClick={() => {
-                const event = new KeyboardEvent('keydown', { key: 'p', ctrlKey: true });
-                window.dispatchEvent(event);
-              }}
-              className="w-full bg-ide-border hover:bg-[#4d4d4d] text-white py-1.5 rounded text-[12px] transition-colors"
-            >
-              Open Global Search
-            </button>
-          </div>
-        )}
+        {activeTab === 'explorer' && <ExplorerView />}
+        {activeTab === 'extensions' && <ExtensionsView />}
+        {activeTab === 'search' && <SearchView />}
+        {activeTab === 'settings' && <SettingsView />}
 
         {activeTab === 'issues' && (
           <div className="flex-1 overflow-y-auto p-4 text-ide-text">
@@ -290,7 +30,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
             <button 
               onClick={() => {
                 setSelectedIssueId(null);
-                handleOpenTab('issues_view', 'PullRequests.md', 'M', '#519657', 'issues_view');
+                openTab({ id: 'issues_view', title: 'PullRequests.md', icon: 'M', color: '#519657', type: 'issues_view' });
               }}
               className="w-full bg-ide-primary hover:bg-[#005f9e] text-white py-1.5 rounded text-[12px] transition-colors mb-4"
             >
@@ -298,88 +38,11 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
             </button>
           </div>
         )}
-
-        {activeTab === 'settings' && (
-          <div className="flex-1 overflow-y-auto p-4 text-ide-text">
-            <div className="mb-6">
-              <div className="mb-2 text-[11px] text-ide-text-muted uppercase">Theme</div>
-              <select 
-                value={theme}
-                onChange={(e) => setTheme(e.target.value as 'vscode-dark' | 'intellij' | 'light' | 'outlook')}
-                className="w-full bg-ide-border border border-ide-border rounded p-1 text-[12px] outline-none cursor-pointer"
-              >
-                <option value="vscode-dark">VSCode Dark</option>
-                <option value="intellij">IntelliJ Darcula</option>
-                <option value="light">Light Theme</option>
-                  <option value="outlook">Outlook Mail Mode</option>
-              </select>
-            </div>
-
-            <div className="mb-6">
-              <div className="mb-2 text-[11px] text-ide-text-muted uppercase">Legal Notice & Policy</div>
-              <div className="text-[11px] text-ide-text-muted leading-relaxed bg-ide-bg p-2 rounded border border-ide-border">
-                본 서비스는 정보 제공 목적이며 실제 투자 권유를 의미하지 않습니다.<br/><br/>
-                야후 파이낸스 API 특성상 한국 시장(국장) 데이터는 15~20분 지연될 수 있습니다.<br/><br/>
-                서버에 개인정보를 평문으로 저장하지 않으며 브라우저 LocalStorage를 활용합니다.
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Source Control Panel (Bottom 55%) - Always Visible except settings */}
       {activeTab !== 'settings' && activeTab !== 'git' && (
-        <div className="flex-[55] border-t border-ide-border flex flex-col min-h-0 overflow-hidden text-ide-text text-[12px] shrink-0">
-          <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-ide-text flex-shrink-0 bg-ide-sidebar border-b border-ide-border">
-            소스 제어
-          </div>
-          {/* Commit Input Area */}
-          <div className="p-3 shrink-0 border-b border-ide-border">
-            <div className="flex items-center justify-between mb-2 text-[11px] cursor-pointer hover:text-white">
-              <div className="flex items-center">
-                <span className="mr-1">▼</span> 변경 내용
-              </div>
-            </div>
-            <textarea 
-              className="w-full h-16 bg-ide-border border border-ide-border rounded p-1.5 text-ide-text text-[12px] resize-none focus:outline-none focus:border-ide-primary"
-              placeholder='메시지(Ctrl+Enter(으)로 "main"에 커밋)'
-              disabled
-            />
-            <div className="mt-2 flex">
-              <button className="flex-1 bg-ide-primary hover:bg-[#005f9e] text-white py-1 rounded text-[12px] flex items-center justify-center transition-colors disabled:opacity-50">
-                ✓ 커밋
-              </button>
-            </div>
-          </div>
-          
-          {/* Git Graph Area */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col relative">
-            <div className="sticky top-0 bg-ide-sidebar p-2 flex items-center justify-between text-[11px] border-b border-ide-border shrink-0 z-20">
-              <div className="flex items-center text-ide-text">
-                <span className="mr-1">▼</span> 그래프
-              </div>
-              <div className="text-ide-text-muted">자동 ⊙ ⎇ ⟲ ↺ ...</div>
-            </div>
-            
-            <div className="p-2 space-y-1 relative">
-              <div className="absolute left-[15px] top-4 bottom-0 w-[1px] bg-ide-primary"></div>
-              
-              {gitLogs.length > 0 ? gitLogs.map((msg, idx) => (
-                <div key={idx} className="flex items-center group cursor-pointer hover:bg-ide-hover py-0.5 rounded px-1 relative z-10">
-                  <div className={`w-[9px] h-[9px] rounded-full border-2 ${idx === 0 ? 'border-code-keyword bg-ide-bg' : 'border-ide-primary bg-ide-primary'} flex-shrink-0 z-10 ml-[2px] mr-2`} />
-                  <div className="truncate text-[11.5px] text-ide-text flex-1 mr-2" title={msg}>{msg}</div>
-                  {idx === 0 && (
-                    <div className="flex-shrink-0 flex items-center space-x-1">
-                      <span className="text-[9px] border border-code-keyword text-code-keyword px-1 rounded-sm">◎ main</span>
-                    </div>
-                  )}
-                </div>
-              )) : (
-                <div className="text-[11px] text-ide-text-muted pl-6 py-2">Loading git history...</div>
-              )}
-            </div>
-          </div>
-        </div>
+        <SourceControlPanel />
       )}
     </div>
   );
