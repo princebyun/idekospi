@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { useState, useEffect } from 'react';
 
 export function StatusBar() {
-  const { prices, onlineUsers, wsStatus } = useStore();
+  const { prices, onlineUsers, wsStatus, alertHistory, toggleAlertHistory } = useStore();
   const [showTerms, setShowTerms] = useState(false);
   
   const [tickerIndex, setTickerIndex] = useState(0);
@@ -91,8 +91,14 @@ export function StatusBar() {
         </div>
         <div className="hover:bg-[#1f8ad2] px-2 py-0.5 rounded transition-colors">UTF-8</div>
         <div className="hover:bg-[#1f8ad2] px-2 py-0.5 rounded transition-colors">TypeScript React</div>
-        <div className="hover:bg-[#1f8ad2] px-2 py-0.5 rounded flex items-center transition-colors">
+        <div 
+          className="hover:bg-[#1f8ad2] px-2 py-0.5 rounded flex items-center transition-colors cursor-pointer relative"
+          onClick={toggleAlertHistory}
+        >
           <Bell size={13} />
+          {alertHistory.length > 0 && (
+            <span className="absolute top-1 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full shadow-[0_0_4px_rgba(239,68,68,0.8)]"></span>
+          )}
         </div>
       </div>
 

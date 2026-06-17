@@ -15,6 +15,7 @@ import { FakeSidebar } from './components/panic/FakeSidebar';
 import { FakeTerminal } from './components/panic/FakeTerminal';
 import { FakeStatusBar } from './components/panic/FakeStatusBar';
 import { OutlookMode } from './components/OutlookMode';
+import { AlertHistoryPanel } from './components/AlertHistoryPanel';
 
 function App() {
   const { 
@@ -244,6 +245,7 @@ function App() {
       </div>
       
       {isPanicMode ? <FakeStatusBar /> : <StatusBar />}
+      <AlertHistoryPanel />
     </div>
   );
 }

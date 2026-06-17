@@ -14,6 +14,7 @@ export interface UiSlice {
   bottomPanelTab: 'terminal' | 'output';
   selectedIssueId: string | null;
   wsStatus: 'connecting' | 'connected' | 'disconnected';
+  isAlertHistoryOpen: boolean;
   
   openTab: (tab: Tab) => void;
   closeTab: (tabId: string) => void;
@@ -28,6 +29,7 @@ export interface UiSlice {
   setBottomPanelTab: (tab: 'terminal' | 'output') => void;
   setSelectedIssueId: (id: string | null) => void;
   setWsStatus: (status: 'connecting' | 'connected' | 'disconnected') => void;
+  toggleAlertHistory: () => void;
 }
 
 export const createUiSlice: StateCreator<IdeState, [], [], UiSlice> = (set) => ({
@@ -45,6 +47,7 @@ export const createUiSlice: StateCreator<IdeState, [], [], UiSlice> = (set) => (
   bottomPanelTab: 'terminal',
   selectedIssueId: null,
   wsStatus: 'disconnected',
+  isAlertHistoryOpen: false,
 
   openTab: (tab) => set((state) => {
     if (!state.tabs.find((t) => t.id === tab.id)) {
@@ -72,4 +75,5 @@ export const createUiSlice: StateCreator<IdeState, [], [], UiSlice> = (set) => (
   setBottomPanelTab: (tab) => set({ bottomPanelTab: tab }),
   setSelectedIssueId: (id) => set({ selectedIssueId: id }),
   setWsStatus: (status) => set({ wsStatus: status }),
+  toggleAlertHistory: () => set((state) => ({ isAlertHistoryOpen: !state.isAlertHistoryOpen })),
 });

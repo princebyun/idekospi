@@ -1,12 +1,18 @@
 import { useState } from 'react';
 import { useStore } from '../../store/useStore';
+import { FolderPlus, Pencil, Trash } from 'lucide-react';
 
 export function ExplorerView() {
-  const { openTab, activeTabId, portfolio, reorderPortfolio, removeStock } = useStore();
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const { openTab, activeTabId, portfolio, groups, removeStock, addGroup, updateStock, removeGroup, renameGroup } = useStore();
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [editGroupName, setEditGroupName] = useState('');
 
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedId(id);
+    e.dataTransfer.setData('stockId', id);
     e.dataTransfer.effectAllowed = 'move';
   };
 
@@ -15,24 +21,55 @@ export function ExplorerView() {
     e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+  const handleDropToGroup = (e: React.DragEvent, groupId: string | undefined) => {
     e.preventDefault();
-    if (draggedIndex !== null && draggedIndex !== dropIndex) {
-      reorderPortfolio(draggedIndex, dropIndex);
+    const stockId = e.dataTransfer.getData('stockId');
+    if (stockId) {
+      updateStock(stockId, { groupId });
     }
-    setDraggedIndex(null);
+    setDraggedId(null);
   };
 
   const handleDragEnd = () => {
-    setDraggedIndex(null);
+    setDraggedId(null);
   };
 
   const handleOpenTab = (id: string, title: string, icon: string, color: string, type: string, code?: string) => {
     openTab({ id, title, icon, color, type, code });
   };
 
+  const renderStockItem = (item: any, paddingLeft: string) => {
+    const isKrx = item.code.endsWith('.KS') || item.code.endsWith('.KQ') || item.code.startsWith('KRX:') || item.code === 'FUT';
+    
+    return (
+      <div 
+        key={item.id}
+        draggable
+        onDragStart={(e) => handleDragStart(e, item.id)}
+        onDragEnd={handleDragEnd}
+        className={`group pr-2 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center justify-between ${activeTabId === (isKrx ? `code_${item.code}` : `chart_${item.code}`) ? 'bg-[#37373d] text-white' : ''} ${draggedId === item.id ? 'opacity-50' : ''}`}
+        style={{ paddingLeft }}
+        onClick={() => handleOpenTab(isKrx ? `code_${item.code}` : `chart_${item.code}`, isKrx ? `${item.name}.ts` : `${item.name}.chart`, isKrx ? 'TS' : '📊', isKrx ? '#007acc' : '#ce9178', isKrx ? 'code_single' : 'chart', item.code)}
+      >
+        <div className="flex items-center truncate">
+          {isKrx ? (
+            <span className="text-ide-primary w-4 mr-1 text-xs font-bold text-center flex-shrink-0">TS</span>
+          ) : (
+            <span className="w-4 mr-1 text-[11px] text-center flex-shrink-0">📊</span>
+          )}
+          <span className="truncate">{item.name}{isKrx ? '.ts' : '.chart'}</span>
+        </div>
+        <button 
+          className="opacity-0 group-hover:opacity-100 hover:text-white text-ide-text-muted px-1"
+          onClick={(e) => { e.stopPropagation(); removeStock(item.id); }}
+          title="Remove from Portfolio"
+        >×</button>
+      </div>
+    );
+  };
+
   return (
-    <div className="flex-1 overflow-y-auto font-mono text-[13px]">
+    <div className="flex-1 overflow-y-auto font-mono text-[13px] custom-scrollbar">
       {/* Root Folder */}
       <div className="py-0.5 px-1 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none font-bold">
         <span className="mr-1 text-[10px]">▼</span> idekospi
@@ -69,8 +106,6 @@ export function ExplorerView() {
       <div className="py-0.5 px-1 pl-7 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none">
         <span className="mr-1 text-[10px]">▼</span> markets
       </div>
-      
-      {/* Markets.ts */}
       <div 
         className={`pl-11 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center ${activeTabId === 'markets' ? 'bg-[#37373d] text-white' : ''}`}
         onClick={() => handleOpenTab('markets', 'Markets.ts', 'TS', '#007acc', 'markets_all')}
@@ -78,11 +113,52 @@ export function ExplorerView() {
         <span className="text-ide-primary w-4 mr-1 text-xs font-bold text-center">TS</span>Markets.ts
       </div>
 
-      {/* portfolio Folder */}
-      <div className="py-0.5 px-1 pl-7 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none mt-1">
-        <span className="mr-1 text-[10px]">▼</span> portfolio
+      {/* portfolio Folder Header */}
+      <div 
+        className="group py-0.5 px-1 pl-7 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center justify-between select-none mt-1"
+        onDragOver={handleDragOver}
+        onDrop={(e) => handleDropToGroup(e, undefined)}
+      >
+        <div className="flex items-center">
+          <span className="mr-1 text-[10px]">▼</span> portfolio
+        </div>
+        <button 
+          onClick={(e) => { e.stopPropagation(); setIsCreatingGroup(true); }}
+          className="opacity-0 group-hover:opacity-100 hover:text-white text-ide-text-muted px-1"
+          title="새 폴더 만들기"
+        >
+          <FolderPlus size={13} />
+        </button>
       </div>
 
+      {/* Create Group Input */}
+      {isCreatingGroup && (
+        <div className="pl-11 pr-2 py-1 flex items-center">
+          <input 
+            autoFocus
+            className="w-full bg-ide-border text-ide-text border border-ide-primary outline-none px-1 py-0.5 text-xs"
+            value={newGroupName}
+            onChange={e => setNewGroupName(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && newGroupName.trim()) {
+                addGroup(newGroupName.trim());
+                setNewGroupName('');
+                setIsCreatingGroup(false);
+              }
+              if (e.key === 'Escape') {
+                setIsCreatingGroup(false);
+                setNewGroupName('');
+              }
+            }}
+            onBlur={() => {
+              setIsCreatingGroup(false);
+              setNewGroupName('');
+            }}
+          />
+        </div>
+      )}
+
+      {/* Portfolio Dashboard */}
       <div 
         className={`pl-11 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center ${activeTabId === 'portfolio_dashboard' ? 'bg-[#37373d] text-white' : ''}`}
         onClick={() => handleOpenTab('portfolio_dashboard', 'Portfolio.dashboard', 'TS', '#007acc', 'portfolio_dashboard')}
@@ -90,58 +166,47 @@ export function ExplorerView() {
         <span className="text-ide-primary w-4 mr-1 text-xs font-bold text-center">TS</span>Portfolio.dashboard
       </div>
 
-      {/* Portfolio Items */}
-      {portfolio.map((item, index) => {
-        const isKrx = item.code.endsWith('.KS') || item.code.endsWith('.KQ') || item.code.startsWith('KRX:') || item.code === 'FUT';
-        
-        if (isKrx) {
-          return (
-            <div 
-              key={item.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, index)}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, index)}
-              onDragEnd={handleDragEnd}
-              className={`group pl-11 pr-2 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center justify-between ${activeTabId === `code_${item.code}` ? 'bg-[#37373d] text-white' : ''} ${draggedIndex === index ? 'opacity-50' : ''}`}
-              onClick={() => handleOpenTab(`code_${item.code}`, `${item.name}.ts`, 'TS', '#007acc', 'code_single', item.code)}
-            >
-              <div className="flex items-center truncate">
-                <span className="text-ide-primary w-4 mr-1 text-xs font-bold text-center flex-shrink-0">TS</span>
-                <span className="truncate">{item.name}.ts</span>
-              </div>
-              <button 
-                className="opacity-0 group-hover:opacity-100 hover:text-white text-ide-text-muted px-1"
-                onClick={(e) => { e.stopPropagation(); removeStock(item.id); }}
-                title="Remove from Portfolio"
-              >×</button>
-            </div>
-          );
-        }
-
-        return (
+      {/* Groups */}
+      {groups?.map(group => (
+        <div key={group.id}>
           <div 
-            key={item.id}
-            draggable
-            onDragStart={(e) => handleDragStart(e, index)}
+            className="group py-0.5 px-1 pl-11 pr-2 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center justify-between select-none"
             onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, index)}
-            onDragEnd={handleDragEnd}
-            className={`group pl-11 pr-2 py-0.5 hover:bg-ide-hover cursor-pointer text-ide-text select-none flex items-center justify-between ${activeTabId === `chart_${item.code}` ? 'bg-[#37373d] text-white' : ''} ${draggedIndex === index ? 'opacity-50' : ''}`}
-            onClick={() => handleOpenTab(`chart_${item.code}`, `${item.name}.chart`, '📊', '#ce9178', 'chart', item.code)}
+            onDrop={(e) => handleDropToGroup(e, group.id)}
           >
-            <div className="flex items-center truncate">
-              <span className="w-4 mr-1 text-[11px] text-center flex-shrink-0">📊</span>
-              <span className="truncate">{item.name}.chart</span>
-            </div>
-            <button 
-              className="opacity-0 group-hover:opacity-100 hover:text-white text-ide-text-muted px-1"
-              onClick={(e) => { e.stopPropagation(); removeStock(item.id); }}
-              title="Remove from Portfolio"
-            >×</button>
+            {editingGroupId === group.id ? (
+              <input 
+                autoFocus
+                className="w-full bg-ide-border text-ide-text border border-ide-primary outline-none px-1 text-xs"
+                value={editGroupName}
+                onChange={e => setEditGroupName(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && editGroupName.trim()) {
+                    renameGroup(group.id, editGroupName.trim());
+                    setEditingGroupId(null);
+                  }
+                  if (e.key === 'Escape') setEditingGroupId(null);
+                }}
+                onBlur={() => setEditingGroupId(null)}
+              />
+            ) : (
+              <>
+                <div className="flex items-center text-ide-text-muted">
+                  <span className="mr-1 text-[10px]">▼</span> {group.name}
+                </div>
+                <div className="flex items-center opacity-0 group-hover:opacity-100">
+                  <button onClick={(e) => { e.stopPropagation(); setEditGroupName(group.name); setEditingGroupId(group.id); }} className="hover:text-white text-ide-text-muted px-1" title="이름 변경"><Pencil size={11} /></button>
+                  <button onClick={(e) => { e.stopPropagation(); removeGroup(group.id); }} className="hover:text-[#ff9d9d] text-ide-text-muted px-1" title="폴더 삭제"><Trash size={11} /></button>
+                </div>
+              </>
+            )}
           </div>
-        );
-      })}
+          {portfolio.filter(item => item.groupId === group.id).map(item => renderStockItem(item, '3.5rem'))}
+        </div>
+      ))}
+
+      {/* Root Portfolio Items */}
+      {portfolio.filter(item => !item.groupId).map(item => renderStockItem(item, '2.75rem'))}
       
       {/* config files */}
       <div className="py-0.5 px-1 pl-4 hover:bg-ide-hover cursor-pointer text-ide-text flex items-center select-none mt-2">

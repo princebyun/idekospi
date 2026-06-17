@@ -13,8 +13,21 @@ export interface StockItem {
   id: string;
   name: string;
   code: string;
+  groupId?: string;
   buyPrice?: number;
   amount?: number;
+}
+
+export interface PortfolioGroup {
+  id: string;
+  name: string;
+}
+
+export interface AlertHistory {
+  id: string;
+  timestamp: number;
+  message: string;
+  type: 'UP' | 'DOWN' | 'INFO';
 }
 
 export interface Tab {
@@ -62,10 +75,11 @@ export const useStore = create<IdeState>()(
       ...createTradingSlice(...a),
     }),
     {
-      name: 'ide-kospi-storage-v7', // 캐시 무효화 및 새로운 기본값 적용
+      name: 'ide-kospi-storage-v8', // 캐시 무효화 및 새로운 기본값 적용
       partialize: (state) => ({ 
         theme: state.theme,
         portfolio: state.portfolio, 
+        groups: state.groups,
         tabs: state.tabs, 
         activeTabId: state.activeTabId,
         sidebarWidth: state.sidebarWidth,
@@ -75,7 +89,8 @@ export const useStore = create<IdeState>()(
         isMenuBarVisible: state.isMenuBarVisible,
         timeframe: state.timeframe,
         balance: state.balance,
-        holdings: state.holdings
+        holdings: state.holdings,
+        alertHistory: state.alertHistory
       }),
     }
   )
