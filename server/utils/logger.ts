@@ -3,7 +3,7 @@ import path from 'path';
 
 // If running from dist/server/utils, ../../logs goes to root/logs
 // If running from server/utils (ts-node), ../../logs goes to root/logs
-const logDir = path.join(__dirname, '../../logs');
+const logDir = path.join(import.meta.dirname, '../../logs');
 if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
 
 export const logger = {

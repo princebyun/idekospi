@@ -1,4 +1,4 @@
-import { fetchYahooStock, fetchNaverStockBasic } from './stockFetcher';
+import { fetchYahooStock, fetchNaverStockBasic, isKoreanSymbol } from './stockFetcher';
 import { broadcastMessage } from '../routes/chat';
 import { updateHistoryAndCalculateRates } from './priceHistoryManager';
 
@@ -11,8 +11,7 @@ export const startCentralPolling = () => {
       const allStocks = [...DOMESTIC_LIST, ...GLOBAL_LIST];
       const promises = allStocks.map(async (symbol) => {
         try {
-          const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ') || symbol === 'FUT';
-          const data = isKorean ? await fetchNaverStockBasic(symbol) : await fetchYahooStock(symbol);
+          const data = isKoreanSymbol(symbol) ? await fetchNaverStockBasic(symbol) : await fetchYahooStock(symbol);
           
           const { changeRate15m, changeRate30m } = updateHistoryAndCalculateRates(symbol, data.price, data.changeRate);
           

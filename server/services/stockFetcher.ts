@@ -102,19 +102,43 @@ export async function fetchYahooStock(symbol: string): Promise<StockFetchResult>
   return result;
 }
 
+// Yahoo 심볼 → 네이버 인덱스 코드 매핑 (국내 지수)
+const NAVER_INDEX_MAP: Record<string, string> = {
+  '^KS11': 'KOSPI',
+  '^KQ11': 'KOSDAQ',
+};
+
+// Helper: 한국 시장 종목/지수 판별
+export function isKoreanSymbol(symbol: string): boolean {
+  return symbol.endsWith('.KS') || symbol.endsWith('.KQ') || symbol === 'FUT' || symbol in NAVER_INDEX_MAP;
+}
+
 // Helper: Fetch from Naver (with Yahoo Fallback)
 export async function fetchNaverStockBasic(symbol: string): Promise<StockFetchResult> {
   const cacheKey = `naver_${symbol}`;
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
-  const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ') || symbol === 'FUT';
-  if (!isKorean) return fetchYahooStock(symbol);
+  if (!isKoreanSymbol(symbol)) return fetchYahooStock(symbol);
 
-  const codeOnly = symbol.replace('.KS', '').replace('.KQ', '');
-  const apiUrl = symbol === 'FUT' 
-    ? `https://m.stock.naver.com/api/index/${codeOnly}/basic`
-    : `https://m.stock.naver.com/api/stock/${codeOnly}/basic`;
+  // 네이버 API URL 결정
+  let apiUrl: string;
+  let codeOnly: string;
+  const naverIndexCode = NAVER_INDEX_MAP[symbol];
+
+  if (naverIndexCode) {
+    // KOSPI/KOSDAQ 지수 → 네이버 인덱스 API
+    codeOnly = symbol;
+    apiUrl = `https://m.stock.naver.com/api/index/${naverIndexCode}/basic`;
+  } else if (symbol === 'FUT') {
+    // KOSPI200 선물
+    codeOnly = 'FUT';
+    apiUrl = `https://m.stock.naver.com/api/index/FUT/basic`;
+  } else {
+    // 일반 한국 주식 (.KS, .KQ)
+    codeOnly = symbol.replace('.KS', '').replace('.KQ', '');
+    apiUrl = `https://m.stock.naver.com/api/stock/${codeOnly}/basic`;
+  }
   
   try {
     const res = await fetch(apiUrl);

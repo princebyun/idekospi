@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { fetchYahooStock, fetchNaverStockBasic, yahooFinance } from '../services/stockFetcher';
+import { fetchYahooStock, fetchNaverStockBasic, yahooFinance, isKoreanSymbol } from '../services/stockFetcher';
 
 const router = Router();
 
@@ -10,7 +10,7 @@ router.get('/api/stocks', async (req, res) => {
     
     const promises = symbols.map(async (symbol) => {
       try {
-        const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
+        const isKorean = isKoreanSymbol(symbol);
         const data = isKorean ? await fetchNaverStockBasic(symbol) : await fetchYahooStock(symbol);
         
         return {
@@ -39,7 +39,7 @@ router.get('/api/stock/details', async (req, res) => {
     const symbol = req.query.symbol as string;
     if (!symbol) return res.status(400).json({ error: 'Symbol required' });
 
-    const isKorean = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
+    const isKorean = isKoreanSymbol(symbol);
     
     // 1. 현재 가격 데이터 가져오기 (Naver 또는 Yahoo)
     const currentData = isKorean ? await fetchNaverStockBasic(symbol) : await fetchYahooStock(symbol);
